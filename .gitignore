@@ -1,3 +1,7 @@
 **/.antlr/
 **/bin/
 **/obj/
+
+.vs/
+*.suo
+**/FileContentIndex
