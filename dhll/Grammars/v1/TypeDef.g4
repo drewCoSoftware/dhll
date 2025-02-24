@@ -10,14 +10,18 @@ initializer: ASSIGN expr;
 
 expr: WORD | INT | TRUE | FALSE;
 
-identifier: WORD;
+identifier: ID;
 typename: identifier;
 
 ASSIGN: '=';
 INT: [0-9]+;
 
+FIRSTCHAR: [a-zA-Z_];
+ID: (FIRSTCHAR)[a-zA-Z0-9_]+;
 
 WORD: [a-zA-Z]+;
+
+
 
 FALSE: 'false';
 TRUE: 'true';

@@ -37,8 +37,8 @@ public partial class TypeDefParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		T__0=1, ASSIGN=2, INT=3, WORD=4, FALSE=5, TRUE=6, OBRACE=7, CBRACE=8, 
-		EOS=9, WS=10;
+		T__0=1, ASSIGN=2, INT=3, FIRSTCHAR=4, ID=5, WORD=6, FALSE=7, TRUE=8, OBRACE=9, 
+		CBRACE=10, EOS=11, WS=12;
 	public const int
 		RULE_file = 0, RULE_typedef = 1, RULE_decl = 2, RULE_initializer = 3, 
 		RULE_expr = 4, RULE_identifier = 5, RULE_typename = 6;
@@ -47,12 +47,12 @@ public partial class TypeDefParser : Parser {
 	};
 
 	private static readonly string[] _LiteralNames = {
-		null, "'typedef'", "'='", null, null, "'false'", "'true'", "'{'", "'}'", 
-		"';'"
+		null, "'typedef'", "'='", null, null, null, null, "'false'", "'true'", 
+		"'{'", "'}'", "';'"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, null, "ASSIGN", "INT", "WORD", "FALSE", "TRUE", "OBRACE", "CBRACE", 
-		"EOS", "WS"
+		null, null, "ASSIGN", "INT", "FIRSTCHAR", "ID", "WORD", "FALSE", "TRUE", 
+		"OBRACE", "CBRACE", "EOS", "WS"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -212,7 +212,7 @@ public partial class TypeDefParser : Parser {
 			State = 29;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if (_la==WORD) {
+			if (_la==ID) {
 				{
 				State = 25;
 				ErrorHandler.Sync(this);
@@ -227,7 +227,7 @@ public partial class TypeDefParser : Parser {
 					State = 27;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
-				} while ( _la==WORD );
+				} while ( _la==ID );
 				}
 			}
 
@@ -407,7 +407,7 @@ public partial class TypeDefParser : Parser {
 			{
 			State = 43;
 			_la = TokenStream.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 120L) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 456L) != 0)) ) {
 			ErrorHandler.RecoverInline(this);
 			}
 			else {
@@ -428,7 +428,7 @@ public partial class TypeDefParser : Parser {
 	}
 
 	public partial class IdentifierContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode WORD() { return GetToken(TypeDefParser.WORD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(TypeDefParser.ID, 0); }
 		public IdentifierContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -460,7 +460,7 @@ public partial class TypeDefParser : Parser {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 45;
-			Match(WORD);
+			Match(ID);
 			}
 		}
 		catch (RecognitionException re) {
@@ -524,20 +524,20 @@ public partial class TypeDefParser : Parser {
 	}
 
 	private static int[] _serializedATN = {
-		4,1,10,50,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,
+		4,1,12,50,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,
 		4,0,16,8,0,11,0,12,0,17,1,0,1,0,1,1,1,1,1,1,1,1,4,1,26,8,1,11,1,12,1,27,
 		3,1,30,8,1,1,1,1,1,1,2,1,2,1,2,3,2,37,8,2,1,2,1,2,1,3,1,3,1,3,1,4,1,4,
-		1,5,1,5,1,6,1,6,1,6,1,17,0,7,0,2,4,6,8,10,12,0,1,1,0,3,6,46,0,15,1,0,0,
-		0,2,21,1,0,0,0,4,33,1,0,0,0,6,40,1,0,0,0,8,43,1,0,0,0,10,45,1,0,0,0,12,
-		47,1,0,0,0,14,16,3,2,1,0,15,14,1,0,0,0,16,17,1,0,0,0,17,18,1,0,0,0,17,
-		15,1,0,0,0,18,19,1,0,0,0,19,20,5,0,0,1,20,1,1,0,0,0,21,22,5,1,0,0,22,23,
-		3,10,5,0,23,29,5,7,0,0,24,26,3,4,2,0,25,24,1,0,0,0,26,27,1,0,0,0,27,25,
-		1,0,0,0,27,28,1,0,0,0,28,30,1,0,0,0,29,25,1,0,0,0,29,30,1,0,0,0,30,31,
-		1,0,0,0,31,32,5,8,0,0,32,3,1,0,0,0,33,34,3,12,6,0,34,36,3,10,5,0,35,37,
-		3,6,3,0,36,35,1,0,0,0,36,37,1,0,0,0,37,38,1,0,0,0,38,39,5,9,0,0,39,5,1,
-		0,0,0,40,41,5,2,0,0,41,42,3,8,4,0,42,7,1,0,0,0,43,44,7,0,0,0,44,9,1,0,
-		0,0,45,46,5,4,0,0,46,11,1,0,0,0,47,48,3,10,5,0,48,13,1,0,0,0,4,17,27,29,
-		36
+		1,5,1,5,1,6,1,6,1,6,1,17,0,7,0,2,4,6,8,10,12,0,1,2,0,3,3,6,8,46,0,15,1,
+		0,0,0,2,21,1,0,0,0,4,33,1,0,0,0,6,40,1,0,0,0,8,43,1,0,0,0,10,45,1,0,0,
+		0,12,47,1,0,0,0,14,16,3,2,1,0,15,14,1,0,0,0,16,17,1,0,0,0,17,18,1,0,0,
+		0,17,15,1,0,0,0,18,19,1,0,0,0,19,20,5,0,0,1,20,1,1,0,0,0,21,22,5,1,0,0,
+		22,23,3,10,5,0,23,29,5,9,0,0,24,26,3,4,2,0,25,24,1,0,0,0,26,27,1,0,0,0,
+		27,25,1,0,0,0,27,28,1,0,0,0,28,30,1,0,0,0,29,25,1,0,0,0,29,30,1,0,0,0,
+		30,31,1,0,0,0,31,32,5,10,0,0,32,3,1,0,0,0,33,34,3,12,6,0,34,36,3,10,5,
+		0,35,37,3,6,3,0,36,35,1,0,0,0,36,37,1,0,0,0,37,38,1,0,0,0,38,39,5,11,0,
+		0,39,5,1,0,0,0,40,41,5,2,0,0,41,42,3,8,4,0,42,7,1,0,0,0,43,44,7,0,0,0,
+		44,9,1,0,0,0,45,46,5,5,0,0,46,11,1,0,0,0,47,48,3,10,5,0,48,13,1,0,0,0,
+		4,17,27,29,36
 	};
 
 	public static readonly ATN _ATN =

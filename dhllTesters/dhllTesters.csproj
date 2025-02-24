@@ -18,11 +18,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dhll.csproj" />
+    <ProjectReference Include="..\dhll\dhll.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestInputs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestInputs\BasicTypeDef.dhll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

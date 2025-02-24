@@ -1,1 +1,1 @@
-typedef MyType { bool x = false; int y = 10; }
+_MyCoolIdentifier123
