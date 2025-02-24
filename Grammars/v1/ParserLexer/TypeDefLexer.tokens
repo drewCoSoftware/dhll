@@ -1,0 +1,17 @@
+T__0=1
+ASSIGN=2
+INT=3
+WORD=4
+FALSE=5
+TRUE=6
+OBRACE=7
+CBRACE=8
+EOS=9
+WS=10
+'typedef'=1
+'='=2
+'false'=5
+'true'=6
+'{'=7
+'}'=8
+';'=9
