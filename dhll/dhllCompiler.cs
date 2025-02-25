@@ -1,8 +1,10 @@
 ﻿
 using Antlr4.Runtime;
+using dhll.Emitters;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
+using System.Net.Http.Headers;
 using static dhll.v1.TypeDefParser;
 
 namespace dhll
@@ -38,12 +40,42 @@ namespace dhll
       var ts = new CommonTokenStream(lexer);
       var parser = new TypeDefParser(ts);
 
-      TypedefContext context = parser.typedef();
+      FileContext context = parser.file();
       var v = new TypeDefVisitorImpl();
 
-      var td = (TypeDef)v.Visit(context);
+      var dFile = (dhllFile)v.VisitFile(context);
+      dFile.Path = Options.InputFile;
+
+      // TODO: Check for parse errors, etc.
+
+
+      string outputDir = FileTools.GetLocalDir(Options.OutputDir);
+      FileTools.CreateDirectory(outputDir);
+
+      // Load the emitter...
+      IEmitter emitter = LoadEmitter();
+
+      // Run the emitter...
+      EmitterResults results = emitter.Emit(outputDir, dFile);
+
 
       return 0;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private IEmitter LoadEmitter()
+    {
+      // NOTE: We will use a registration type approach in the future.
+      // That will allow for all kinds of plugins + overrides if we wanted.
+      switch (Options.OutputLang)
+      {
+        case "typescript":
+          var res = new TypescriptEmitter(Logger);
+          return res;
+
+        default:
+          throw new NotSupportedException();
+      }
     }
 
 
@@ -60,11 +92,13 @@ namespace dhll
         throw new InvalidOperationException(msg);
       }
 
-      if (!File.Exists(Options.InputFile)) {
+      string usePath = FileTools.GetRootedPath(Options.InputFile);
+      if (!File.Exists(usePath))
+      {
         string msg = $"The input file at path: {Options.InputFile} does not exist!";
         throw new FileNotFoundException(msg);
       }
-      Options.InputFile = FileTools.GetRootedPath(Options.InputFile); 
+      Options.InputFile = FileTools.GetRootedPath(Options.InputFile);
 
     }
 

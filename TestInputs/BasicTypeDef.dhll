@@ -1,0 +1,4 @@
+typedef ModalWindow {
+    bool IsVisible = false;
+    string Title = "Modal";
+}

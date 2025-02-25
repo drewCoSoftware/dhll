@@ -1,1 +1,4 @@
-_MyCoolIdentifier123
+typedef ModalWindow {
+    bool IsVisible = false;
+    string Title = "Modal";
+}

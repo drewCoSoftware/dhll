@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "dhll": {
+      "commandName": "Project",
+      "commandLineArgs": "compile --file \"..\\..\\..\\..\\TestInputs\\BasicTypeDef.dhll\" --to \"typescript\""
+    }
+  }
+}

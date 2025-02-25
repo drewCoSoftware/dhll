@@ -1,4 +1,6 @@
 
+using Antlr4.Runtime.Misc;
+
 namespace dhll.v1;
 
 // ==============================================================================================================================
@@ -22,9 +24,38 @@ public class TypeDef
   public List<Declare> Declarations { get; set; }
 }
 
+
+// ==============================================================================================================================
+public class dhllFile
+{
+  /// <summary>
+  /// The original file path...
+  /// </summary>
+  public string Path { get; set; }
+
+  /// <summary>
+  /// Every typedef that is contained in this file.
+  /// </summary>
+  public List<TypeDef> TypeDefs { get; set; } = new List<TypeDef>();
+}
+
+
 // ==============================================================================================================================
 public class TypeDefVisitorImpl : TypeDefBaseVisitor<object>
 {
+  // --------------------------------------------------------------------------------------------------------------------------
+  public override object VisitFile([NotNull] TypeDefParser.FileContext context)
+  {
+    var res = new dhllFile();
+
+    foreach (var item in context.typedef())
+    {
+      var td = (TypeDef)VisitTypedef(item);
+      res.TypeDefs.Add(td);
+    }
+
+    return res;
+  }
 
   // --------------------------------------------------------------------------------------------------------------------------
   public override object VisitTypedef([Antlr4.Runtime.Misc.NotNull] TypeDefParser.TypedefContext context)
@@ -56,7 +87,8 @@ public class TypeDefVisitorImpl : TypeDefBaseVisitor<object>
     {
       res.InitValue = initializer.expr().GetText();
     }
-    else {
+    else
+    {
       Console.WriteLine("no initializer!");
     }
     return res;

@@ -8,7 +8,7 @@ decl: typename identifier initializer? EOS;
 
 initializer: ASSIGN expr;
 
-expr: WORD | INT | TRUE | FALSE;
+expr: INT | TRUE | FALSE | STRING;
 
 identifier: ID;
 typename: identifier;
@@ -16,15 +16,19 @@ typename: identifier;
 ASSIGN: '=';
 INT: [0-9]+;
 
+FALSE: 'false';
+TRUE: 'true';
+
 FIRSTCHAR: [a-zA-Z_];
 ID: (FIRSTCHAR)[a-zA-Z0-9_]+;
+
 
 WORD: [a-zA-Z]+;
 
 
+QUOTE: '"';
+STRING: (QUOTE)(.*?)(QUOTE);
 
-FALSE: 'false';
-TRUE: 'true';
 
 OBRACE: '{';
 CBRACE: '}';

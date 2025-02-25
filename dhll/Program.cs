@@ -14,7 +14,9 @@ namespace dhll
     // --------------------------------------------------------------------------------------------------------------------------
     static int Main(string[] args)
     {
-      int res = CmdParser.Default.ParseArguments(args).MapResult<CommandLineOptions, int>((CommandLineOptions ops) => Compile(ops), errs => -1);
+      int res = CmdParser.Default.ParseArguments<CommandLineOptions>(args)
+                                 .MapResult((CommandLineOptions ops) => Compile(ops),
+                                 errs => -1);
       return res;
 
       //Console.WriteLine("Hello, World!");
