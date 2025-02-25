@@ -85,6 +85,18 @@ public partial class dhllBaseListener : IdhllListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitInitializer([NotNull] dhllParser.InitializerContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="dhllParser.prop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterProp([NotNull] dhllParser.PropContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="dhllParser.prop"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitProp([NotNull] dhllParser.PropContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -120,6 +132,18 @@ public partial class dhllBaseListener : IdhllListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitTypename([NotNull] dhllParser.TypenameContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="dhllParser.scope"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterScope([NotNull] dhllParser.ScopeContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="dhllParser.scope"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitScope([NotNull] dhllParser.ScopeContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

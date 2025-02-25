@@ -37,22 +37,26 @@ public partial class dhllParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		T__0=1, ASSIGN=2, INT=3, FALSE=4, TRUE=5, FIRSTCHAR=6, ID=7, WORD=8, QUOTE=9, 
-		STRING=10, OBRACE=11, CBRACE=12, EOS=13, WS=14;
+		T__0=1, ASSIGN=2, INT=3, FALSE=4, TRUE=5, PUBLIC=6, PRIVATE=7, PROP=8, 
+		FIRSTCHAR=9, ID=10, WORD=11, QUOTE=12, STRING=13, OBRACE=14, CBRACE=15, 
+		EOS=16, WS=17;
 	public const int
 		RULE_file = 0, RULE_typedef = 1, RULE_decl = 2, RULE_initializer = 3, 
-		RULE_expr = 4, RULE_identifier = 5, RULE_typename = 6;
+		RULE_prop = 4, RULE_expr = 5, RULE_identifier = 6, RULE_typename = 7, 
+		RULE_scope = 8;
 	public static readonly string[] ruleNames = {
-		"file", "typedef", "decl", "initializer", "expr", "identifier", "typename"
+		"file", "typedef", "decl", "initializer", "prop", "expr", "identifier", 
+		"typename", "scope"
 	};
 
 	private static readonly string[] _LiteralNames = {
-		null, "'typedef'", "'='", null, "'false'", "'true'", null, null, null, 
-		"'\"'", null, "'{'", "'}'", "';'"
+		null, "'typedef'", "'='", null, "'false'", "'true'", "'public'", "'private'", 
+		"'prop'", null, null, null, "'\"'", null, "'{'", "'}'", "';'"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, null, "ASSIGN", "INT", "FALSE", "TRUE", "FIRSTCHAR", "ID", "WORD", 
-		"QUOTE", "STRING", "OBRACE", "CBRACE", "EOS", "WS"
+		null, null, "ASSIGN", "INT", "FALSE", "TRUE", "PUBLIC", "PRIVATE", "PROP", 
+		"FIRSTCHAR", "ID", "WORD", "QUOTE", "STRING", "OBRACE", "CBRACE", "EOS", 
+		"WS"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -125,7 +129,7 @@ public partial class dhllParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 15;
+			State = 19;
 			ErrorHandler.Sync(this);
 			_alt = 1+1;
 			do {
@@ -133,7 +137,7 @@ public partial class dhllParser : Parser {
 				case 1+1:
 					{
 					{
-					State = 14;
+					State = 18;
 					typedef();
 					}
 					}
@@ -141,11 +145,11 @@ public partial class dhllParser : Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				State = 17;
+				State = 21;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,0,Context);
 			} while ( _alt!=1 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER );
-			State = 19;
+			State = 23;
 			Match(Eof);
 			}
 		}
@@ -203,35 +207,35 @@ public partial class dhllParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 21;
+			State = 25;
 			Match(T__0);
-			State = 22;
+			State = 26;
 			identifier();
-			State = 23;
+			State = 27;
 			Match(OBRACE);
-			State = 29;
+			State = 33;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
-			if (_la==ID) {
+			if (_la==PROP || _la==ID) {
 				{
-				State = 25;
+				State = 29;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 				do {
 					{
 					{
-					State = 24;
+					State = 28;
 					decl();
 					}
 					}
-					State = 27;
+					State = 31;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
-				} while ( _la==ID );
+				} while ( _la==PROP || _la==ID );
 				}
 			}
 
-			State = 31;
+			State = 35;
 			Match(CBRACE);
 			}
 		}
@@ -254,6 +258,9 @@ public partial class dhllParser : Parser {
 			return GetRuleContext<IdentifierContext>(0);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EOS() { return GetToken(dhllParser.EOS, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public PropContext prop() {
+			return GetRuleContext<PropContext>(0);
+		}
 		[System.Diagnostics.DebuggerNonUserCode] public InitializerContext initializer() {
 			return GetRuleContext<InitializerContext>(0);
 		}
@@ -288,21 +295,31 @@ public partial class dhllParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 33;
+			State = 38;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			if (_la==PROP) {
+				{
+				State = 37;
+				prop();
+				}
+			}
+
+			State = 40;
 			typename();
-			State = 34;
+			State = 41;
 			identifier();
-			State = 36;
+			State = 43;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==ASSIGN) {
 				{
-				State = 35;
+				State = 42;
 				initializer();
 				}
 			}
 
-			State = 38;
+			State = 45;
 			Match(EOS);
 			}
 		}
@@ -352,10 +369,57 @@ public partial class dhllParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 40;
+			State = 47;
 			Match(ASSIGN);
-			State = 41;
+			State = 48;
 			expr();
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
+	public partial class PropContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PROP() { return GetToken(dhllParser.PROP, 0); }
+		public PropContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_prop; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IdhllListener typedListener = listener as IdhllListener;
+			if (typedListener != null) typedListener.EnterProp(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IdhllListener typedListener = listener as IdhllListener;
+			if (typedListener != null) typedListener.ExitProp(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitProp(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public PropContext prop() {
+		PropContext _localctx = new PropContext(Context, State);
+		EnterRule(_localctx, 8, RULE_prop);
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 50;
+			Match(PROP);
 			}
 		}
 		catch (RecognitionException re) {
@@ -400,14 +464,14 @@ public partial class dhllParser : Parser {
 	[RuleVersion(0)]
 	public ExprContext expr() {
 		ExprContext _localctx = new ExprContext(Context, State);
-		EnterRule(_localctx, 8, RULE_expr);
+		EnterRule(_localctx, 10, RULE_expr);
 		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 43;
+			State = 52;
 			_la = TokenStream.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 1080L) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 8248L) != 0)) ) {
 			ErrorHandler.RecoverInline(this);
 			}
 			else {
@@ -455,11 +519,11 @@ public partial class dhllParser : Parser {
 	[RuleVersion(0)]
 	public IdentifierContext identifier() {
 		IdentifierContext _localctx = new IdentifierContext(Context, State);
-		EnterRule(_localctx, 10, RULE_identifier);
+		EnterRule(_localctx, 12, RULE_identifier);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 45;
+			State = 54;
 			Match(ID);
 			}
 		}
@@ -504,11 +568,11 @@ public partial class dhllParser : Parser {
 	[RuleVersion(0)]
 	public TypenameContext typename() {
 		TypenameContext _localctx = new TypenameContext(Context, State);
-		EnterRule(_localctx, 12, RULE_typename);
+		EnterRule(_localctx, 14, RULE_typename);
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 47;
+			State = 56;
 			identifier();
 			}
 		}
@@ -523,21 +587,80 @@ public partial class dhllParser : Parser {
 		return _localctx;
 	}
 
+	public partial class ScopeContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PUBLIC() { return GetToken(dhllParser.PUBLIC, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode PRIVATE() { return GetToken(dhllParser.PRIVATE, 0); }
+		public ScopeContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_scope; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			IdhllListener typedListener = listener as IdhllListener;
+			if (typedListener != null) typedListener.EnterScope(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			IdhllListener typedListener = listener as IdhllListener;
+			if (typedListener != null) typedListener.ExitScope(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitScope(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public ScopeContext scope() {
+		ScopeContext _localctx = new ScopeContext(Context, State);
+		EnterRule(_localctx, 16, RULE_scope);
+		int _la;
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 58;
+			_la = TokenStream.LA(1);
+			if ( !(_la==PUBLIC || _la==PRIVATE) ) {
+			ErrorHandler.RecoverInline(this);
+			}
+			else {
+				ErrorHandler.ReportMatch(this);
+			    Consume();
+			}
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
 	private static int[] _serializedATN = {
-		4,1,14,50,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,
-		4,0,16,8,0,11,0,12,0,17,1,0,1,0,1,1,1,1,1,1,1,1,4,1,26,8,1,11,1,12,1,27,
-		3,1,30,8,1,1,1,1,1,1,2,1,2,1,2,3,2,37,8,2,1,2,1,2,1,3,1,3,1,3,1,4,1,4,
-		1,5,1,5,1,6,1,6,1,6,1,17,0,7,0,2,4,6,8,10,12,0,1,2,0,3,5,10,10,46,0,15,
-		1,0,0,0,2,21,1,0,0,0,4,33,1,0,0,0,6,40,1,0,0,0,8,43,1,0,0,0,10,45,1,0,
-		0,0,12,47,1,0,0,0,14,16,3,2,1,0,15,14,1,0,0,0,16,17,1,0,0,0,17,18,1,0,
-		0,0,17,15,1,0,0,0,18,19,1,0,0,0,19,20,5,0,0,1,20,1,1,0,0,0,21,22,5,1,0,
-		0,22,23,3,10,5,0,23,29,5,11,0,0,24,26,3,4,2,0,25,24,1,0,0,0,26,27,1,0,
-		0,0,27,25,1,0,0,0,27,28,1,0,0,0,28,30,1,0,0,0,29,25,1,0,0,0,29,30,1,0,
-		0,0,30,31,1,0,0,0,31,32,5,12,0,0,32,3,1,0,0,0,33,34,3,12,6,0,34,36,3,10,
-		5,0,35,37,3,6,3,0,36,35,1,0,0,0,36,37,1,0,0,0,37,38,1,0,0,0,38,39,5,13,
-		0,0,39,5,1,0,0,0,40,41,5,2,0,0,41,42,3,8,4,0,42,7,1,0,0,0,43,44,7,0,0,
-		0,44,9,1,0,0,0,45,46,5,7,0,0,46,11,1,0,0,0,47,48,3,10,5,0,48,13,1,0,0,
-		0,4,17,27,29,36
+		4,1,17,61,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		7,7,2,8,7,8,1,0,4,0,20,8,0,11,0,12,0,21,1,0,1,0,1,1,1,1,1,1,1,1,4,1,30,
+		8,1,11,1,12,1,31,3,1,34,8,1,1,1,1,1,1,2,3,2,39,8,2,1,2,1,2,1,2,3,2,44,
+		8,2,1,2,1,2,1,3,1,3,1,3,1,4,1,4,1,5,1,5,1,6,1,6,1,7,1,7,1,8,1,8,1,8,1,
+		21,0,9,0,2,4,6,8,10,12,14,16,0,2,2,0,3,5,13,13,1,0,6,7,56,0,19,1,0,0,0,
+		2,25,1,0,0,0,4,38,1,0,0,0,6,47,1,0,0,0,8,50,1,0,0,0,10,52,1,0,0,0,12,54,
+		1,0,0,0,14,56,1,0,0,0,16,58,1,0,0,0,18,20,3,2,1,0,19,18,1,0,0,0,20,21,
+		1,0,0,0,21,22,1,0,0,0,21,19,1,0,0,0,22,23,1,0,0,0,23,24,5,0,0,1,24,1,1,
+		0,0,0,25,26,5,1,0,0,26,27,3,12,6,0,27,33,5,14,0,0,28,30,3,4,2,0,29,28,
+		1,0,0,0,30,31,1,0,0,0,31,29,1,0,0,0,31,32,1,0,0,0,32,34,1,0,0,0,33,29,
+		1,0,0,0,33,34,1,0,0,0,34,35,1,0,0,0,35,36,5,15,0,0,36,3,1,0,0,0,37,39,
+		3,8,4,0,38,37,1,0,0,0,38,39,1,0,0,0,39,40,1,0,0,0,40,41,3,14,7,0,41,43,
+		3,12,6,0,42,44,3,6,3,0,43,42,1,0,0,0,43,44,1,0,0,0,44,45,1,0,0,0,45,46,
+		5,16,0,0,46,5,1,0,0,0,47,48,5,2,0,0,48,49,3,10,5,0,49,7,1,0,0,0,50,51,
+		5,8,0,0,51,9,1,0,0,0,52,53,7,0,0,0,53,11,1,0,0,0,54,55,5,10,0,0,55,13,
+		1,0,0,0,56,57,3,12,6,0,57,15,1,0,0,0,58,59,7,1,0,0,59,17,1,0,0,0,5,21,
+		31,33,38,43
 	};
 
 	public static readonly ATN _ATN =

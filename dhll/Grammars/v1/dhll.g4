@@ -4,20 +4,29 @@ file: typedef+? EOF;
 
 typedef: 'typedef' identifier OBRACE (decl+)? CBRACE;
 
-decl: typename identifier initializer? EOS;
+decl: prop? typename identifier initializer? EOS;
 
 initializer: ASSIGN expr;
+prop:PROP;
 
 expr: INT | TRUE | FALSE | STRING;
 
 identifier: ID;
 typename: identifier;
 
+scope: PUBLIC | PRIVATE;
+
 ASSIGN: '=';
 INT: [0-9]+;
 
 FALSE: 'false';
 TRUE: 'true';
+
+
+PUBLIC: 'public';
+PRIVATE: 'private';
+
+PROP: 'prop';           // Indicates a declaration should be implemented as a property.
 
 FIRSTCHAR: [a-zA-Z_];
 ID: (FIRSTCHAR)[a-zA-Z0-9_]+;

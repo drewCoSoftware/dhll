@@ -2,7 +2,7 @@
 using drewCo.Tools;
 using dhll.v1;
 using Antlr4.Runtime;
-using static dhll.v1.TypeDefParser;
+using static dhll.v1.dhllParser;
 
 namespace dhllTesters
 {
@@ -60,13 +60,13 @@ namespace dhllTesters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private TypeDefParser.TypedefContext GetTypeDefContext(string input)
+    private TypedefContext GetTypeDefContext(string input)
     {
       AntlrInputStream s = new AntlrInputStream(input);
-      var lexer = new TypeDefLexer(s);
+      var lexer = new dhllLexer(s);
 
       var ts = new CommonTokenStream(lexer);
-      var parser = new TypeDefParser(ts);
+      var parser = new dhllParser(ts);
 
       TypedefContext context = parser.typedef();
       return context;
