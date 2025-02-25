@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./v1/TypeDef.g4 by ANTLR 4.13.2
+// Generated from ./v1/dhll.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -26,53 +26,53 @@ using IToken = Antlr4.Runtime.IToken;
 
 /// <summary>
 /// This interface defines a complete generic visitor for a parse tree produced
-/// by <see cref="TypeDefParser"/>.
+/// by <see cref="dhllParser"/>.
 /// </summary>
 /// <typeparam name="Result">The return type of the visit operation.</typeparam>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.CLSCompliant(false)]
-public interface ITypeDefVisitor<Result> : IParseTreeVisitor<Result> {
+public interface IdhllVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.file"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitFile([NotNull] TypeDefParser.FileContext context);
+	Result VisitFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitTypedef([NotNull] TypeDefParser.TypedefContext context);
+	Result VisitTypedef([NotNull] dhllParser.TypedefContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitDecl([NotNull] TypeDefParser.DeclContext context);
+	Result VisitDecl([NotNull] dhllParser.DeclContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitInitializer([NotNull] TypeDefParser.InitializerContext context);
+	Result VisitInitializer([NotNull] dhllParser.InitializerContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitExpr([NotNull] TypeDefParser.ExprContext context);
+	Result VisitExpr([NotNull] dhllParser.ExprContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitIdentifier([NotNull] TypeDefParser.IdentifierContext context);
+	Result VisitIdentifier([NotNull] dhllParser.IdentifierContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitTypename([NotNull] TypeDefParser.TypenameContext context);
+	Result VisitTypename([NotNull] dhllParser.TypenameContext context);
 }
 } // namespace dhll.v1

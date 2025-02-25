@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./v1/TypeDef.g4 by ANTLR 4.13.2
+// Generated from ./v1/dhll.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -26,7 +26,7 @@ using IToken = Antlr4.Runtime.IToken;
 using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 
 /// <summary>
-/// This class provides an empty implementation of <see cref="ITypeDefVisitor{Result}"/>,
+/// This class provides an empty implementation of <see cref="IdhllVisitor{Result}"/>,
 /// which can be extended to create a visitor which only needs to handle a subset
 /// of the available methods.
 /// </summary>
@@ -34,9 +34,9 @@ using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.Diagnostics.DebuggerNonUserCode]
 [System.CLSCompliant(false)]
-public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, ITypeDefVisitor<Result> {
+public partial class dhllBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, IdhllVisitor<Result> {
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.file"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -44,9 +44,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitFile([NotNull] TypeDefParser.FileContext context) { return VisitChildren(context); }
+	public virtual Result VisitFile([NotNull] dhllParser.FileContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -54,9 +54,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitTypedef([NotNull] TypeDefParser.TypedefContext context) { return VisitChildren(context); }
+	public virtual Result VisitTypedef([NotNull] dhllParser.TypedefContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -64,9 +64,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitDecl([NotNull] TypeDefParser.DeclContext context) { return VisitChildren(context); }
+	public virtual Result VisitDecl([NotNull] dhllParser.DeclContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -74,9 +74,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitInitializer([NotNull] TypeDefParser.InitializerContext context) { return VisitChildren(context); }
+	public virtual Result VisitInitializer([NotNull] dhllParser.InitializerContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -84,9 +84,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitExpr([NotNull] TypeDefParser.ExprContext context) { return VisitChildren(context); }
+	public virtual Result VisitExpr([NotNull] dhllParser.ExprContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -94,9 +94,9 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitIdentifier([NotNull] TypeDefParser.IdentifierContext context) { return VisitChildren(context); }
+	public virtual Result VisitIdentifier([NotNull] dhllParser.IdentifierContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -104,6 +104,6 @@ public partial class TypeDefBaseVisitor<Result> : AbstractParseTreeVisitor<Resul
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitTypename([NotNull] TypeDefParser.TypenameContext context) { return VisitChildren(context); }
+	public virtual Result VisitTypename([NotNull] dhllParser.TypenameContext context) { return VisitChildren(context); }
 }
 } // namespace dhll.v1

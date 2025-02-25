@@ -4,8 +4,7 @@ using dhll.Emitters;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
-using System.Net.Http.Headers;
-using static dhll.v1.TypeDefParser;
+using static dhll.v1.dhllParser;
 
 namespace dhll
 {
@@ -35,10 +34,10 @@ namespace dhll
       string input = File.ReadAllText(Options.InputFile);
 
       AntlrInputStream s = new AntlrInputStream(input);
-      var lexer = new TypeDefLexer(s);
+      var lexer = new dhllLexer(s);
 
       var ts = new CommonTokenStream(lexer);
-      var parser = new TypeDefParser(ts);
+      var parser = new dhllParser(ts);
 
       FileContext context = parser.file();
       var v = new TypeDefVisitorImpl();

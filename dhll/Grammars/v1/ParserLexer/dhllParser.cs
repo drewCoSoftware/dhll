@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./v1/TypeDef.g4 by ANTLR 4.13.2
+// Generated from ./v1/dhll.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -33,7 +33,7 @@ using DFA = Antlr4.Runtime.Dfa.DFA;
 
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.CLSCompliant(false)]
-public partial class TypeDefParser : Parser {
+public partial class dhllParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
@@ -65,29 +65,29 @@ public partial class TypeDefParser : Parser {
 		}
 	}
 
-	public override string GrammarFileName { get { return "TypeDef.g4"; } }
+	public override string GrammarFileName { get { return "dhll.g4"; } }
 
 	public override string[] RuleNames { get { return ruleNames; } }
 
 	public override int[] SerializedAtn { get { return _serializedATN; } }
 
-	static TypeDefParser() {
+	static dhllParser() {
 		decisionToDFA = new DFA[_ATN.NumberOfDecisions];
 		for (int i = 0; i < _ATN.NumberOfDecisions; i++) {
 			decisionToDFA[i] = new DFA(_ATN.GetDecisionState(i), i);
 		}
 	}
 
-		public TypeDefParser(ITokenStream input) : this(input, Console.Out, Console.Error) { }
+		public dhllParser(ITokenStream input) : this(input, Console.Out, Console.Error) { }
 
-		public TypeDefParser(ITokenStream input, TextWriter output, TextWriter errorOutput)
+		public dhllParser(ITokenStream input, TextWriter output, TextWriter errorOutput)
 		: base(input, output, errorOutput)
 	{
 		Interpreter = new ParserATNSimulator(this, _ATN, decisionToDFA, sharedContextCache);
 	}
 
 	public partial class FileContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Eof() { return GetToken(TypeDefParser.Eof, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Eof() { return GetToken(dhllParser.Eof, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public TypedefContext[] typedef() {
 			return GetRuleContexts<TypedefContext>();
 		}
@@ -101,17 +101,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_file; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterFile(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitFile(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitFile(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -164,8 +164,8 @@ public partial class TypeDefParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public IdentifierContext identifier() {
 			return GetRuleContext<IdentifierContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OBRACE() { return GetToken(TypeDefParser.OBRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CBRACE() { return GetToken(TypeDefParser.CBRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode OBRACE() { return GetToken(dhllParser.OBRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CBRACE() { return GetToken(dhllParser.CBRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public DeclContext[] decl() {
 			return GetRuleContexts<DeclContext>();
 		}
@@ -179,17 +179,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_typedef; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterTypedef(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitTypedef(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitTypedef(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -253,7 +253,7 @@ public partial class TypeDefParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public IdentifierContext identifier() {
 			return GetRuleContext<IdentifierContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EOS() { return GetToken(TypeDefParser.EOS, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode EOS() { return GetToken(dhllParser.EOS, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public InitializerContext initializer() {
 			return GetRuleContext<InitializerContext>(0);
 		}
@@ -264,17 +264,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_decl; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterDecl(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitDecl(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitDecl(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -318,7 +318,7 @@ public partial class TypeDefParser : Parser {
 	}
 
 	public partial class InitializerContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ASSIGN() { return GetToken(TypeDefParser.ASSIGN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ASSIGN() { return GetToken(dhllParser.ASSIGN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
@@ -329,17 +329,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_initializer; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterInitializer(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitInitializer(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitInitializer(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -370,10 +370,10 @@ public partial class TypeDefParser : Parser {
 	}
 
 	public partial class ExprContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode INT() { return GetToken(TypeDefParser.INT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TRUE() { return GetToken(TypeDefParser.TRUE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FALSE() { return GetToken(TypeDefParser.FALSE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(TypeDefParser.STRING, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode INT() { return GetToken(dhllParser.INT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TRUE() { return GetToken(dhllParser.TRUE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FALSE() { return GetToken(dhllParser.FALSE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode STRING() { return GetToken(dhllParser.STRING, 0); }
 		public ExprContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -381,17 +381,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_expr; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterExpr(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitExpr(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitExpr(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -428,7 +428,7 @@ public partial class TypeDefParser : Parser {
 	}
 
 	public partial class IdentifierContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(TypeDefParser.ID, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(dhllParser.ID, 0); }
 		public IdentifierContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -436,17 +436,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_identifier; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterIdentifier(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitIdentifier(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitIdentifier(this);
 			else return visitor.VisitChildren(this);
 		}
@@ -485,17 +485,17 @@ public partial class TypeDefParser : Parser {
 		public override int RuleIndex { get { return RULE_typename; } }
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void EnterRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.EnterTypename(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override void ExitRule(IParseTreeListener listener) {
-			ITypeDefListener typedListener = listener as ITypeDefListener;
+			IdhllListener typedListener = listener as IdhllListener;
 			if (typedListener != null) typedListener.ExitTypename(this);
 		}
 		[System.Diagnostics.DebuggerNonUserCode]
 		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
-			ITypeDefVisitor<TResult> typedVisitor = visitor as ITypeDefVisitor<TResult>;
+			IdhllVisitor<TResult> typedVisitor = visitor as IdhllVisitor<TResult>;
 			if (typedVisitor != null) return typedVisitor.VisitTypename(this);
 			else return visitor.VisitChildren(this);
 		}

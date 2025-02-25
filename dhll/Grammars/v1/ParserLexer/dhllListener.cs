@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./v1/TypeDef.g4 by ANTLR 4.13.2
+// Generated from ./v1/dhll.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -26,80 +26,80 @@ using IToken = Antlr4.Runtime.IToken;
 
 /// <summary>
 /// This interface defines a complete listener for a parse tree produced by
-/// <see cref="TypeDefParser"/>.
+/// <see cref="dhllParser"/>.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.CLSCompliant(false)]
-public interface ITypeDefListener : IParseTreeListener {
+public interface IdhllListener : IParseTreeListener {
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.file"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterFile([NotNull] TypeDefParser.FileContext context);
+	void EnterFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.file"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitFile([NotNull] TypeDefParser.FileContext context);
+	void ExitFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterTypedef([NotNull] TypeDefParser.TypedefContext context);
+	void EnterTypedef([NotNull] dhllParser.TypedefContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitTypedef([NotNull] TypeDefParser.TypedefContext context);
+	void ExitTypedef([NotNull] dhllParser.TypedefContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterDecl([NotNull] TypeDefParser.DeclContext context);
+	void EnterDecl([NotNull] dhllParser.DeclContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitDecl([NotNull] TypeDefParser.DeclContext context);
+	void ExitDecl([NotNull] dhllParser.DeclContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterInitializer([NotNull] TypeDefParser.InitializerContext context);
+	void EnterInitializer([NotNull] dhllParser.InitializerContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitInitializer([NotNull] TypeDefParser.InitializerContext context);
+	void ExitInitializer([NotNull] dhllParser.InitializerContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterExpr([NotNull] TypeDefParser.ExprContext context);
+	void EnterExpr([NotNull] dhllParser.ExprContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitExpr([NotNull] TypeDefParser.ExprContext context);
+	void ExitExpr([NotNull] dhllParser.ExprContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterIdentifier([NotNull] TypeDefParser.IdentifierContext context);
+	void EnterIdentifier([NotNull] dhllParser.IdentifierContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitIdentifier([NotNull] TypeDefParser.IdentifierContext context);
+	void ExitIdentifier([NotNull] dhllParser.IdentifierContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterTypename([NotNull] TypeDefParser.TypenameContext context);
+	void EnterTypename([NotNull] dhllParser.TypenameContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitTypename([NotNull] TypeDefParser.TypenameContext context);
+	void ExitTypename([NotNull] dhllParser.TypenameContext context);
 }
 } // namespace dhll.v1

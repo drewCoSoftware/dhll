@@ -1,4 +1,4 @@
-grammar TypeDef;
+grammar dhll;
 
 file: typedef+? EOF;
 

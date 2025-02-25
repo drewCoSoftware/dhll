@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./v1/TypeDef.g4 by ANTLR 4.13.2
+// Generated from ./v1/dhll.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -28,98 +28,98 @@ using IToken = Antlr4.Runtime.IToken;
 using ParserRuleContext = Antlr4.Runtime.ParserRuleContext;
 
 /// <summary>
-/// This class provides an empty implementation of <see cref="ITypeDefListener"/>,
+/// This class provides an empty implementation of <see cref="IdhllListener"/>,
 /// which can be extended to create a listener which only needs to handle a subset
 /// of the available methods.
 /// </summary>
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.Diagnostics.DebuggerNonUserCode]
 [System.CLSCompliant(false)]
-public partial class TypeDefBaseListener : ITypeDefListener {
+public partial class dhllBaseListener : IdhllListener {
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.file"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterFile([NotNull] TypeDefParser.FileContext context) { }
+	public virtual void EnterFile([NotNull] dhllParser.FileContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.file"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.file"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitFile([NotNull] TypeDefParser.FileContext context) { }
+	public virtual void ExitFile([NotNull] dhllParser.FileContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTypedef([NotNull] TypeDefParser.TypedefContext context) { }
+	public virtual void EnterTypedef([NotNull] dhllParser.TypedefContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.typedef"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTypedef([NotNull] TypeDefParser.TypedefContext context) { }
+	public virtual void ExitTypedef([NotNull] dhllParser.TypedefContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterDecl([NotNull] TypeDefParser.DeclContext context) { }
+	public virtual void EnterDecl([NotNull] dhllParser.DeclContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.decl"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.decl"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitDecl([NotNull] TypeDefParser.DeclContext context) { }
+	public virtual void ExitDecl([NotNull] dhllParser.DeclContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterInitializer([NotNull] TypeDefParser.InitializerContext context) { }
+	public virtual void EnterInitializer([NotNull] dhllParser.InitializerContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.initializer"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.initializer"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitInitializer([NotNull] TypeDefParser.InitializerContext context) { }
+	public virtual void ExitInitializer([NotNull] dhllParser.InitializerContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterExpr([NotNull] TypeDefParser.ExprContext context) { }
+	public virtual void EnterExpr([NotNull] dhllParser.ExprContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.expr"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.expr"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitExpr([NotNull] TypeDefParser.ExprContext context) { }
+	public virtual void ExitExpr([NotNull] dhllParser.ExprContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterIdentifier([NotNull] TypeDefParser.IdentifierContext context) { }
+	public virtual void EnterIdentifier([NotNull] dhllParser.IdentifierContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.identifier"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitIdentifier([NotNull] TypeDefParser.IdentifierContext context) { }
+	public virtual void ExitIdentifier([NotNull] dhllParser.IdentifierContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterTypename([NotNull] TypeDefParser.TypenameContext context) { }
+	public virtual void EnterTypename([NotNull] dhllParser.TypenameContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="TypeDefParser.typename"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.typename"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitTypename([NotNull] TypeDefParser.TypenameContext context) { }
+	public virtual void ExitTypename([NotNull] dhllParser.TypenameContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

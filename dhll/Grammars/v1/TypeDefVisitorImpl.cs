@@ -41,10 +41,10 @@ public class dhllFile
 
 
 // ==============================================================================================================================
-public class TypeDefVisitorImpl : TypeDefBaseVisitor<object>
+public class TypeDefVisitorImpl : dhllBaseVisitor<object>
 {
   // --------------------------------------------------------------------------------------------------------------------------
-  public override object VisitFile([NotNull] TypeDefParser.FileContext context)
+  public override object VisitFile([NotNull] dhllParser.FileContext context)
   {
     var res = new dhllFile();
 
@@ -58,7 +58,7 @@ public class TypeDefVisitorImpl : TypeDefBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public override object VisitTypedef([Antlr4.Runtime.Misc.NotNull] TypeDefParser.TypedefContext context)
+  public override object VisitTypedef([Antlr4.Runtime.Misc.NotNull] dhllParser.TypedefContext context)
   {
     var id = context.identifier().GetText();
 
@@ -75,7 +75,7 @@ public class TypeDefVisitorImpl : TypeDefBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public override object VisitDecl([Antlr4.Runtime.Misc.NotNull] TypeDefParser.DeclContext context)
+  public override object VisitDecl([Antlr4.Runtime.Misc.NotNull] dhllParser.DeclContext context)
   {
     var res = new Declare();
 
