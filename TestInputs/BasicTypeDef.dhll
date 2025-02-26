@@ -1,9 +1,4 @@
 typedef ModalWindow {
-    bool IsVisible = false;
-    string Title = "Modal";
-}
-
-typedef ModalWindow2 {
     prop bool IsVisible = false;
-    prop string Title = "Modal";
+    string Title = "Modal";
 }

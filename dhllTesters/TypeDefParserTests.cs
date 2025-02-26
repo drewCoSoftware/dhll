@@ -49,14 +49,13 @@ namespace dhllTesters
       string input = LoadTestInput("BasicTypeDef");
 
       var context =  GetTypeDefContext(input);
-      var v = new TypeDefVisitorImpl();
+      var v = new dhllVisitorImpl();
       var td = (TypeDef)v.Visit(context);
 
       Assert.That(td.Identifier, Is.EqualTo("TypeDef1"));
       Assert.That(td.Declarations.Count, Is.EqualTo(1));
       Assert.That(td.Declarations[0].Identifier, Is.EqualTo("x"));
       Assert.That(td.Declarations[0].InitValue, Is.EqualTo("10"));
-
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

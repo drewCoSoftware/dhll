@@ -1,14 +1,22 @@
 
 using Antlr4.Runtime.Misc;
+using dhll.Emitters;
 
 namespace dhll.v1;
 
 // ==============================================================================================================================
 public class Declare
 {
+  public EScope Scope { get; set; } = EScope.Public;
+
   public string TypeName { get; set; }
   public string Identifier { get; set; }
   public string? InitValue { get; set; }
+
+  public bool IsProperty { get; set; }
+
+  // FUTURE:
+  // public bool IsAtomic { get; set; }
 }
 
 // ==============================================================================================================================
@@ -41,18 +49,25 @@ public class dhllFile
 
 
 // ==============================================================================================================================
-public class TypeDefVisitorImpl : dhllBaseVisitor<object>
+public class dhllVisitorImpl : dhllBaseVisitor<object>
 {
+
+  private List<TypeDef> TypeDefs = new List<TypeDef>();
+
   // --------------------------------------------------------------------------------------------------------------------------
   public override object VisitFile([NotNull] dhllParser.FileContext context)
   {
-    var res = new dhllFile();
-
     foreach (var item in context.typedef())
     {
       var td = (TypeDef)VisitTypedef(item);
-      res.TypeDefs.Add(td);
+      this.TypeDefs.Add(td);
     }
+
+    var res = new dhllFile();
+    res.TypeDefs = this.TypeDefs;
+
+
+    // TODO: Check for errors, multiple defs, etc.
 
     return res;
   }
@@ -91,6 +106,8 @@ public class TypeDefVisitorImpl : dhllBaseVisitor<object>
     {
       Console.WriteLine("no initializer!");
     }
+
+    res.IsProperty = context.prop()?.GetText() == "prop";
     return res;
   }
 }

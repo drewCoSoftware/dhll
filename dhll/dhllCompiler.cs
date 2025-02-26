@@ -40,7 +40,7 @@ namespace dhll
       var parser = new dhllParser(ts);
 
       FileContext context = parser.file();
-      var v = new TypeDefVisitorImpl();
+      var v = new dhllVisitorImpl();
 
       var dFile = (dhllFile)v.VisitFile(context);
       dFile.Path = Options.InputFile;
