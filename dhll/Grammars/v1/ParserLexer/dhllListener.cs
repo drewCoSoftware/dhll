@@ -42,6 +42,16 @@ public interface IdhllListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="dhllParser.inlineComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterInlineComment([NotNull] dhllParser.InlineCommentContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="dhllParser.inlineComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitInlineComment([NotNull] dhllParser.InlineCommentContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -82,15 +92,15 @@ public interface IdhllListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitProp([NotNull] dhllParser.PropContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="dhllParser.expr"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.value"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterExpr([NotNull] dhllParser.ExprContext context);
+	void EnterValue([NotNull] dhllParser.ValueContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="dhllParser.expr"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.value"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitExpr([NotNull] dhllParser.ExprContext context);
+	void ExitValue([NotNull] dhllParser.ValueContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// </summary>

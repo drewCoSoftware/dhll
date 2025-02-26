@@ -100,7 +100,7 @@ public class dhllVisitorImpl : dhllBaseVisitor<object>
     var initializer = context.initializer();
     if (initializer != null)
     {
-      res.InitValue = initializer.expr().GetText();
+      res.InitValue = initializer.value().GetText();
     }
     else
     {

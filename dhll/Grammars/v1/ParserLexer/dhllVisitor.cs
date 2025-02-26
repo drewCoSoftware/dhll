@@ -39,6 +39,12 @@ public interface IdhllVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="dhllParser.inlineComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInlineComment([NotNull] dhllParser.InlineCommentContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -63,11 +69,11 @@ public interface IdhllVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitProp([NotNull] dhllParser.PropContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="dhllParser.expr"/>.
+	/// Visit a parse tree produced by <see cref="dhllParser.value"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitExpr([NotNull] dhllParser.ExprContext context);
+	Result VisitValue([NotNull] dhllParser.ValueContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// </summary>

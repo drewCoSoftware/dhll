@@ -1,4 +1,5 @@
-typedef ModalWindow {
-    bool IsVisible = false;
-    string Title = "Modal";
+// My COOL FILE !
+typedef ModalWindow { 
+    int x =  100;
+
 }

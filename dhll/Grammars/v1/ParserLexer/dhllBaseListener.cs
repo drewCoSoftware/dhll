@@ -49,6 +49,18 @@ public partial class dhllBaseListener : IdhllListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitFile([NotNull] dhllParser.FileContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="dhllParser.inlineComment"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterInlineComment([NotNull] dhllParser.InlineCommentContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="dhllParser.inlineComment"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitInlineComment([NotNull] dhllParser.InlineCommentContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -97,17 +109,17 @@ public partial class dhllBaseListener : IdhllListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitProp([NotNull] dhllParser.PropContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="dhllParser.expr"/>.
+	/// Enter a parse tree produced by <see cref="dhllParser.value"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterExpr([NotNull] dhllParser.ExprContext context) { }
+	public virtual void EnterValue([NotNull] dhllParser.ValueContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="dhllParser.expr"/>.
+	/// Exit a parse tree produced by <see cref="dhllParser.value"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitExpr([NotNull] dhllParser.ExprContext context) { }
+	public virtual void ExitValue([NotNull] dhllParser.ValueContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.identifier"/>.
 	/// <para>The default implementation does nothing.</para>
