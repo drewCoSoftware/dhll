@@ -1,4 +1,6 @@
-﻿using dhll.v1;
+﻿using Antlr4.Runtime;
+using dhll.CodeGen;
+using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
 using System;
@@ -32,9 +34,7 @@ namespace dhll.Emitters
   // ==============================================================================================================================
   internal class TypescriptEmitter : EmitterBase, IEmitter
   {
-    // Let's squirt some code for the declarations...
-    // TODO: We need a dedicated code squirter, I think!
-    const string TAB = "  ";      // Two-space tab, for now.
+    private CodeFile CF = new CodeFile();
 
 
     private static Dictionary<string, string> TypeNameTable = new Dictionary<string, string>() {
@@ -57,38 +57,52 @@ namespace dhll.Emitters
       string fName = Path.GetFileNameWithoutExtension(file.Path);
       string outputPath = FileTools.GetRootedPath(Path.Combine(outputDir, fName + ".ts"));
 
+      WriteCodeGenHeader();
 
 
-      var sb = new StringBuilder();
       foreach (var td in file.TypeDefs)
       {
         var preProcResults = PreProcessDeclarations(td);
 
-        sb.Append($"class {td.Identifier} {{");
+        CF.Write($"class {td.Identifier} ");
+        CF.OpenBlock();
+        CF.NextLine();
 
         foreach (var item in preProcResults.Declares)
         {
-          EmitDeclaration(sb, item);
+          EmitDeclaration(item);
         }
+        CF.NextLine();
 
         // Now emit all of the getters / setters.
         foreach (var item in preProcResults.GetterSetters)
         {
-          EmitGetterSetter(sb, item);
+          EmitGetterSetter(item);
         }
 
-
-        sb.Append(Environment.NewLine);
-        sb.Append("}");
-        sb.Append(Environment.NewLine);
+        CF.CloseBlock();
+        CF.NextLine();
       }
 
-      string content = sb.ToString();
-      File.WriteAllText(outputPath, content);
-
+      CF.Save(outputPath);
       Logger.Info($"Output: {outputPath}");
 
       return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private void WriteCodeGenHeader()
+    {
+      CF.WriteLine("// -------------------------------------------------------- ");
+      CF.WriteLine("// -------------------- CODE GEN WARNING ------------------ ");
+    //  CF.WriteLine("//                                                        //");
+      CF.WriteLine("// This file was created by a code generator.  You may edit ");
+      CF.WriteLine("// it but be aware that your changes may disappear suddenly ");
+      CF.WriteLine("// when the generator program runs next!                    ");
+      CF.WriteLine("//                                                          ");
+      CF.WriteLine("// -------------------------------------------------------- ");
+   //   CF.WriteLine("// ---------------------------------------------------------- //");
+      CF.NextLine(1);
     }
 
 
@@ -142,27 +156,29 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private void EmitDeclaration(StringBuilder sb, Declare item)
+    private void EmitDeclaration(Declare item)
     {
       var useType = TranslateTypeName(item.TypeName);
 
-      sb.Append($"{Environment.NewLine}{TAB}{item.Identifier}: {useType}");
+      string line = $"{item.Identifier}: {useType}";
       if (item.InitValue != null)
       {
-        sb.Append($" = {item.InitValue}");
+        line += $" = {item.InitValue}";
       }
-      sb.Append($";{Environment.NewLine}");
+      line += ";";
+
+      CF.WriteLine(line);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private void EmitGetterSetter(StringBuilder sb, GetterSetter item)
+    private void EmitGetterSetter(GetterSetter item)
     {
       if (item.UseGetter)
       {
-        sb.AppendLine($"public get {item.Identifier}() {{");
-        sb.AppendLine($"{TAB}return this.{item.BackingMember.Identifier};");
-        sb.AppendLine($"}}");
-        sb.AppendLine();
+        CF.Write($"public get {item.Identifier}() ");
+        CF.OpenBlock();
+        CF.WriteLine($"return this.{item.BackingMember.Identifier};");
+        CF.CloseBlock(2);
       }
 
       if (item.UseSetter)
@@ -170,11 +186,12 @@ namespace dhll.Emitters
         string typeName = TranslateTypeName(item.BackingMember.TypeName);
         string bid = ConvertToArgumentName(item.Identifier) + "_";
 
-        sb.AppendLine($"public set {item.Identifier}({bid}: {typeName}) {{");
-        sb.AppendLine($"{TAB}this.{item.BackingMember.Identifier} = {bid};");
-        sb.AppendLine($"}}");
-        sb.AppendLine();
+        CF.Write($"public set {item.Identifier}({bid}: {typeName}) ");
+        CF.OpenBlock();
+        CF.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
+        CF.CloseBlock(2);
       }
+
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -198,7 +215,8 @@ namespace dhll.Emitters
       if (input.Length == 0) { return input; }
 
       uint val = (uint)input[0];
-      if (val >=65 & val <= 90) { 
+      if (val >= 65 & val <= 90)
+      {
         val += 32;
       }
 
