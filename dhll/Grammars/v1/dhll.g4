@@ -33,7 +33,7 @@ PRIVATE: 'private';
 PROP: 'prop';           // Indicates a declaration should be implemented as a property.
 
 FIRSTCHAR: [a-zA-Z_];
-ID: [a-zA-Z_] [a-zA-Z0-9_]+;     // FIX: This is making it so that we need at least two chars.  making the second part optional (?) makes it so no ids are detected....
+ID: [a-zA-Z_]([a-zA-Z0-9_]*);     // FIX: This is making it so that we need at least two chars.  making the second part optional (?) makes it so no ids are detected....
 
 
 WORD: [a-zA-Z]+;

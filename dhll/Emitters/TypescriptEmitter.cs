@@ -98,7 +98,6 @@ namespace dhll.Emitters
       CF.WriteLine("// This file was created by a code generator.  You may edit ");
       CF.WriteLine("// it but be aware that your changes may disappear suddenly ");
       CF.WriteLine("// when the generator program runs next!                    ");
-      CF.WriteLine("//                                                          ");
       CF.WriteLine("// -------------------------------------------------------- ");
       CF.NextLine(1);
     }
