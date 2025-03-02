@@ -80,7 +80,7 @@ mode ATTVALUE;
 // an attribute value may have spaces b/t the '=' and the value
 ATTVALUE_VALUE: ' '* ATTRIBUTE -> popMode;
 
-ATTRIBUTE: DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING | ATTCHARS | HEXCHARS | DECCHARS;
+ATTRIBUTE: DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING | ATTCHARS | HEXCHARS | DECCHARS | PROP_STRING;
 
 fragment ATTCHARS: ATTCHAR+ ' '?;
 
@@ -94,6 +94,7 @@ fragment DOUBLE_QUOTE_STRING: '"' ~[<"]* '"';
 
 fragment SINGLE_QUOTE_STRING: '\'' ~[<']* '\'';
 
+fragment PROP_STRING: '{' ~[<']* '}';
 
 // // XML: '<?xml' .*? '>';
 

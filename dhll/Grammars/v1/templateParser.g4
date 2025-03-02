@@ -4,11 +4,18 @@ options {
     tokenVocab = templateLexer;
 }
 
-template: htmlElement* EOF;
+template: htmlElements* EOF;
 
-htmlElement: TAG_OPEN TAG_NAME TAG_CLOSE
+htmlElements
+    : htmlMisc* htmlElement htmlMisc*
+    ;
+
+htmlMisc: SEA_WS;
+
+
+htmlElement: TAG_OPEN TAG_NAME htmlAttribute* (TAG_CLOSE
      (htmlContent TAG_OPEN TAG_SLASH TAG_NAME TAG_CLOSE)?
-        | TAG_SLASH_CLOSE
+        | TAG_SLASH_CLOSE)
 ;
 
 
