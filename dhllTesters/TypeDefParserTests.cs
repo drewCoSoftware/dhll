@@ -20,7 +20,6 @@ namespace dhllTesters
     // --------------------------------------------------------------------------------------------------------------------------
     protected string GetTestInputPath(string name)
     {
-      if (!name.EndsWith(".dhll")) { name += ".dhll"; }
       string res = Path.Combine(TestDir, name);
 
       return res;

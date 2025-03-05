@@ -23,8 +23,8 @@ namespace dhllTesters
     {
       var compiler = new dhllCompiler(null);
 
-      string inputPath = GetTestInputPath("Template1.dhll");
-      TemplateDefinition[] defs = compiler.CompileTemplates(inputPath);
+      string inputPath = GetTestInputPath("Template1.dhlt");
+      TemplateDefinition[] defs = compiler.ParseTemplates(inputPath);
 
       Assert.That(defs.Length, Is.EqualTo(1), "There should be one template def!");
 

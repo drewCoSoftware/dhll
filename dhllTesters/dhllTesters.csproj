@@ -33,7 +33,7 @@
     <None Include="..\TestInputs\BasicTypeDef.dhll" Link="TestInputs\BasicTypeDef.dhll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\TestInputs\Template1.dhll" Link="TestInputs\Template1.dhll">
+    <None Include="..\TestInputs\Template1.dhlt" Link="TestInputs\Template1.dhlt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

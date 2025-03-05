@@ -64,7 +64,7 @@ public class dhllCompiler
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDefinition[] CompileTemplates(string inputFilePath)
+  public TemplateDefinition[] ParseTemplates(string inputFilePath)
   {
 
     string input = File.ReadAllText(inputFilePath);
