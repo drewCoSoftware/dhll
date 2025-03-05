@@ -28,5 +28,5 @@ antlr4 -package dhll.v1 -visitor -Dlanguage=CSharp -o ./v1/ParserLexer ./v1/Type
 To test some rules:
 ```
 // Make sure to point to the correct file version.
-antlr4-parse ./v1/TypeDef.g4 file -gui test-input.txt
+antlr4-parse ./v1/dhll.g4 file -gui test-input.txt
 ```

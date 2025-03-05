@@ -1,3 +1,0 @@
-typedef TypeDef1 {
-  int x = 10;
-};

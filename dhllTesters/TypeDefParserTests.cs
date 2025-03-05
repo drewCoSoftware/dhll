@@ -17,13 +17,19 @@ namespace dhllTesters
       TestDir = FileTools.GetLocalDir("TestInputs");
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------
+    protected string GetTestInputPath(string name)
+    {
+      if (!name.EndsWith(".dhll")) { name += ".dhll"; }
+      string res = Path.Combine(TestDir, name);
+
+      return res;
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------
     protected string LoadTestInput(string name)
     {
-      if (!name.EndsWith(".dhll")) { name += ".dhll"; }
-      string inputPath = Path.Combine(TestDir, name);
-
+      string inputPath = GetTestInputPath(name);  
       if (!File.Exists(inputPath))
       {
         throw new FileNotFoundException($"The input file at path: {inputPath} does not exist!");
@@ -48,7 +54,7 @@ namespace dhllTesters
     {
       string input = LoadTestInput("BasicTypeDef");
 
-      var context =  GetTypeDefContext(input);
+      var context = GetTypeDefContext(input);
       var v = new dhllVisitorImpl();
       var td = (TypeDef)v.Visit(context);
 

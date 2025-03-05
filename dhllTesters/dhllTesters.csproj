@@ -30,7 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestInputs\BasicTypeDef.dhll">
+    <None Include="..\TestInputs\BasicTypeDef.dhll" Link="TestInputs\BasicTypeDef.dhll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\TestInputs\Template1.dhll" Link="TestInputs\Template1.dhll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

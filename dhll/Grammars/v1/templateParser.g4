@@ -4,7 +4,7 @@ options {
     tokenVocab = templateLexer;
 }
 
-template: htmlElements* EOF;
+templates: htmlElements* EOF;
 
 htmlElements
     : htmlMisc* htmlElement htmlMisc*
@@ -12,8 +12,9 @@ htmlElements
 
 htmlMisc: SEA_WS;
 
+entityName: TAG_NAME;
 
-htmlElement: TAG_OPEN TAG_NAME htmlAttribute* (TAG_CLOSE
+htmlElement: TAG_OPEN entityName htmlAttribute* (TAG_CLOSE
      (htmlContent TAG_OPEN TAG_SLASH TAG_NAME TAG_CLOSE)?
         | TAG_SLASH_CLOSE)
 ;
@@ -24,7 +25,7 @@ htmlContent
     ;
 
 htmlAttribute
-    : TAG_NAME (TAG_EQUALS ATTVALUE_VALUE)?
+    : entityName (TAG_EQUALS ATTVALUE_VALUE)?
     ;
 
 htmlChardata
