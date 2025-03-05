@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
+using Antlr4.Runtime.Tree;
 using dhll.v1;
 using drewCo.Tools;
 using System.Collections.Specialized;
@@ -20,6 +21,11 @@ public class Node
   public string Name { get; set; } = default!;
   public List<Attribute> Attributes { get; set; } = new List<Attribute>();
   public List<Node> Children { get; set; } = new List<Node>();
+
+  /// <summary>
+  /// Text/HTML content.  Used for text nodes.
+  /// </summary>
+  public string? Value { get; set; } = default;
 }
 
 // ==============================================================================================================================
@@ -137,12 +143,12 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private Node ComputeDOM(templateParser.HtmlElementContext rootElem)
+  private Node ComputeDOM(templateParser.HtmlElementContext elem)
   {
-    string tagName = rootElem.entityName().GetText();
+    string tagName = elem.entityName().GetText();
 
-    var attributes = ComputeAttributes(rootElem);
-    List<Node> children = ComputeChildren(rootElem);
+    var attributes = ComputeAttributes(elem);
+    List<Node> children = ComputeChildren(elem);
 
     var res = new Node()
     {
@@ -182,22 +188,71 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     return res;
   }
 
+  public override object VisitChildren(IRuleNode node)
+  {
+    return base.VisitChildren(node);
+  }
+
   // --------------------------------------------------------------------------------------------------------------------------
   private List<Node> ComputeChildren(templateParser.HtmlElementContext elem)
   {
-    var res = new List<Node>();
+    List<Node> res = null!;
 
     // TODO: Implement me!
     var elems = elem.children;
     foreach (var child in elems)
     {
-      //// VisitChildren(
+      var content = child as templateParser.HtmlContentContext;
+      if (content != null)
+      {
+        res = GetChildNodesFromContent(content);
+      }
+      //else if (child is templateParser.HtmlElementContext)
+      //{
+      //  int z = 10;
+      //}
+      //else if (child is templateParser.HtmlChardataContext)
+      //{
+      //  int z = 10;
+      //}
+      ////// VisitChildren(
+      ////int x = 10;
+      ////if (child.
       //int x = 10;
-      //if (child.
-      int x = 10;
-      string cName = child.GetType().Name;
-      Debug.WriteLine(cName);
+      //string cName = child.GetType().Name;
+      //Debug.WriteLine(cName);
     }
+
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private List<Node> GetChildNodesFromContent(templateParser.HtmlContentContext child)
+  {
+    var res = new List<Node>();
+
+    var kids = child.children;
+    foreach (var kid in kids)
+    {
+      if (kid is templateParser.HtmlElementContext)
+      {
+        var n = ComputeDOM(kid as templateParser.HtmlElementContext); 
+        res.Add(n);
+      }
+      else if (kid is templateParser.HtmlChardataContext)
+      {
+        var charData = kid as templateParser.HtmlChardataContext;
+        var n = new Node()
+        {
+          Name = "<text>",
+          Value = charData.GetText()
+        };
+        res.Add(n);
+        int z = 10;
+      }
+    }
+
+    // NOTE: We could combine contiguous text nodes at this point to simplify the tree a bit.
 
     return res;
   }
