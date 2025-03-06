@@ -28,6 +28,8 @@ namespace dhllTesters
 
       Assert.That(defs.Length, Is.EqualTo(1), "There should be one template def!");
 
+      int x = 10;
+
       // TODO: We can expand upon this test by adding more checks for DOM structure, attributes, etc.
       // Assert.True(false, "Please finish this test!");
     }

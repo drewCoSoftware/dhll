@@ -6,9 +6,25 @@ using drewCo.Tools;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace dhll.Grammars.v1;
 
+
+// ==============================================================================================================================
+public class FormatPart
+{
+  public string Value { get; set; }
+  public bool IsExpession { get; set; }
+}
+
+// ==============================================================================================================================
+public class DynamicContent
+{
+  // Some way (function) to represent the interpolated string....
+  public List<FormatPart> Parts { get; set; }
+  public List<string> PropertyNames { get; set; } = new List<string>();
+}
 
 
 // ==============================================================================================================================
@@ -26,6 +42,12 @@ public class Node
   /// Text/HTML content.  Used for text nodes.
   /// </summary>
   public string? Value { get; set; } = default;
+
+  /// <summary>
+  /// If there is any dynamic content / prop expressions in the content, we will use this.
+  /// </summary>
+    public DynamicContent? DynamicContent { get; set; } = null;
+
 }
 
 // ==============================================================================================================================
@@ -33,8 +55,9 @@ public class Attribute
 {
   public string Name { get; set; } = default!;
   public string? Value { get; set; } = default!;
-}
 
+  public DynamicContent? DynamicContent { get; set; } = null;
+}
 
 // ==============================================================================================================================
 /// <summary>
@@ -80,14 +103,13 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       TemplateDefs.Add(def);
     }
 
-    // NOTE: No clue what to return here....
+    // NOTE: No clue what to return here....  Null is the default return value FWIW.
     return null;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
   private TemplateDefinition ParseTemplate(templateParser.HtmlElementContext elem)
   {
-
     // Each template element MUST have a single child element!
     var content = elem.htmlContent();
     int childElemCount = content.htmlElement().Count();
@@ -170,16 +192,28 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       string name = ExtractQuotedValue(attr.entityName().GetText())!;
       string? val = ExtractQuotedValue(attr.ATTVALUE_VALUE()?.GetText());
 
-      if (val != null && IsPropString(val))
+      DynamicContent? dc = null;
+      List<string> propNames = new List<string>();
+      if (val != null && HasPropString(val))
       {
-        // This is where stuff gets interesting....
-        int x = 10;
+        dc = ParseDynamicContent(val);
+
+        // Any value, be it class or text must be representable as a string.
+        // This means that any time an implicated property changes, then we will compute a string (like sprintf) and then slap in into the DOM at the correct place.
+        // Correct places can be:
+        // - An attribute
+        // - Inner text/html of an element.
+        // - That's about it!
+        // so we need:
+        // --> The selector for the element.
+        // --> what property we are affecting....
       }
 
       var toAdd = new Attribute()
       {
         Name = name,
-        Value = val
+        Value = val,
+        DynamicContent = dc
       };
 
       res.Add(toAdd);
@@ -188,9 +222,51 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     return res;
   }
 
-  public override object VisitChildren(IRuleNode node)
+  // --------------------------------------------------------------------------------------------------------------------------
+  private DynamicContent ParseDynamicContent(string val)
   {
-    return base.VisitChildren(node);
+    int start = 0;
+
+    var parts = new List<FormatPart>();
+
+    MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
+    foreach (Match m in matches)
+    {
+      int index = m.Captures[0].Index;
+      string prevPart = val.Substring(start, index - start);
+      if (prevPart != string.Empty)
+      {
+        parts.Add(new FormatPart()
+        {
+          Value = prevPart,
+        });
+      }
+
+
+      parts.Add(new FormatPart()
+      {
+        Value = m.Value.Substring(1, m.Value.Length - 2),
+        IsExpession = true
+      });
+
+      start = index + m.Length;
+    }
+
+    // Leftover string?
+    if (val.Length > start)
+    {
+      parts.Add(new FormatPart()
+      {
+        Value = val.Substring(start)
+      });
+    }
+
+    var res = new DynamicContent()
+    {
+      Parts = parts
+    };
+
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -207,20 +283,6 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       {
         res = GetChildNodesFromContent(content);
       }
-      //else if (child is templateParser.HtmlElementContext)
-      //{
-      //  int z = 10;
-      //}
-      //else if (child is templateParser.HtmlChardataContext)
-      //{
-      //  int z = 10;
-      //}
-      ////// VisitChildren(
-      ////int x = 10;
-      ////if (child.
-      //int x = 10;
-      //string cName = child.GetType().Name;
-      //Debug.WriteLine(cName);
     }
 
     return res;
@@ -236,16 +298,26 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     {
       if (kid is templateParser.HtmlElementContext)
       {
-        var n = ComputeDOM(kid as templateParser.HtmlElementContext); 
+        var n = ComputeDOM(kid as templateParser.HtmlElementContext);
         res.Add(n);
       }
       else if (kid is templateParser.HtmlChardataContext)
       {
-        var charData = kid as templateParser.HtmlChardataContext;
+        var charData = (kid as templateParser.HtmlChardataContext)!;
+
+        string text = charData.GetText();
+        bool hasDynamic = HasPropString(text);
+        DynamicContent? dc = null;
+        if (hasDynamic)
+        {
+          dc = ParseDynamicContent(text);
+        }
+
         var n = new Node()
         {
           Name = "<text>",
-          Value = charData.GetText()
+          Value = text,
+          DynamicContent = dc
         };
         res.Add(n);
         int z = 10;
@@ -261,6 +333,16 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   public static bool StartsAndEndsWith(string input, string startsWith, string endsWith)
   {
     bool res = input.StartsWith(startsWith) && input.EndsWith(endsWith);
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Tells us if the given input string has one or more prop strings...
+  /// </summary>
+  public static bool HasPropString(string input)
+  {
+    bool res = Regex.IsMatch(input, "\\{.*\\}");
     return res;
   }
 
