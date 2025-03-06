@@ -116,6 +116,11 @@ namespace dhll.CodeGen
       NextLine(breakCount);
     }
 
-
+    // --------------------------------------------------------------------------------------------------------------------------
+    internal string GetString()
+    {
+      string res = SB.ToString();
+      return res;
+    }
   }
 }

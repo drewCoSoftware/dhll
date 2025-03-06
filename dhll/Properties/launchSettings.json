@@ -3,6 +3,10 @@
     "dhll": {
       "commandName": "Project",
       "commandLineArgs": "compile --file \"..\\..\\..\\..\\TestInputs\\BasicTypeDef.dhll\" --to \"typescript\""
+    },
+    "dhlt": {
+      "commandName": "Project",
+      "commandLineArgs": "compile --file \"..\\..\\..\\..\\TestInputs\\Template1.dhlt\" --to \"typescript\""
     }
   }
 }

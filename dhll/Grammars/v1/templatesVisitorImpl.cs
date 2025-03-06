@@ -46,8 +46,13 @@ public class Node
   /// <summary>
   /// If there is any dynamic content / prop expressions in the content, we will use this.
   /// </summary>
-    public DynamicContent? DynamicContent { get; set; } = null;
+  public DynamicContent? DynamicContent { get; set; } = null;
 
+
+  /// <summary>
+  /// Used during codegen.
+  /// </summary>
+  internal string Symbol { get; set; } = null!;
 }
 
 // ==============================================================================================================================

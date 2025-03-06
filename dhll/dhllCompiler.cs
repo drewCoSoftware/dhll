@@ -34,29 +34,67 @@ public class dhllCompiler
 
     string input = File.ReadAllText(Options.InputFile);
 
-    AntlrInputStream s = new AntlrInputStream(input);
-    var lexer = new dhllLexer(s);
 
-    var ts = new CommonTokenStream(lexer);
-    var parser = new dhllParser(ts);
+    if (Options.InputFile.EndsWith(".dhll"))
+    {
+      AntlrInputStream s = new AntlrInputStream(input);
+      var lexer = new dhllLexer(s);
 
-    FileContext context = parser.file();
-    var v = new dhllVisitorImpl();
+      var ts = new CommonTokenStream(lexer);
+      var parser = new dhllParser(ts);
 
-    var dFile = (dhllFile)v.VisitFile(context);
-    dFile.Path = Options.InputFile;
+      FileContext context = parser.file();
+      var v = new dhllVisitorImpl();
 
-    // TODO: Check for parse errors, etc.
+      var dFile = (dhllFile)v.VisitFile(context);
+      dFile.Path = Options.InputFile;
+
+      string outputDir = FileTools.GetLocalDir(Options.OutputDir);
+      FileTools.CreateDirectory(outputDir);
+
+      // Load the emitter...
+      IEmitter emitter = LoadEmitter();
+
+      // Run the emitter...
+      EmitterResults results = emitter.Emit(outputDir, dFile);
+
+      // TODO: Check for parse errors, etc.
+    }
+    else if (Options.InputFile.EndsWith(".dhlt"))
+    {
+      var defs = ParseTemplates(Options.InputFile);
+
+      var d = defs[0];
+
+      CreateDOMEmitter emitter = new CreateDOMEmitter();
+
+      emitter.GetCreateDOMFunction(d, Options.OutputDir);
 
 
-    string outputDir = FileTools.GetLocalDir(Options.OutputDir);
-    FileTools.CreateDirectory(outputDir);
+      //AntlrInputStream s = new AntlrInputStream(input);
+      //var lexer = new dhllLexer(s);
 
-    // Load the emitter...
-    IEmitter emitter = LoadEmitter();
+      //var ts = new CommonTokenStream(lexer);
+      //var parser = new templateParser(ts);
 
-    // Run the emitter...
-    EmitterResults results = emitter.Emit(outputDir, dFile);
+      //TemplatesContext context = parser.templates();
+      //var v = new templatesVisitorImpl();
+
+      //var dFile = (dhllFile)v.VisitTemplates(context);
+      //dFile.Path = Options.InputFile;
+
+      //string outputDir = FileTools.GetLocalDir(Options.OutputDir);
+      //FileTools.CreateDirectory(outputDir);
+
+      //// Load the emitter...
+      //IEmitter emitter = LoadEmitter();
+
+      //// Run the emitter...
+      //EmitterResults results = emitter.Emit(outputDir, dFile);
+
+    }
+
+
 
 
     return 0;
