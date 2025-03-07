@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace dhll.CodeGen
 {
@@ -49,17 +50,19 @@ namespace dhll.CodeGen
 
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public virtual void WriteLine(string data, int breakCount = 1)
+    public virtual CodeFile WriteLine(string data, int breakCount = 1)
     {
       // HACK:  We are doing this because we have block output (if/then, etc.) that needs to write many lines with
       // formatting.  So we shouldn't have the 'emit' functions returning strings, they should all be writing directly to
       // a stream.  The test cases will have to be overhauled somewhat to support this.  We should do this sooner rather than later!
-      if (data == null) { return; }
+      if (data != null)
+      {
+        SB.Append(TabFill);
+        SB.Append(data);
 
-      SB.Append(TabFill);
-      SB.Append(data);
-
-      NextLine(breakCount);
+        NextLine(breakCount);
+      }
+      return this;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -72,25 +75,27 @@ namespace dhll.CodeGen
     /// <summary>
     /// Add extra line breaks to the current output stream.
     /// </summary>
-    public void NextLine(int breakCount = 1)
+    public CodeFile NextLine(int breakCount = 1)
     {
       for (int i = 0; i < breakCount; i++)
       {
         SB.Append(NewLine);
       }
+
+      return this;
     }
 
-
-
     // --------------------------------------------------------------------------------------------------------------------------
-    public void Write(string text)
+    public CodeFile Write(string text)
     {
       SB.Append(TabFill);
       SB.Append(text);
+
+      return this;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public virtual void OpenBlock(bool breakBeforeBrace = false)
+    public virtual CodeFile OpenBlock(bool breakBeforeBrace = false)
     {
       if (breakBeforeBrace)
       {
@@ -101,11 +106,13 @@ namespace dhll.CodeGen
       TabDepth += 1;
 
       NextLine();
+
+      return this;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <param name="endline">Should a line ending character be included ?</param>
-    public virtual void CloseBlock(int breakCount = 0)
+    public virtual CodeFile CloseBlock(int breakCount = 0)
     {
       TabDepth -= 1;
 
@@ -114,6 +121,8 @@ namespace dhll.CodeGen
 
 
       NextLine(breakCount);
+
+      return this;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

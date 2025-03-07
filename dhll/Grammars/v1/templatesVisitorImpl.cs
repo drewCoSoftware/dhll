@@ -233,6 +233,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     int start = 0;
 
     var parts = new List<FormatPart>();
+    var propNames = new List<string>();
 
     MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
     foreach (Match m in matches)
@@ -248,9 +249,16 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       }
 
 
+      string expValue = m.Value.Substring(1, m.Value.Length - 2);
+      // NOTE: If we have some kind of expression for our properties, then we have to have a way
+      // to extract all of the named properties..  At this time we don't have a way to really do that
+      // outside of updating the grammar, so for now, we will just assume that the expression is a single
+      // property name....
+      propNames.Add(expValue.Trim());
+
       parts.Add(new FormatPart()
       {
-        Value = m.Value.Substring(1, m.Value.Length - 2),
+        Value = expValue,
         IsExpession = true
       });
 
@@ -268,8 +276,14 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
     var res = new DynamicContent()
     {
-      Parts = parts
+      Parts = parts,
+      PropertyNames = propNames.Distinct().ToList()
     };
+
+    if (res.PropertyNames.Count == 0) {
+      // NOTE: A future version could allow for const expressions....
+      throw new Exception("There are no named properties in the expression!");
+    }
 
     return res;
   }

@@ -1,0 +1,4 @@
+<!-- Evidence of HTML comment support.... -->
+<template for="MyType">
+  <div>{MyText}</div>
+</template>

@@ -91,6 +91,23 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
+    public static string GetScopeWord(EScope scope)
+    {
+      switch (scope)
+      {
+        case EScope.Default:
+          return string.Empty;
+        case EScope.Public:
+          return "public";
+        case EScope.Private:
+          return "private";
+
+        default:
+          throw new NotSupportedException();
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
     private void WriteCodeGenHeader()
     {
       CF.WriteLine("// -------------------------------------------------------- ");
@@ -118,7 +135,7 @@ namespace dhll.Emitters
         if (dec.IsProperty)
         {
           // Create a new backing member for this declaration.
-          string useId = "_" + dec.Identifier;
+          string useId = GetInternalIdentifier(dec.Identifier);
           var useDec = new Declare()
           {
             TypeName = dec.TypeName,
@@ -149,6 +166,13 @@ namespace dhll.Emitters
         GetterSetters = getterSetters,
       };
 
+      return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    public static string GetInternalIdentifier(string identifier)
+    {
+      string res = "_" + identifier;
       return res;
     }
 
@@ -260,7 +284,8 @@ namespace dhll.Emitters
   // ==============================================================================================================================
   public enum EScope
   {
-    Public = 0,
+    Default = 0,
+    Public,
     Private
   }
 

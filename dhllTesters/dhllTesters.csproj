@@ -36,6 +36,9 @@
     <None Include="..\TestInputs\Template1.dhlt" Link="TestInputs\Template1.dhlt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\TestInputs\Template2.dhlt" Link="TestInputs\Template2.dhlt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
