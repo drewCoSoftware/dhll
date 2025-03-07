@@ -1,4 +1,5 @@
-﻿using dhll.CodeGen;
+﻿using CommandLine;
+using dhll.CodeGen;
 using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
@@ -24,11 +25,7 @@ internal class CreateDOMEmitter
   {
     PreProcessDynamicContent(def.DOM);
 
-
     CodeFile cf = new CodeFile();
-
-    // Maybe a way to do the dynamic strings?
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 
     // Walk the tree and create elements + children as we go....
     Node root = def.DOM;
@@ -36,12 +33,12 @@ internal class CreateDOMEmitter
     cf.WriteLine($"function CreateDOM(): HTMLElement ");
     cf.OpenBlock();
 
-    string nodeSymbol = NamingContext.GetUniqueNameFor("node");
-    root.Symbol = nodeSymbol;
+    //string nodeSymbol = NamingContext.GetUniqueNameFor("node");
+    //root.Symbol = nodeSymbol;
 
-    cf.WriteLine($"let {nodeSymbol} = document.createElement('{root.Name}');");
+    cf.WriteLine($"let {root.Symbol} = document.createElement('{root.Name}');");
 
-    AddAttributes(cf, root, nodeSymbol);
+    AddAttributes(cf, root, root.Symbol);
 
     // Now we need to populate the child elements....
     CreateChildElements(cf, root, NamingContext);
@@ -76,10 +73,20 @@ internal class CreateDOMEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void PreProcessNode(Node node)
   {
+    bool isTextNode = node.Name == "<text>";
+
+    node.Symbol = isTextNode ? null : NamingContext.GetUniqueNameFor("node");
+
     if (node.Name == "<text>" && node.DynamicContent != null)
     {
       string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
       node.DynamicFunction = funcName;
+
+      // We need to make note that this is a target...
+      // So if every content function is unique, then we can make a 1:1 association with a DOM element....
+      // soo....  --> elem.innerText = contentFunc();
+      // Every time we set a value on the associated list of properties, then we need to call this func....
+      // --> We already have a unique name for the DOM element as it is created....
     }
 
     foreach (var attr in node.Attributes)
@@ -141,20 +148,17 @@ internal class CreateDOMEmitter
       }
       else
       {
-        string symbol = nameContext.GetUniqueNameFor("child");
-        item.Symbol = symbol;
-
         cf.NextLine(2);
-        cf.WriteLine($"let {symbol} = document.createElement('{item.Name}');");
+        cf.WriteLine($"let {item.Symbol} = document.createElement('{item.Name}');");
 
         // Attributes.
-        AddAttributes(cf, item, symbol);
+        AddAttributes(cf, item, item.Symbol);
 
         // Now its child elements too....
         CreateChildElements(cf, item, nameContext);
 
         // Add the child node to the parent....
-        cf.WriteLine($"{parent.Symbol}.append({symbol});");
+        cf.WriteLine($"{parent.Symbol}.append({item.Symbol});");
       }
 
     }
@@ -263,7 +267,6 @@ internal class DynamicFunctionsGroup
 
       funcDef.Body.Add(ComputeStringFunction(dc));
 
-
       // Now we will associate the dynamic function with all of the implicated properties.
       foreach (var item in dc.PropertyNames)
       {
@@ -286,6 +289,9 @@ internal class DynamicFunctionsGroup
   // --------------------------------------------------------------------------------------------------------------------------
   private string ComputeStringFunction(DynamicContent dc)
   {
+    // Maybe a way to do the dynamic strings?
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+
     string joined = string.Join(" + ", from x in dc.Parts
                                        select x.IsExpession ? $"({x.Value})" : $"\"{x.Value}\"");
 
@@ -311,6 +317,12 @@ internal class DynamicFunctionsGroup
       cf.CloseBlock();
       cf.NextLine(2);
     }
+
+    //// TEST:
+    //foreach (var item in PropsToFunctions.Keys)
+    //{
+    //  cf.WriteLine($"PROP: {item}");
+    //}
   }
 }
 

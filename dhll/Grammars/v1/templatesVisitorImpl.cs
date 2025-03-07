@@ -60,9 +60,10 @@ public partial class Node
 
   /// <summary>
   /// Used during codegen.
+  /// Text nodes are never named and can therefore be null.
   /// </summary>
   [CodeGen]
-  internal string Symbol { get; set; } = null!;
+  internal string? Symbol { get; set; } = null;
 
   /// <summary>
   /// Used during codegen.
