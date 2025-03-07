@@ -1,5 +1,4 @@
-﻿using CommandLine;
-using dhll.CodeGen;
+﻿using dhll.CodeGen;
 using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
@@ -12,12 +11,14 @@ internal class CreateDOMEmitter
 {
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
+  private PropChangeTargets PropTargets = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
   public CreateDOMEmitter()
   {
     NamingContext = new NamingContext();
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
+    PropTargets = new PropChangeTargets();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -33,12 +34,9 @@ internal class CreateDOMEmitter
     cf.WriteLine($"function CreateDOM(): HTMLElement ");
     cf.OpenBlock();
 
-    //string nodeSymbol = NamingContext.GetUniqueNameFor("node");
-    //root.Symbol = nodeSymbol;
-
     cf.WriteLine($"let {root.Symbol} = document.createElement('{root.Name}');");
 
-    AddAttributes(cf, root, root.Symbol);
+    AddAttributes(cf, root, root.Symbol!);
 
     // Now we need to populate the child elements....
     CreateChildElements(cf, root, NamingContext);
@@ -79,6 +77,11 @@ internal class CreateDOMEmitter
 
     if (node.Name == "<text>" && node.DynamicContent != null)
     {
+      // NOTE: This check should probably happen elsewhere....
+      if (node.Parent == null) { 
+        throw new InvalidOperationException("<text> nodes must have a parent!");
+      }
+
       string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
       node.DynamicFunction = funcName;
 
@@ -87,6 +90,8 @@ internal class CreateDOMEmitter
       // soo....  --> elem.innerText = contentFunc();
       // Every time we set a value on the associated list of properties, then we need to call this func....
       // --> We already have a unique name for the DOM element as it is created....
+      // So then each function is associated with a unique target....
+      PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
     }
 
     foreach (var attr in node.Attributes)
@@ -95,6 +100,8 @@ internal class CreateDOMEmitter
       {
         string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
         attr.DynamicFunction = funcName;
+
+        PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
       }
     }
 
@@ -104,8 +111,9 @@ internal class CreateDOMEmitter
     }
   }
 
+
   // --------------------------------------------------------------------------------------------------------------------------
-  private void AddAttributes(CodeFile cf, Node toNode, string nodeSymbol)
+  private void AddAttributes(CodeFile cf, Node toNode, string parentSymbol)
   {
     foreach (var item in toNode.Attributes)
     {
@@ -118,7 +126,7 @@ internal class CreateDOMEmitter
         useValue = $"{funcName}()";
       }
 
-      cf.WriteLine($"{nodeSymbol}.setAttribute('{item.Name}', {useValue});");
+      cf.WriteLine($"{parentSymbol}.setAttribute('{item.Name}', {useValue});");
     }
   }
 
@@ -176,155 +184,8 @@ internal class CreateDOMEmitter
 
     return res;
   }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  public EmitterResults Emit(string outputDir, dhllFile file)
-  {
-    throw new NotImplementedException();
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  public string TranslateTypeName(string typeName)
-  {
-    throw new NotImplementedException();
-  }
-
 }
 
-
-// ==============================================================================================================================
-/// <summary>
-/// Helps keep track of names, etc. so that we can create unique symbols while generating code.
-/// </summary>
-internal class NamingContext
-{
-
-  private Dictionary<string, int> NamesToCounts = new Dictionary<string, int>();
-  private object DataLock = new object();
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  public string GetUniqueNameFor(string symbol)
-  {
-
-    lock (DataLock)
-    {
-      int count = 0;
-      if (NamesToCounts.TryGetValue(symbol, out count))
-      {
-        count++;
-      }
-      NamesToCounts[symbol] = count;
-
-      if (count == 0)
-      {
-        return symbol;
-      }
-
-      string res = $"{symbol}{count}";
-      return res;
-    }
-
-  }
-}
-
-// ==============================================================================================================================
-/// <summary>
-/// Tracks our dynamic functions, names + their associated property names.
-/// </summary>
-internal class DynamicFunctionsGroup
-{
-  private Dictionary<string, List<FunctionDef>> PropsToFunctions = new Dictionary<string, List<FunctionDef>>();
-  private List<FunctionDef> UniqueFunctions = new List<FunctionDef>();
-
-  private object DataLock = new object();
-
-  private NamingContext NamingContext = null!;
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  public DynamicFunctionsGroup(NamingContext namingContext_)
-  {
-    NamingContext = namingContext_;
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  /// <summary>
-  /// Create internal internal entries based on the dynamic content....
-  /// Returns the name of the generated function!
-  /// </summary>
-  public string AddDynamicFunction(DynamicContent dc)
-  {
-    lock (DataLock)
-    {
-      string name = NamingContext.GetUniqueNameFor("getValue");
-
-      // We need to create the function definition....
-      // Simple function def, that takes zero arguments...
-      var funcDef = new FunctionDef()
-      {
-        Name = name,
-        ReturnType = "string"
-      };
-
-      funcDef.Body.Add(ComputeStringFunction(dc));
-
-      // Now we will associate the dynamic function with all of the implicated properties.
-      foreach (var item in dc.PropertyNames)
-      {
-        if (!PropsToFunctions.TryGetValue(item, out var funcs))
-        {
-          funcs = new List<FunctionDef>();
-          PropsToFunctions[item] = funcs;
-        }
-
-        funcs.Add(funcDef);
-      }
-
-      UniqueFunctions.Add(funcDef);
-
-      return name;
-    }
-
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  private string ComputeStringFunction(DynamicContent dc)
-  {
-    // Maybe a way to do the dynamic strings?
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
-
-    string joined = string.Join(" + ", from x in dc.Parts
-                                       select x.IsExpession ? $"({x.Value})" : $"\"{x.Value}\"");
-
-    string res = $"return {joined};";
-    return res;
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  internal void EmitFunctionDefs(CodeFile cf)
-  {
-    cf.NextLine(2);
-    foreach (var def in UniqueFunctions)
-    {
-      // TODO: We should have a typescript emitter squirt all of this out.
-      // We just don't have a fully functional DHLL implementation at this time to make that work.
-      string scope = TypescriptEmitter.GetScopeWord(def.Scope);
-      cf.WriteLine($"{scope} function {def.Name}(): string ", 0);
-      cf.OpenBlock(false);
-      foreach (var item in def.Body)
-      {
-        cf.WriteLine(item);
-      }
-      cf.CloseBlock();
-      cf.NextLine(2);
-    }
-
-    //// TEST:
-    //foreach (var item in PropsToFunctions.Keys)
-    //{
-    //  cf.WriteLine($"PROP: {item}");
-    //}
-  }
-}
 
 // ==============================================================================================================================
 internal class FunctionDef
@@ -337,6 +198,4 @@ internal class FunctionDef
 
   public List<string> Body = new List<string>();
 }
-
-
 

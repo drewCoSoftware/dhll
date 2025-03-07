@@ -32,13 +32,18 @@ public class DynamicContent
 /// This attribute is really only used to make it clear that a certain property is only used for codegen
 /// purposes, and shouldn't be messed with.
 /// </summary>
-[AttributeUsage(AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
 public class CodeGenAttribute : System.Attribute
 { }
 
 // ==============================================================================================================================
 public partial class Node
 {
+  /// <summary>
+  /// The parent node, or null if this is the root node.
+  /// </summary>
+  public Node? Parent { get; set; } = null;
+
   /// <summary>
   /// Name of the tag, i.e. 'p', 'img', etc.
   /// If this represents text data, use: '&gt;text&lt;' for the name.
@@ -197,16 +202,18 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   private Node ComputeDOM(templateParser.HtmlElementContext elem)
   {
     string tagName = elem.entityName().GetText();
-
     var attributes = ComputeAttributes(elem);
-    List<Node> children = ComputeChildren(elem);
 
     var res = new Node()
     {
+      Parent = null,
       Name = tagName,
       Attributes = attributes,
-      Children = children
     };
+
+    List<Node> children = ComputeChildren(elem, res);
+
+    res.Children = children;
 
     return res;
   }
@@ -314,7 +321,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private List<Node> ComputeChildren(templateParser.HtmlElementContext elem)
+  private List<Node> ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
     List<Node> res = null!;
 
@@ -325,7 +332,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       var content = child as templateParser.HtmlContentContext;
       if (content != null)
       {
-        res = GetChildNodesFromContent(content);
+        res = GetChildNodesFromContent(content, parentNode);
       }
     }
 
@@ -333,11 +340,11 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private List<Node> GetChildNodesFromContent(templateParser.HtmlContentContext child)
+  private List<Node> GetChildNodesFromContent(templateParser.HtmlContentContext parent, Node parentNode)
   {
     var res = new List<Node>();
 
-    var kids = child.children;
+    var kids = parent.children;
     foreach (var kid in kids)
     {
       if (kid is templateParser.HtmlElementContext)
@@ -359,6 +366,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
         var n = new Node()
         {
+          Parent = parentNode,
           Name = "<text>",
           Value = text,
           DynamicContent = dc
