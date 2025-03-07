@@ -28,7 +28,16 @@ public class DynamicContent
 
 
 // ==============================================================================================================================
-public class Node
+/// <summary>
+/// This attribute is really only used to make it clear that a certain property is only used for codegen
+/// purposes, and shouldn't be messed with.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public class CodeGenAttribute : System.Attribute
+{ }
+
+// ==============================================================================================================================
+public partial class Node
 {
   /// <summary>
   /// Name of the tag, i.e. 'p', 'img', etc.
@@ -52,7 +61,15 @@ public class Node
   /// <summary>
   /// Used during codegen.
   /// </summary>
+  [CodeGen]
   internal string Symbol { get; set; } = null!;
+
+  /// <summary>
+  /// Used during codegen.
+  /// </summary>
+  [CodeGen]
+  internal string DynamicFunction { get; set; } = null!;
+
 }
 
 // ==============================================================================================================================
@@ -62,6 +79,12 @@ public class Attribute
   public string? Value { get; set; } = default!;
 
   public DynamicContent? DynamicContent { get; set; } = null;
+
+  /// <summary>
+  /// Used during codegen.
+  /// </summary>
+  [CodeGen]
+  internal string DynamicFunction { get; set; }
 }
 
 // ==============================================================================================================================
@@ -280,7 +303,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       PropertyNames = propNames.Distinct().ToList()
     };
 
-    if (res.PropertyNames.Count == 0) {
+    if (res.PropertyNames.Count == 0)
+    {
       // NOTE: A future version could allow for const expressions....
       throw new Exception("There are no named properties in the expression!");
     }
