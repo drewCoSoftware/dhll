@@ -1,0 +1,6 @@
+{
+    Files: [
+        "ModalWindow.dhll",
+        "modalWindow.dhlt"
+    ]
+}
