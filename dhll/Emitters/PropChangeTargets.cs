@@ -22,10 +22,10 @@ internal class PropChangeTargets
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public string[] GetAllTargetNodeSymbols(IList<string>? extraSymbols = null)
+  public string[] GetAllTargetNodeIdentifiers(IList<string>? extraSymbols = null)
   {
     var allNodes = GetAllTargetNodes();
-    var res = (from x in allNodes select x.Symbol).ToList();
+    var res = (from x in allNodes select x.Identifier).ToList();
 
     if (extraSymbols != null)
     {

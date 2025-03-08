@@ -33,36 +33,27 @@ internal class TemplateEmitter
     string assignTo = GetAssignSyntax(root);
     cf.WriteLine($"{QualifyIdentifier(assignTo)} = document.createElement('{root.Name}');");
 
-    AddAttributes(cf, root, root.Symbol!);
+    AddAttributes(cf, root, root.Identifier!);
 
     // Now we need to populate the child elements....
     CreateChildElements(cf, root, NamingContext);
 
     cf.NextLine(2);
-    cf.WriteLine($"return {QualifyIdentifier(root.Symbol!)};");
+    cf.WriteLine($"return {QualifyIdentifier(root.Identifier!)};");
 
     cf.CloseBlock();
+    cf.NextLine(2);
 
 
-    // Now spit out all of the formatting function defs....
-    // Dynamics.EmitFunctionDefs(cf);
-
-
-    //FileTools.CreateDirectory(outputDir);
-    //string path = Path.Combine(outputDir, "test-output.ts");
-    //cf.Save(path);
-
-    //string res = cf.GetString();
-    //return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
   private string GetAssignSyntax(Node node)
   {
-    string res = $"let {node.Symbol}";
-    if (Dynamics.SymbolIsClassLevel(node.Symbol))
+    string res = $"let {node.Identifier}";
+    if (Dynamics.IdentifierIsClassLevel(node.Identifier))
     {
-      res = $"this.{node.Symbol!}";
+      res = $"this.{node.Identifier!}";
     }
     return res;
   }
@@ -104,7 +95,7 @@ internal class TemplateEmitter
 
         if (useValue != null)
         {
-          cf.WriteLine($"{QualifyIdentifier(parent.Symbol)}.insertAdjacentText('beforeend', {useValue});");
+          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
         }
 
         continue;
@@ -116,13 +107,13 @@ internal class TemplateEmitter
         cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
 
         // Attributes.
-        AddAttributes(cf, item, item.Symbol);
+        AddAttributes(cf, item, item.Identifier);
 
         // Now its child elements too....
         CreateChildElements(cf, item, nameContext);
 
         // Add the child node to the parent....
-        cf.WriteLine($"{QualifyIdentifier(parent.Symbol)}.append({QualifyIdentifier(item.Symbol)});");
+        cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
       }
 
     }
@@ -137,7 +128,7 @@ internal class TemplateEmitter
   /// </summary>
   private string QualifyIdentifier(string symbol)
   {
-    if (Dynamics.SymbolIsClassLevel(symbol))
+    if (Dynamics.IdentifierIsClassLevel(symbol))
     {
       return $"this.{symbol}";
     }
@@ -161,7 +152,7 @@ internal class TemplateEmitter
 internal class FunctionDef
 {
   public EScope Scope { get; set; } = EScope.Default;
-  public string Name { get; set; }
+  public string Identifier { get; set; }
   public string ReturnType { get; set; }
 
   // TODO: Function args...

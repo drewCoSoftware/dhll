@@ -37,7 +37,7 @@ internal class DynamicFunctionsGroup
       // Simple function def, that takes zero arguments...
       var funcDef = new FunctionDef()
       {
-        Name = name,
+        Identifier = name,
         ReturnType = "string"
       };
 
@@ -84,7 +84,7 @@ internal class DynamicFunctionsGroup
       // TODO: We should have a typescript emitter squirt all of this out.
       // We just don't have a fully functional DHLL implementation at this time to make that work.
       string scope = TypescriptEmitter.GetScopeWord(def.Scope);
-      cf.WriteLine($"{scope} function {def.Name}(): string ", 0);
+      cf.WriteLine($"{scope} {def.Identifier}(): string ", 0);
       cf.OpenBlock(false);
       foreach (var item in def.Body)
       {

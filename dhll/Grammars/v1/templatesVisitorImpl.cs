@@ -78,7 +78,7 @@ public partial class Node
   /// Text nodes are never named and can therefore be null.
   /// </summary>
   [CodeGen]
-  internal string? Symbol { get; set; } = null;
+  internal string? Identifier { get; set; } = null;
 
   /// <summary>
   /// Used during codegen.

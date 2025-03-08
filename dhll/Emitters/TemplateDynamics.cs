@@ -11,7 +11,7 @@ namespace dhll;
 /// </summary>
 internal class TemplateDynamics
 {
-  public const string ROOT_NODE_SYMBOL = "_Root";
+  public const string ROOT_NODE_IDENTIFIER = "_Root";
 
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
@@ -22,10 +22,10 @@ internal class TemplateDynamics
   public Node DOM { get { return Def.DOM; } }
 
   /// <summary>
-  /// The set of all symbols that we have identified that are at class level.
+  /// The set of all identifiers that we have identified that are at class level.
   /// This is used so that we can keep persistent references to nodes that have dynamic content.
   /// </summary>
-  private HashSet<string> ClassLevelNodeSymbols = null!;
+  private HashSet<string> ClassLevelNodeIdentifiers = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
   public TemplateDynamics(TemplateDefinition def_)
@@ -36,24 +36,24 @@ internal class TemplateDynamics
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
     PropTargets = new PropChangeTargets();
 
-    Def.DOM.Symbol = NamingContext.GetUniqueNameFor(ROOT_NODE_SYMBOL);
+    Def.DOM.Identifier = NamingContext.GetUniqueNameFor(ROOT_NODE_IDENTIFIER);
 
     PreProcessNodes();
 
-    ClassLevelNodeSymbols = PropTargets.GetAllTargetNodeSymbols(new[] { ROOT_NODE_SYMBOL }).ToHashSet();
+    ClassLevelNodeIdentifiers = PropTargets.GetAllTargetNodeIdentifiers(new[] { ROOT_NODE_IDENTIFIER }).ToHashSet();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
   private void PreProcessNodes()
   {
     SetDynamicContent(Def.DOM);
-    SetNodeSymbols(Def.DOM);
+    SetNodeIdentifiers(Def.DOM);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public bool SymbolIsClassLevel(string symbol)
+  public bool IdentifierIsClassLevel(string identifier)
   {
-    return ClassLevelNodeSymbols.Contains(symbol);
+    return ClassLevelNodeIdentifiers.Contains(identifier);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -64,26 +64,26 @@ internal class TemplateDynamics
 
   // --------------------------------------------------------------------------------------------------------------------------
   /// <summary>
-  /// After dynamic content on nodes has been detected, this will assign each node a unique symbol.
-  /// These symbols are used to indicate which nodes are 'class-level' in which case we will keep a
+  /// After dynamic content on nodes has been detected, this will assign each node a unique identifier.
+  /// These identifiers are used to indicate which nodes are 'class-level' in which case we will keep a
   /// persistent reference to them.
   /// </summary>
-  private void SetNodeSymbols(Node node)
+  private void SetNodeIdentifiers(Node node)
   {
     bool isTextNode = node.Name == "<text>";
 
-    if (node.Symbol == null && !isTextNode)
+    if (node.Identifier == null && !isTextNode)
     {
 
       // NOTE: In a future version we could probably use some kind of 'hinting' system to have
       // more meaningful names for the nodes.
       string baseName = PropTargets.HasNode(node) ? "_Node" : "node";
-      node.Symbol = NamingContext.GetUniqueNameFor(baseName);
+      node.Identifier = NamingContext.GetUniqueNameFor(baseName);
     }
 
     foreach (var child in node.Children)
     {
-      SetNodeSymbols(child);
+      SetNodeIdentifiers(child);
     }
   }
 
@@ -140,7 +140,7 @@ internal class TemplateDynamics
     cf.NextLine();
     cf.WriteLine("// ---- DOM Elements ------");
 
-    foreach (var s in ClassLevelNodeSymbols)
+    foreach (var s in ClassLevelNodeIdentifiers)
     {
       cf.WriteLine($"{s}: HTMLElement;");
     }

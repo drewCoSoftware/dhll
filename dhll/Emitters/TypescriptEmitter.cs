@@ -75,6 +75,8 @@ namespace dhll.Emitters
         if (dynamics != null) {
           dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunction(CF);
+
+          dynamics.EmitFunctionDefs(CF);
         }
 
         // Now emit all of the getters / setters.
