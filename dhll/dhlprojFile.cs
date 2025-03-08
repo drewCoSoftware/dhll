@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using IOPath = System.IO.Path;
 
 namespace dhll;
 // ==============================================================================================================================
@@ -23,8 +24,9 @@ public class dhlprojFile
   [JsonIgnore]
   public string Path { get; private set; } = null!;
 
-  ExternalReadonlyList<string> _Files = new ExternalReadonlyList<string>();
-  public ReadOnlyCollection<string> Files { get { return _Files.External; } }
+  public List<string> Files { get; set; } = new List<string>();
+  //ExternalReadonlyList<string> _Files = new ExternalReadonlyList<string>();
+  //public ReadOnlyCollection<string> Files { get { return _Files.External; } }
 
   // --------------------------------------------------------------------------------------------------------------------------
   [JsonConstructor]
@@ -63,7 +65,7 @@ public class dhlprojFile
     }
 
     string relPath = FileTools.GetRelativePath(this.Path, path);
-    _Files.Add(relPath);
+    Files.Add(relPath);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +83,17 @@ public class dhlprojFile
     return res;
   }
 
+  // --------------------------------------------------------------------------------------------------------------------------
+  public string GetFullPath(string relPath)
+  {
+    if (this.Path == null) { throw new InvalidOperationException("There is no base path!"); }
+
+    string dir = IOPath.GetDirectoryName(this.Path);
+    string res = IOPath.GetFullPath(IOPath.Combine(dir, relPath));
+
+    return res;
+    // throw new NotImplementedException();
+  }
 }
 
 // ==============================================================================================================================

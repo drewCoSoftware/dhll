@@ -1,0 +1,1 @@
+﻿global using TemplateIndex = System.Collections.Generic.Dictionary<string, dhll.TemplateDynamics>;

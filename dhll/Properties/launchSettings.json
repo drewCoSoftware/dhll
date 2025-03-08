@@ -6,7 +6,7 @@
     },
     "dhlt": {
       "commandName": "Project",
-      "commandLineArgs": "compile --file \"..\\..\\..\\..\\TestInputs\\Template1.dhlt\" --to \"typescript\""
+      "commandLineArgs": "compile --file \"..\\..\\..\\..\\TestInputs\\TestProject.dhlproj\" --to \"typescript\"  --outputdir \".\\TestOutput\""
     }
   }
 }

@@ -1,48 +1,13 @@
-
-using drewCo.Tools;
 using dhll.v1;
 using Antlr4.Runtime;
 using static dhll.v1.dhllParser;
 
 namespace dhllTesters
 {
-  // ==============================================================================================================================
-  public class TestBase
-  {
-    protected string TestDir = null!;
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    public TestBase()
-    {
-      TestDir = FileTools.GetLocalDir("TestInputs");
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    protected string GetTestInputPath(string name)
-    {
-      string res = Path.Combine(TestDir, name);
-
-      return res;
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    protected string LoadTestInput(string name)
-    {
-      string inputPath = GetTestInputPath(name);  
-      if (!File.Exists(inputPath))
-      {
-        throw new FileNotFoundException($"The input file at path: {inputPath} does not exist!");
-      }
-
-      string data = File.ReadAllText(inputPath);
-      return data;
-    }
-  }
 
   // ==============================================================================================================================
   public class Tests : TestBase
   {
-
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <summary>
@@ -51,16 +16,16 @@ namespace dhllTesters
     [Test]
     public void CanParseTypeDefs()
     {
-      string input = LoadTestInput("BasicTypeDef");
+      string input = LoadTestInput("BasicTypeDef.dhll");
 
       var context = GetTypeDefContext(input);
       var v = new dhllVisitorImpl();
       var td = (TypeDef)v.Visit(context);
 
-      Assert.That(td.Identifier, Is.EqualTo("TypeDef1"));
-      Assert.That(td.Declarations.Count, Is.EqualTo(1));
-      Assert.That(td.Declarations[0].Identifier, Is.EqualTo("x"));
-      Assert.That(td.Declarations[0].InitValue, Is.EqualTo("10"));
+      Assert.That(td.Identifier, Is.EqualTo("ModalWindow"));
+      Assert.That(td.Declarations.Count, Is.EqualTo(2));
+      Assert.That(td.Declarations[0].Identifier, Is.EqualTo("IsVisible"));
+      Assert.That(td.Declarations[0].InitValue, Is.EqualTo("false"));
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

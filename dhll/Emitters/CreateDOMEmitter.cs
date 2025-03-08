@@ -5,31 +5,19 @@ using drewCo.Tools;
 
 namespace dhll.Emitters;
 
-
 // ==============================================================================================================================
 internal class CreateDOMEmitter
 {
-  private NamingContext NamingContext = null!;
-  private DynamicFunctionsGroup DynamicFunctions = null!;
-  private PropChangeTargets PropTargets = null!;
+
+  private NamingContext NamingContext = new NamingContext();
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public CreateDOMEmitter()
+  public string GetCreateDOMFunction(TemplateDynamics templateDynamics, string outputDir)
   {
-    NamingContext = new NamingContext();
-    DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
-    PropTargets = new PropChangeTargets();
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  public string GetCreateDOMFunction(TemplateDefinition def, string outputDir)
-  {
-    PreProcessDynamicContent(def.DOM);
-
     CodeFile cf = new CodeFile();
 
     // Walk the tree and create elements + children as we go....
-    Node root = def.DOM;
+    Node root = templateDynamics.DOM;
 
     cf.WriteLine($"function CreateDOM(): HTMLElement ");
     cf.OpenBlock();
@@ -48,7 +36,7 @@ internal class CreateDOMEmitter
 
 
     // Now spit out all of the formatting function defs....
-    DynamicFunctions.EmitFunctionDefs(cf);
+    templateDynamics.EmitFunctionDefs(cf);
 
 
     FileTools.CreateDirectory(outputDir);
@@ -57,58 +45,6 @@ internal class CreateDOMEmitter
 
     string res = cf.GetString();
     return res;
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  /// <summary>
-  /// Find all dynamic content, and create functions, etc. for them.
-  /// </summary>
-  private void PreProcessDynamicContent(Node node)
-  {
-    PreProcessNode(node);
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  private void PreProcessNode(Node node)
-  {
-    bool isTextNode = node.Name == "<text>";
-
-    node.Symbol = isTextNode ? null : NamingContext.GetUniqueNameFor("node");
-
-    if (node.Name == "<text>" && node.DynamicContent != null)
-    {
-      // NOTE: This check should probably happen elsewhere....
-      if (node.Parent == null) { 
-        throw new InvalidOperationException("<text> nodes must have a parent!");
-      }
-
-      string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
-      node.DynamicFunction = funcName;
-
-      // We need to make note that this is a target...
-      // So if every content function is unique, then we can make a 1:1 association with a DOM element....
-      // soo....  --> elem.innerText = contentFunc();
-      // Every time we set a value on the associated list of properties, then we need to call this func....
-      // --> We already have a unique name for the DOM element as it is created....
-      // So then each function is associated with a unique target....
-      PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
-    }
-
-    foreach (var attr in node.Attributes)
-    {
-      if (attr.DynamicContent != null)
-      {
-        string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
-        attr.DynamicFunction = funcName;
-
-        PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
-      }
-    }
-
-    foreach (var child in node.Children)
-    {
-      PreProcessNode(child);
-    }
   }
 
 

@@ -11,44 +11,29 @@ using System.Threading.Tasks;
 
 namespace dhll.Emitters
 {
-  // ==============================================================================================================================
-  public interface IEmitter
-  {
-    EmitterResults Emit(string outputDir, dhllFile file);
-    string TranslateTypeName(string typeName);
-  }
-
-  // ==============================================================================================================================
-  public class EmitterResults
-  {
-    public string[] OutputFiles { get; set; } = null!;
-  }
-
-  // ==============================================================================================================================
-  internal abstract class EmitterBase
-  {
-    protected Logger Logger = default!;
-    public EmitterBase(Logger logger_) { Logger = logger_; }
-  }
 
   // ==============================================================================================================================
   internal class TypescriptEmitter : EmitterBase, IEmitter
   {
     private CodeFile CF = new CodeFile();
-
+    private TemplateIndex TemplateIndex = null!;
 
     private static Dictionary<string, string> TypeNameTable = new Dictionary<string, string>() {
       { "bool", "boolean" }
     };
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public TypescriptEmitter(Logger logger_) : base(logger_)
-    { }
+    public TypescriptEmitter(Logger logger_, TemplateIndex templateIndex_)
+      : base(logger_)
+    {
+      TemplateIndex = templateIndex_;
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------
     public EmitterResults Emit(string outputDir, dhllFile file)
     {
       var res = new EmitterResults();
+      var outputFiles = new List<string>();
 
       Logger.Info($"File: {file.Path}");
 
@@ -85,7 +70,9 @@ namespace dhll.Emitters
       }
 
       CF.Save(outputPath);
-      Logger.Info($"Output: {outputPath}");
+       
+      outputFiles.Add(outputPath);
+      res.OutputFiles = outputFiles.ToArray();
 
       return res;
     }

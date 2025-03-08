@@ -9,7 +9,7 @@ namespace dhll
   {
     const string DEFAULT_OUTPUT_DIR = "Output";
 
-    [Option("file", Required = true, HelpText = "Path to file to compile.")]
+    [Option("file", Required = true, HelpText = "Path to file to compile.  This can be a single .dhll file, or a .dhlproj file.")]
     public string InputFile { get; set; } = default!;
 
     [Option("to", Required = true, HelpText = "Language to compile to.")]

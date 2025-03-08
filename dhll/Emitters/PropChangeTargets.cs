@@ -5,8 +5,9 @@ namespace dhll.Emitters;
 // ==============================================================================================================================
 internal class PropChangeTargets
 {
-
-  // Cuz I don't know what to name it.....
+  /// <summary>
+  /// Tells us more about property targets and their interactions.
+  /// </summary>
   class PropTargetInfo
   {
     public Node TargetNode { get; set; } = default!;
