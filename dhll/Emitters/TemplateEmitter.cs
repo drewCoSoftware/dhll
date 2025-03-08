@@ -89,8 +89,9 @@ internal class TemplateEmitter
         if (item.DynamicContent != null)
         {
           // We need to know all of the variable names....
+          // HACK: We are assuming that the dynamic functions are all at class level!
           string funcName = item.DynamicFunction;
-          useValue = $"{funcName}()";
+          useValue = $"this.{funcName}()";
         }
 
         if (useValue != null)

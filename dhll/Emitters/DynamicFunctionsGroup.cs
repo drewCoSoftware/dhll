@@ -68,10 +68,20 @@ internal class DynamicFunctionsGroup
     // Maybe a way to do the dynamic strings?
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 
+
+    // HACK:
+    // We are assuming that all expressions are single, class level variables!
     string joined = string.Join(" + ", from x in dc.Parts
-                                       select x.IsExpession ? $"({x.Value})" : $"\"{x.Value}\"");
+                                       select x.IsExpession ? $"(this.{x.Value})" : $"\"{StripNewlines(x.Value)}\"");
 
     string res = $"return {joined};";
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private object StripNewlines(string input)
+  {
+    string res = input.Replace("\r", "").Replace("\n", "");
     return res;
   }
 
