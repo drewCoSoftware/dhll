@@ -1,4 +1,6 @@
 ﻿using dhll.Grammars.v1;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 
 namespace dhll.Emitters;
 
@@ -18,7 +20,29 @@ internal class PropChangeTargets
   private Dictionary<string, List<PropTargetInfo>> PropsToTargets = new Dictionary<string, List<PropTargetInfo>>();
   private object DataLock = new object();
 
+
   // --------------------------------------------------------------------------------------------------------------------------
+  public string[] GetAllTargetNodeSymbols(IList<string>? extraSymbols = null)
+  {
+    var allNodes = GetAllTargetNodes();
+    var res = (from x in allNodes select x.Symbol).ToList();
+
+    if (extraSymbols != null)
+    {
+      foreach (var s in extraSymbols)
+      {
+        if (res.Any(x => x == s)) { continue; }
+        res.Insert(0, s);
+      }
+    }
+
+    return res.ToArray();
+  }
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Returns an array of all nodes that are marked as targets of property changes.
+  /// </summary>
+  /// <param name="extraNodesBySymbol">A set of additional node names that you wish to include.</param>
   public Node[] GetAllTargetNodes()
   {
     var res = new List<Node>();
@@ -61,6 +85,22 @@ internal class PropChangeTargets
         });
       }
     }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Returns a flag indicating that the given node is targeted by at least one property.
+  /// </summary>
+  internal bool HasNode(Node node)
+  {
+    foreach (var item in PropsToTargets.Values)
+    {
+      foreach (var n in item)
+      {
+        if (n.TargetNode == node) { return true; }
+      }
+    }
+    return false;
   }
 }
 

@@ -11,7 +11,7 @@ namespace dhll;
 /// </summary>
 internal class TemplateDynamics
 {
-  public const string ROOT_NODE_NAME = "_Root";
+  public const string ROOT_NODE_SYMBOL = "_Root";
 
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
@@ -20,6 +20,12 @@ internal class TemplateDynamics
   private TemplateDefinition Def = null!;
 
   public Node DOM { get { return Def.DOM; } }
+
+  /// <summary>
+  /// The set of all symbols that we have identified that are at class level.
+  /// This is used so that we can keep persistent references to nodes that have dynamic content.
+  /// </summary>
+  private HashSet<string> ClassLevelNodeSymbols = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
   public TemplateDynamics(TemplateDefinition def_)
@@ -30,8 +36,24 @@ internal class TemplateDynamics
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
     PropTargets = new PropChangeTargets();
 
-    Def.DOM.Symbol = NamingContext.GetUniqueNameFor(ROOT_NODE_NAME);
-    PreProcessNode(Def.DOM);
+    Def.DOM.Symbol = NamingContext.GetUniqueNameFor(ROOT_NODE_SYMBOL);
+
+    PreProcessNodes();
+
+    ClassLevelNodeSymbols = PropTargets.GetAllTargetNodeSymbols(new[] { ROOT_NODE_SYMBOL }).ToHashSet();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void PreProcessNodes()
+  {
+    SetDynamicContent(Def.DOM);
+    SetNodeSymbols(Def.DOM);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public bool SymbolIsClassLevel(string symbol)
+  {
+    return ClassLevelNodeSymbols.Contains(symbol);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -41,17 +63,36 @@ internal class TemplateDynamics
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void PreProcessNode(Node node)
+  /// <summary>
+  /// After dynamic content on nodes has been detected, this will assign each node a unique symbol.
+  /// These symbols are used to indicate which nodes are 'class-level' in which case we will keep a
+  /// persistent reference to them.
+  /// </summary>
+  private void SetNodeSymbols(Node node)
   {
     bool isTextNode = node.Name == "<text>";
 
-    if (node.Symbol == null)
+    if (node.Symbol == null && !isTextNode)
     {
-      string baseName = node.HasDynamicContent ? "_Node" : "node";
-      node.Symbol = isTextNode ? null : NamingContext.GetUniqueNameFor(baseName);
+
+      // NOTE: In a future version we could probably use some kind of 'hinting' system to have
+      // more meaningful names for the nodes.
+      string baseName = PropTargets.HasNode(node) ? "_Node" : "node";
+      node.Symbol = NamingContext.GetUniqueNameFor(baseName);
     }
 
-    if (node.Name == "<text>" && node.DynamicContent != null)
+    foreach (var child in node.Children)
+    {
+      SetNodeSymbols(child);
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void SetDynamicContent(Node node)
+  {
+    bool isTextNode = node.Name == "<text>";
+
+    if (isTextNode && node.DynamicContent != null)
     {
       // NOTE: This check should probably happen elsewhere....
       if (node.Parent == null)
@@ -84,7 +125,7 @@ internal class TemplateDynamics
 
     foreach (var child in node.Children)
     {
-      PreProcessNode(child);
+      SetDynamicContent(child);
     }
   }
 
@@ -99,17 +140,9 @@ internal class TemplateDynamics
     cf.NextLine();
     cf.WriteLine("// ---- DOM Elements ------");
 
-    var nodes = PropTargets.GetAllTargetNodes();
-
-    // Always include the root node!
-    if (!nodes.Any(x => x.Symbol == ROOT_NODE_NAME))
+    foreach (var s in ClassLevelNodeSymbols)
     {
-      cf.WriteLine($"{ROOT_NODE_NAME}: HTMLElement");
-    }
-
-    foreach (var node in nodes)
-    {
-      cf.WriteLine($"{node.Symbol}: HTMLElement;");
+      cf.WriteLine($"{s}: HTMLElement;");
     }
 
     cf.NextLine(1);

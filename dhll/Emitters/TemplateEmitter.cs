@@ -60,7 +60,7 @@ internal class TemplateEmitter
   private string GetAssignSyntax(Node node)
   {
     string res = $"let {node.Symbol}";
-    if (node.HasDynamicContent || node.Symbol == TemplateDynamics.ROOT_NODE_NAME)
+    if (Dynamics.SymbolIsClassLevel(node.Symbol))
     {
       res = $"this.{node.Symbol!}";
     }
@@ -137,7 +137,7 @@ internal class TemplateEmitter
   /// </summary>
   private string QualifyIdentifier(string symbol)
   {
-    if (symbol.StartsWith("_"))
+    if (Dynamics.SymbolIsClassLevel(symbol))
     {
       return $"this.{symbol}";
     }
