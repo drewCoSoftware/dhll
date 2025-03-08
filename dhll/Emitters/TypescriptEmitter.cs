@@ -35,7 +35,7 @@ namespace dhll.Emitters
       var res = new EmitterResults();
       var outputFiles = new List<string>();
 
-      Logger.Info($"File: {file.Path}");
+
 
       // Simple version.  We will emit one TS file per dhll input file.
       // It will use the same name.
@@ -44,9 +44,21 @@ namespace dhll.Emitters
 
       WriteCodeGenHeader();
 
-
       foreach (var td in file.TypeDefs)
       {
+        // Let's check to see if there is an associated template...
+        Logger.Verbose("Resolving template data...");
+        TemplateDynamics? dynamics = GetTemplateDynamics(td);
+        TemplateEmitter? templateEmitter = null;
+        if (dynamics != null)
+        {
+          Logger.Verbose($"Resolved template for type: {td.Identifier}");
+          templateEmitter = new TemplateEmitter(dynamics);
+        }
+        else {
+          Logger.Verbose($"There is no template for type: {td.Identifier}");
+        }
+
         var preProcResults = PreProcessDeclarations(td);
 
         CF.Write($"class {td.Identifier} ");
@@ -59,6 +71,12 @@ namespace dhll.Emitters
         }
         CF.NextLine();
 
+        // Emit template elements that we will want to bind to during calls to setters....
+        if (dynamics != null) {
+          dynamics.EmitDOMDeclarations(CF);
+          templateEmitter.EmitCreateDOMFunction(CF);
+        }
+
         // Now emit all of the getters / setters.
         foreach (var item in preProcResults.GetterSetters)
         {
@@ -70,11 +88,17 @@ namespace dhll.Emitters
       }
 
       CF.Save(outputPath);
-       
+
       outputFiles.Add(outputPath);
       res.OutputFiles = outputFiles.ToArray();
 
       return res;
+    }
+
+    private TemplateDynamics? GetTemplateDynamics(TypeDef td)
+    {
+      TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
+      return template;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

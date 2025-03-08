@@ -19,6 +19,19 @@ internal class PropChangeTargets
   private object DataLock = new object();
 
   // --------------------------------------------------------------------------------------------------------------------------
+  public Node[] GetAllTargetNodes()
+  {
+    var res = new List<Node>();
+
+    foreach (var item in PropsToTargets)
+    {
+      res.AddRange((from x in item.Value select x.TargetNode).DistinctBy(x => x));
+    }
+
+    return res.ToArray();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
   /// <summary>
   /// Adds an entry to the propery change table.  This is how we assign the correct content to the
   /// node (text) or the named attribute if any.  When the associated property value is set, we can

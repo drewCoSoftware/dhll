@@ -126,7 +126,11 @@ public class dhllCompiler
         foreach (var item in templateDefs)
         {
           string useName = item.ForType;
-          if (item.Name != null) { useName += ("." + item.Name); }
+
+          // NOTE: We can't really support named templates at this time (not practical while prototyping)
+          // But maybe later.. I guess that would mean that our typedefs would have to be a bit more involved
+          // to render / bind against the different versions....
+          // if (item.Name != null) { useName += ("." + item.Name); }
 
           var dynamics = new TemplateDynamics(item);
 
@@ -243,7 +247,7 @@ public class dhllCompiler
     var v = new dhllVisitorImpl();
 
     var dFile = (dhllFile)v.VisitFile(context);
-    dFile.Path = Options.InputFile;
+    dFile.Path = inputFile;
 
     string outputDir = FileTools.GetLocalDir(Options.OutputDir);
     FileTools.CreateDirectory(outputDir);

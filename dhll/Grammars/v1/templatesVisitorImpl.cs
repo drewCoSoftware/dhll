@@ -62,6 +62,16 @@ public partial class Node
   /// </summary>
   public DynamicContent? DynamicContent { get; set; } = null;
 
+  public bool HasDynamicContent
+  {
+    get
+    {
+      bool res = this.DynamicContent != null ||
+      this.Attributes.Any(x => x.DynamicContent != null);
+      return res;
+    }
+  }
+
 
   /// <summary>
   /// Used during codegen.

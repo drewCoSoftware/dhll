@@ -11,6 +11,8 @@ namespace dhll;
 /// </summary>
 internal class TemplateDynamics
 {
+  public const string ROOT_NODE_NAME = "_Root";
+
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
   private PropChangeTargets PropTargets = null!;
@@ -28,6 +30,7 @@ internal class TemplateDynamics
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
     PropTargets = new PropChangeTargets();
 
+    Def.DOM.Symbol = NamingContext.GetUniqueNameFor(ROOT_NODE_NAME);
     PreProcessNode(Def.DOM);
   }
 
@@ -42,7 +45,11 @@ internal class TemplateDynamics
   {
     bool isTextNode = node.Name == "<text>";
 
-    node.Symbol = isTextNode ? null : NamingContext.GetUniqueNameFor("node");
+    if (node.Symbol == null)
+    {
+      string baseName = node.HasDynamicContent ? "_Node" : "node";
+      node.Symbol = isTextNode ? null : NamingContext.GetUniqueNameFor(baseName);
+    }
 
     if (node.Name == "<text>" && node.DynamicContent != null)
     {
@@ -81,6 +88,31 @@ internal class TemplateDynamics
     }
   }
 
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Emit declarations for DOM related elements into the given CodeFile instance.
+  /// </summary>
+  internal void EmitDOMDeclarations(CodeFile cf)
+  {
+    // HACK: We are assuming that we are outputting to typescript syntax!
 
+    cf.NextLine();
+    cf.WriteLine("// ---- DOM Elements ------");
+
+    var nodes = PropTargets.GetAllTargetNodes();
+
+    // Always include the root node!
+    if (!nodes.Any(x => x.Symbol == ROOT_NODE_NAME))
+    {
+      cf.WriteLine($"{ROOT_NODE_NAME}: HTMLElement");
+    }
+
+    foreach (var node in nodes)
+    {
+      cf.WriteLine($"{node.Symbol}: HTMLElement;");
+    }
+
+    cf.NextLine(1);
+  }
 }
 
