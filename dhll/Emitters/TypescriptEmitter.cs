@@ -55,7 +55,8 @@ namespace dhll.Emitters
           Logger.Verbose($"Resolved template for type: {td.Identifier}");
           templateEmitter = new TemplateEmitter(dynamics);
         }
-        else {
+        else
+        {
           Logger.Verbose($"There is no template for type: {td.Identifier}");
         }
 
@@ -72,7 +73,8 @@ namespace dhll.Emitters
         CF.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
-        if (dynamics != null) {
+        if (dynamics != null)
+        {
           dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunction(CF);
 
@@ -82,7 +84,7 @@ namespace dhll.Emitters
         // Now emit all of the getters / setters.
         foreach (var item in preProcResults.GetterSetters)
         {
-          EmitGetterSetter(item);
+          EmitGetterSetter(item, dynamics);
         }
 
         CF.CloseBlock();
@@ -205,9 +207,10 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private void EmitGetterSetter(GetterSetter item)
+    private void EmitGetterSetter(GetterSetter item, TemplateDynamics dynamics)
     {
       if (item.UseGetter)
+
       {
         CF.Write($"public get {item.Identifier}() ");
         CF.OpenBlock();
@@ -223,83 +226,105 @@ namespace dhll.Emitters
         CF.Write($"public set {item.Identifier}({bid}: {typeName}) ");
         CF.OpenBlock();
         CF.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
-        CF.CloseBlock(2);
+
+        // This is where we do property target stuff...
+        var propTargets = dynamics.PropTargets.GetTargetsForProperty(item.Identifier);
+        if (propTargets != null)
+        {
+          int attrIndex = 0;
+          foreach (var t in propTargets)
+          {
+            if (t.Attr != null)
+            {
+              string valId = $"val{attrIndex}";
+              CF.WriteLine($"const {valId} = this.{t.FunctionName}();");
+              CF.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute({t.Attr.Name}, {valId});");
+
+              ++attrIndex;
+            }
+            else
+              {
+                // We are setting content for this item.
+                CF.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
+              }
+            }
+          }
+
+          CF.CloseBlock(2);
+        }
+
       }
 
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    // TODO: This entire function could be wrapped up into something in StringTools.
-    private string ConvertToArgumentName(string identifier)
-    {
-      string asWords = StringTools.DeCamelCase(identifier);
-      string[] parts = asWords.Split(' ');
-      parts[0] = LowerFirst(parts[0]);
-
-      string res = string.Join("", parts);
-      return res;
-    }
-
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    // TODO: StringTools!
-    // Convert the first character of the given input to lowercase.
-    public static string LowerFirst(string input)
-    {
-      if (input.Length == 0) { return input; }
-
-      uint val = (uint)input[0];
-      if (val >= 65 & val <= 90)
+      // --------------------------------------------------------------------------------------------------------------------------
+      private string ConvertToArgumentName(string identifier)
       {
-        val += 32;
-      }
+        string asWords = StringTools.DeCamelCase(identifier);
+        string[] parts = asWords.Split(' ');
+        parts[0] = LowerFirst(parts[0]);
 
-      // Too bad we can't just set the stupid character.  Might be useful to do so in an
-      // unsafe context tho!
-      string res = (char)val + input.Substring(1);
-      return res;
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    public string TranslateTypeName(string typeName)
-    {
-      // TODO: Add lookup tables as needed.
-      if (TypeNameTable.TryGetValue(typeName, out string res))
-      {
+        string res = string.Join("", parts);
         return res;
       }
 
-      // Unknown, use input!
-      return typeName;
+
+      // --------------------------------------------------------------------------------------------------------------------------
+      [Obsolete("Use version from drewCo.Tools.StringTools > 1.3.3.6!")]
+      public static string LowerFirst(string input)
+      {
+        if (input.Length == 0) { return input; }
+
+        uint val = (uint)input[0];
+        if (val >= 65 & val <= 90)
+        {
+          val += 32;
+        }
+
+        // Too bad we can't just set the stupid character.  Might be useful to do so in an
+        // unsafe context tho!
+        string res = (char)val + input.Substring(1);
+        return res;
+      }
+
+      // --------------------------------------------------------------------------------------------------------------------------
+      public string TranslateTypeName(string typeName)
+      {
+        // TODO: Add lookup tables as needed.
+        if (TypeNameTable.TryGetValue(typeName, out string res))
+        {
+          return res;
+        }
+
+        // Unknown, use input!
+        return typeName;
+      }
     }
+
+
+    // ==============================================================================================================================
+    // NOTE: This is very much like a function, but not quite.....
+    // Depends on the language really....
+    // Perhaps there will be a way to unify them at some point?
+    class GetterSetter
+    {
+      public Declare BackingMember { get; set; }
+      public string Identifier { get; set; }
+      public bool UseGetter { get; set; }
+      public bool UseSetter { get; set; }
+    }
+
+    // ==============================================================================================================================
+    class ProcessDeclareResults
+    {
+      public List<Declare> Declares { get; set; }
+      public List<GetterSetter> GetterSetters { get; set; } = new List<GetterSetter>();
+    }
+
+    // ==============================================================================================================================
+    public enum EScope
+    {
+      Default = 0,
+      Public,
+      Private
+    }
+
   }
-
-
-  // ==============================================================================================================================
-  // NOTE: This is very much like a function, but not quite.....
-  // Depends on the language really....
-  // Perhaps there will be a way to unify them at some point?
-  class GetterSetter
-  {
-    public Declare BackingMember { get; set; }
-    public string Identifier { get; set; }
-    public bool UseGetter { get; set; }
-    public bool UseSetter { get; set; }
-  }
-
-  // ==============================================================================================================================
-  class ProcessDeclareResults
-  {
-    public List<Declare> Declares { get; set; }
-    public List<GetterSetter> GetterSetters { get; set; } = new List<GetterSetter>();
-  }
-
-  // ==============================================================================================================================
-  public enum EScope
-  {
-    Default = 0,
-    Public,
-    Private
-  }
-
-}

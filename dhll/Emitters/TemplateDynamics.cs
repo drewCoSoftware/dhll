@@ -15,7 +15,7 @@ internal class TemplateDynamics
 
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
-  private PropChangeTargets PropTargets = null!;
+  public PropChangeTargets PropTargets { get; private set; } = null!;
 
   private TemplateDefinition Def = null!;
 

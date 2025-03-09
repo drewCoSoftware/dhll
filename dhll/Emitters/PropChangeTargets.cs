@@ -7,19 +7,24 @@ namespace dhll.Emitters;
 // ==============================================================================================================================
 internal class PropChangeTargets
 {
-  /// <summary>
-  /// Tells us more about property targets and their interactions.
-  /// </summary>
-  class PropTargetInfo
-  {
-    public Node TargetNode { get; set; } = default!;
-    public string FunctionName { get; set; } = default!;
-    public Grammars.v1.Attribute? Attr { get; set; }
-  }
 
+  /// <summary>
+  /// Key = Property Name
+  /// Value = All nodes that contain dynamic content that the property provides.
+  /// </summary>
   private Dictionary<string, List<PropTargetInfo>> PropsToTargets = new Dictionary<string, List<PropTargetInfo>>();
   private object DataLock = new object();
 
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public PropTargetInfo[]? GetTargetsForProperty(string propertyName)
+  {
+    if (PropsToTargets.TryGetValue(propertyName, out List<PropTargetInfo> targets))
+    {
+      return targets.ToArray();
+    }
+    return null;
+  }
 
   // --------------------------------------------------------------------------------------------------------------------------
   public string[] GetAllTargetNodeIdentifiers(IList<string>? extraSymbols = null)
@@ -104,5 +109,22 @@ internal class PropChangeTargets
   }
 }
 
+/// <summary>
+/// Tells us more about property targets and their interactions.
+/// </summary>
+internal class PropTargetInfo
+{
+  public Node TargetNode { get; set; } = default!;
+
+  /// <summary>
+  /// Name of the function that generates the dynamic content.
+  /// </summary>
+  public string FunctionName { get; set; } = default!;
+
+  /// <summary>
+  /// If the dynamic content targets an attribute.
+  /// </summary>
+  public Grammars.v1.Attribute? Attr { get; set; }
+}
 
 
