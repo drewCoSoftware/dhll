@@ -1,5 +1,7 @@
 ﻿using dhll.CodeGen;
 using dhll.Grammars.v1;
+using drewCo.Tools;
+using System.Text.RegularExpressions;
 
 namespace dhll.Emitters;
 
@@ -74,7 +76,7 @@ internal class DynamicFunctionsGroup
     // TODO: Some kind of option for how we want to handle leading / trailing whitespace in these
     // functions.  Since we are just targeting typescript for now, we are going to remove it all.
 
-    const bool REMOVE_WHITESPACE = true;
+    const bool REMOVE_EXCESS_WHITESPACE = true;
     const bool REMOVE_NEWLINES = true;
 
     var useParts = new List<string>();
@@ -89,8 +91,9 @@ internal class DynamicFunctionsGroup
         if (REMOVE_NEWLINES) {
           p = StripNewlines(p);
         }
-        if (REMOVE_WHITESPACE) { 
-          p = p.Trim();
+        if (REMOVE_EXCESS_WHITESPACE) { 
+          p = Regex.Replace(p, "[ ]*", " ");
+          p = StringTools.Quote(p);
         }
         if (p != string.Empty) { 
           useParts.Add(p);
