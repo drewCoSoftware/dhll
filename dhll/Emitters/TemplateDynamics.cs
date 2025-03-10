@@ -57,7 +57,7 @@ internal class TemplateDynamics
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public void EmitFunctionDefs(CodeFile cf)
+  public void EmitDynamicFunctionDefs(CodeFile cf)
   {
     DynamicFunctions.EmitFunctionDefs(cf);
   }

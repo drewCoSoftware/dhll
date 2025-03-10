@@ -2,4 +2,5 @@ typedef ModalWindow {
     prop bool IsVisible = false;
     prop string Title = "Modal";
     prop string Content = "Some Test Content";
+    prop int Count = 101;
 }

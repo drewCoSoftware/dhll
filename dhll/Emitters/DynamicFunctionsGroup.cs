@@ -71,15 +71,45 @@ internal class DynamicFunctionsGroup
 
     // HACK:
     // We are assuming that all expressions are single, class level variables!
-    string joined = string.Join(" + ", from x in dc.Parts
-                                       select x.IsExpession ? $"(this.{x.Value})" : $"\"{StripNewlines(x.Value)}\"");
+    // TODO: Some kind of option for how we want to handle leading / trailing whitespace in these
+    // functions.  Since we are just targeting typescript for now, we are going to remove it all.
 
-    string res = $"return {joined};";
+    const bool REMOVE_WHITESPACE = true;
+    const bool REMOVE_NEWLINES = true;
+
+    var useParts = new List<string>();
+    foreach (var x in dc.Parts)
+    {
+      if (x.IsExpession) { 
+        // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
+        useParts.Add($"(this.{x.Value})");
+      }
+      else {
+        string p = x.Value;
+        if (REMOVE_NEWLINES) {
+          p = StripNewlines(p);
+        }
+        if (REMOVE_WHITESPACE) { 
+          p = p.Trim();
+        }
+        if (p != string.Empty) { 
+          useParts.Add(p);
+        }
+      }
+    }
+
+    string joined = string.Join(" + ", useParts);
+
+    // HACK: We are assuming that all return types are strings + doing a forced string coersion.
+    string res = $"return ({joined}).toString();";
+
+    // NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
+    // we are just working with raw strings so.......
     return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private object StripNewlines(string input)
+  private string StripNewlines(string input)
   {
     string res = input.Replace("\r", "").Replace("\n", "");
     return res;

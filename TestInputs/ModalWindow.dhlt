@@ -3,7 +3,7 @@
     <div class="title">
       <p>{Title}</p>
     </div>
-    <div class="content">
+    <div class="content" data-count="{Count}">
       {Content}
     </div>
   </div>

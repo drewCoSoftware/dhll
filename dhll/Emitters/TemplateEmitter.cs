@@ -69,7 +69,7 @@ internal class TemplateEmitter
       {
         // The attribute value is created via expression.
         string funcName = item.DynamicFunction;
-        useValue = $"{funcName}()";
+        useValue = $"this.{funcName}()";
       }
 
       cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute('{item.Name}', {useValue});");

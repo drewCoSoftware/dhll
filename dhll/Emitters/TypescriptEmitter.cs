@@ -19,7 +19,10 @@ namespace dhll.Emitters
     private TemplateIndex TemplateIndex = null!;
 
     private static Dictionary<string, string> TypeNameTable = new Dictionary<string, string>() {
-      { "bool", "boolean" }
+      { "bool", "boolean" },
+      { "int", "number" },
+      { "float", "number" },
+      { "double", "number" },
     };
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +81,7 @@ namespace dhll.Emitters
           dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunction(CF);
 
-          dynamics.EmitFunctionDefs(CF);
+          dynamics.EmitDynamicFunctionDefs(CF);
         }
 
         // Now emit all of the getters / setters.
@@ -238,7 +241,7 @@ namespace dhll.Emitters
             {
               string valId = $"val{attrIndex}";
               CF.WriteLine($"const {valId} = this.{t.FunctionName}();");
-              CF.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute({t.Attr.Name}, {valId});");
+              CF.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
 
               ++attrIndex;
             }
