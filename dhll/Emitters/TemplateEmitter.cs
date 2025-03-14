@@ -3,6 +3,7 @@ using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
 using System.Diagnostics.Contracts;
+using System.Security.Cryptography.X509Certificates;
 
 namespace dhll.Emitters;
 
@@ -43,9 +44,97 @@ internal class TemplateEmitter
 
     cf.CloseBlock();
     cf.NextLine(2);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// For existing DOM content we want to be able to bind a specific instance.
+  /// That means that we need to be able to get our DOM elements that are defined in the type
+  /// via selectors....
+  /// Since we already have the tree, we can proabbly just use some simple array index syntax...
+  /// --> The generated function should be able to warn / throw errors when certain elements can't be found.
+  /// --> We also need a way to read the propery values in from the DOM too.  This could get weird for
+  /// properties that are computed as we would have to have some kind of inverse value?
+  /// Actually, we should enforce some kind of 'data-propname-value' attribute as not all expressions are invertable!
+  /// NOTE: Since we are doing a frikkin code generator, why not generate some C# functions that can also create + print + set
+  /// data for the binding?
+  /// 
+  /// NOTE: Do we need to generate another function to find all instances to bind to?  Might be nice...
+  /// </summary>
+  public void EmitBindFunction(CodeFile cf, TemplateDynamics dynamics)
+  {
+    Node root = Dynamics.DOM;
+
+    const string BIND_ID = "dom";
+    cf.Write($"Bind({BIND_ID}:HTMLElement) ");
+    cf.OpenBlock();
+
+    cf.WriteLine("// NOTE: A correctly formed DOM for this type is assumed!");
+
+    // Bind all of the nodes with dynamic content.
+    var boundNodes = BindNode(root, BIND_ID, cf);
+    cf.NextLine(1);
+
+    // Set values for all nodes:
+    SetBoundNodesValue(boundNodes, cf, dynamics);
+
+    cf.CloseBlock(1);
 
 
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void SetBoundNodesValue(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
+  {
+    // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
+    // walk the tree looking for dynamics.
+    string[] propNames = dynamics.PropTargets.GetNames();
+    var targetNodes = dynamics.PropTargets.GetAllTargetNodes();
+    foreach (var p in propNames)
+    {
+      var targets = dynamics.PropTargets.GetTargetsForProperty(p);
+      foreach (var t in targets)
+      {
+        string useId = QualifyIdentifier(t.TargetNode.Identifier);
+        string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
+                                                                      : $".innerText");
+
+        // TODO: We need some way to cast to correct data type here....
+
+        cf.WriteLine($"this._{p} = {getBy};");
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Generate code to bind nodes to the DOM.
+  /// </summary>
+  private List<Node> BindNode(Node node, string bindTo, CodeFile cf)
+  {
+    var res = new List<Node>();
+
+    string elementId = QualifyIdentifier(node.Identifier);
+    if (Dynamics.IdentifierIsClassLevel(node.Identifier))
+    {
+      res.Add(node);
+      cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
+    }
+
+    int index = 0;
+    foreach (var c in node.Children)
+    {
+      if (c.Name == "<text>") { continue; }
+      var kids = BindNode(c, bindTo + $".children[{index}]", cf);
+      res.AddRange(kids);
+      ++index;
+    }
+
+    return res;
+  }
+
+
+
 
   // --------------------------------------------------------------------------------------------------------------------------
   private string GetAssignSyntax(Node node)

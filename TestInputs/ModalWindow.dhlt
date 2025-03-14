@@ -1,7 +1,9 @@
 <template for="ModalWindow" name="test-1">
   <div class="modal">
     <div class="title">
-      <p>{Title}</p>
+      <div class="headline">
+        <p>{Title}</p>
+      </div>
     </div>
     <div class="content" data-count="{Count}">
       {Content}

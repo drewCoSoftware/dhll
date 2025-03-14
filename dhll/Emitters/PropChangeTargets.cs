@@ -107,6 +107,13 @@ internal class PropChangeTargets
     }
     return false;
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal string[] GetNames()
+  {
+    var res = PropsToTargets.Keys.ToArray();
+    return res;
+  }
 }
 
 /// <summary>

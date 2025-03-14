@@ -81,6 +81,8 @@ namespace dhll.Emitters
           dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunction(CF);
 
+          templateEmitter.EmitBindFunction(CF, dynamics);
+
           dynamics.EmitDynamicFunctionDefs(CF);
         }
 
