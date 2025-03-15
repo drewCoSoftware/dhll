@@ -20,8 +20,16 @@ namespace dhll.Emitters
   // ==============================================================================================================================
   internal abstract class EmitterBase
   {
-    protected Logger Logger = default!;
-    public EmitterBase(Logger logger_) { Logger = logger_; }
+    protected Logger Logger { get { return Context.Logger; } }
+    protected CompilerContext Context { get; set; } = default!;
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    public EmitterBase(CompilerContext context_)
+    {
+      Context = context_;
+    }
+
+
   }
 
 }

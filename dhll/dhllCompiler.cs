@@ -34,16 +34,24 @@ public class dhllCompiler
       "typescript"
   };
 
-  private TemplateIndex TypenameToTemplates = new TemplateIndex();
-
   private CommandLineOptions Options;
-  private Logger Logger = null;
+
+  private CompilerContext Context;
+
+  private Logger Logger { get { return Context.Logger; }}
+
 
   // --------------------------------------------------------------------------------------------------------------------------
   public dhllCompiler(CommandLineOptions ops_)
   {
     Options = ops_;
-    Logger = new Logger();
+
+    Context = new CompilerContext()
+    {
+      Logger = new Logger(),
+      TypeIndex = new TypeIndex(),
+      TemplateIndex = new TemplateIndex(),
+    };
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +65,7 @@ public class dhllCompiler
     }
     else if (Options.InputFile.EndsWith(DHLL_EXT))
     {
-      CompileDhllFile(Options.InputFile);
+      ParseAndCompileDhllFile(Options.InputFile);
     }
     else
     {
@@ -89,20 +97,59 @@ public class dhllCompiler
       throw new InvalidOperationException(msg);
     }
 
+    Logger.Verbose("Parsing dhll files...");
+    // We need a pre-pass on the code files so that we can determine the type information
+    // for the properties that may appear in the generated template code.
+    //
+    //This is also the kind of pre-pass where we will end up detecting invalid/missing type names, etc.
+    // Basically, things that are legal syntax, but wouldn't actually compile...
+    List<dhllFile> parsed = ParseAllFiles(codeFiles);
+
+    CreateTypeIndex(parsed);
+
+
     var templateFiles = filesByType[DHLT_EXT];
     ProcessTemplateFiles(templateFiles);
 
     // Now that all of the template information is computed, we can find a way to hook this up to the
     // code file emitter....
-    foreach (var itemPath in codeFiles)
+    foreach (var f in parsed)
     {
-      CompileDhllFile(itemPath);
+      CompileAndEmitFiles(f);
     }
 
 
-
-
     // throw new NotImplementedException();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void CreateTypeIndex(List<dhllFile> parsed)
+  {
+    // Now that we have parsed all input files, we can build a type index, which will be
+    // used for lookups, later.
+    using (var token = Context.TypeIndex.BeginUpdate())
+    {
+      foreach (var item in parsed)
+      {
+        foreach (var td in item.TypeDefs)
+        {
+          Context.TypeIndex.AddOrUpdateType(td);
+        }
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private List<dhllFile> ParseAllFiles(List<string> codeFiles)
+  {
+    var parsed = new List<dhllFile>();
+    foreach (var itemPath in codeFiles)
+    {
+      var f = ParseDhllFile(itemPath);
+      parsed.Add(f);
+    }
+
+    return parsed;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -134,7 +181,7 @@ public class dhllCompiler
 
           var dynamics = new TemplateDynamics(item);
 
-          TypenameToTemplates.Add(useName, dynamics);
+          Context.TemplateIndex.Add(useName, dynamics);
         }
       }
     }
@@ -231,11 +278,33 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CompileDhllFile(string inputFile)
+  private void ParseAndCompileDhllFile(string inputFile)
   {
     Logger.Info($"Compiling dhll at path: {inputFile}");
 
-    string inputText = File.ReadAllText(inputFile);
+    dhllFile parsed = ParseDhllFile(inputFile);
+    CompileAndEmitFiles(parsed);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void CompileAndEmitFiles(dhllFile file)
+  {
+    string outputDir = FileTools.GetLocalDir(Options.OutputDir);
+    FileTools.CreateDirectory(outputDir);
+
+    // Load the emitter...
+    IEmitter emitter = LoadEmitter();
+
+    // Run the emitter...
+    EmitterResults results = emitter.Emit(outputDir, file);
+
+    LogResults(results);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private dhllFile ParseDhllFile(string path)
+  {
+    string inputText = File.ReadAllText(path);
 
     AntlrInputStream s = new AntlrInputStream(inputText);
     var lexer = new dhllLexer(s);
@@ -247,19 +316,9 @@ public class dhllCompiler
     var v = new dhllVisitorImpl();
 
     var dFile = (dhllFile)v.VisitFile(context);
-    dFile.Path = inputFile;
+    dFile.Path = path;
 
-    string outputDir = FileTools.GetLocalDir(Options.OutputDir);
-    FileTools.CreateDirectory(outputDir);
-
-    // Load the emitter...
-    IEmitter emitter = LoadEmitter(this.TypenameToTemplates);
-
-    // Run the emitter...
-    EmitterResults results = emitter.Emit(outputDir, dFile);
-
-    LogResults(results);
-
+    return dFile;
   }
 
 
@@ -299,14 +358,14 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private IEmitter LoadEmitter(TemplateIndex templateIndex_)
+  private IEmitter LoadEmitter()
   {
     // NOTE: We will use a registration type approach in the future.
     // That will allow for all kinds of plugins + overrides if we wanted.
     switch (Options.OutputLang)
     {
       case "typescript":
-        var res = new TypescriptEmitter(Logger, templateIndex_);
+        var res = new TypescriptEmitter(this.Context);
         return res;
 
       default:
@@ -337,4 +396,13 @@ public class dhllCompiler
     Options.InputFile = FileTools.GetRootedPath(Options.InputFile);
 
   }
+}
+
+
+// ==============================================================================================================================
+internal class CompilerContext
+{
+  public Logger Logger { get; set; } = default!;
+  public TemplateIndex TemplateIndex { get; set; } = default!;
+  public TypeIndex TypeIndex { get; set; } = default!;
 }

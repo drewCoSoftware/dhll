@@ -13,6 +13,8 @@ internal class PropChangeTargets
   /// Value = All nodes that contain dynamic content that the property provides.
   /// </summary>
   private Dictionary<string, List<PropTargetInfo>> PropsToTargets = new Dictionary<string, List<PropTargetInfo>>();
+  private Dictionary<string, PropInfo> IdsToPropInfo = new Dictionary<string, PropInfo>();
+
   private object DataLock = new object();
 
 
@@ -75,12 +77,12 @@ internal class PropChangeTargets
 
     lock (DataLock)
     {
-      foreach (var item in dynamicContent.PropertyNames)
+      foreach (var prop in dynamicContent.PropertyNames)
       {
-        if (!PropsToTargets.TryGetValue(item, out var targets))
+        if (!PropsToTargets.TryGetValue(prop, out var targets))
         {
           targets = new List<PropTargetInfo>();
-          PropsToTargets.Add(item, targets);
+          PropsToTargets.Add(prop, targets);
         }
         targets.Add(new PropTargetInfo()
         {
@@ -116,6 +118,21 @@ internal class PropChangeTargets
   }
 }
 
+// ==============================================================================================================================
+public class PropInfo
+{
+  /// <summary>
+  /// Property identifier.
+  /// </summary>
+  public string Identifier { get; set; } = default!;
+
+  /// <summary>
+  /// Name of the data type.
+  /// </summary>
+  public string DataType { get; set; } = default!;
+}
+
+// ==============================================================================================================================
 /// <summary>
 /// Tells us more about property targets and their interactions.
 /// </summary>

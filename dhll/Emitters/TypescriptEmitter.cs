@@ -16,7 +16,8 @@ namespace dhll.Emitters
   internal class TypescriptEmitter : EmitterBase, IEmitter
   {
     private CodeFile CF = new CodeFile();
-    private TemplateIndex TemplateIndex = null!;
+    //  private TemplateIndex TemplateIndex = null!;
+    private CompilerContext CompilerContext = null!;
 
     private static Dictionary<string, string> TypeNameTable = new Dictionary<string, string>() {
       { "bool", "boolean" },
@@ -26,19 +27,15 @@ namespace dhll.Emitters
     };
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public TypescriptEmitter(Logger logger_, TemplateIndex templateIndex_)
-      : base(logger_)
-    {
-      TemplateIndex = templateIndex_;
-    }
+    public TypescriptEmitter(CompilerContext context_)
+      : base(context_)
+    { }
 
     // --------------------------------------------------------------------------------------------------------------------------
     public EmitterResults Emit(string outputDir, dhllFile file)
     {
       var res = new EmitterResults();
       var outputFiles = new List<string>();
-
-
 
       // Simple version.  We will emit one TS file per dhll input file.
       // It will use the same name.
@@ -104,9 +101,10 @@ namespace dhll.Emitters
       return res;
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------
     private TemplateDynamics? GetTemplateDynamics(TypeDef td)
     {
-      TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
+      Context.TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
       return template;
     }
 
@@ -150,7 +148,7 @@ namespace dhll.Emitters
       var declares = new List<Declare>();
       var getterSetters = new List<GetterSetter>();
 
-      foreach (var dec in td.Declarations)
+      foreach (var dec in td.Members)
       {
         if (dec.IsProperty)
         {
@@ -248,88 +246,88 @@ namespace dhll.Emitters
               ++attrIndex;
             }
             else
-              {
-                // We are setting content for this item.
-                CF.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
-              }
+            {
+              // We are setting content for this item.
+              CF.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
             }
           }
-
-          CF.CloseBlock(2);
         }
 
+        CF.CloseBlock(2);
       }
 
-      // --------------------------------------------------------------------------------------------------------------------------
-      private string ConvertToArgumentName(string identifier)
-      {
-        string asWords = StringTools.DeCamelCase(identifier);
-        string[] parts = asWords.Split(' ');
-        parts[0] = LowerFirst(parts[0]);
+    }
 
-        string res = string.Join("", parts);
+    // --------------------------------------------------------------------------------------------------------------------------
+    private string ConvertToArgumentName(string identifier)
+    {
+      string asWords = StringTools.DeCamelCase(identifier);
+      string[] parts = asWords.Split(' ');
+      parts[0] = LowerFirst(parts[0]);
+
+      string res = string.Join("", parts);
+      return res;
+    }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    [Obsolete("Use version from drewCo.Tools.StringTools > 1.3.3.6!")]
+    public static string LowerFirst(string input)
+    {
+      if (input.Length == 0) { return input; }
+
+      uint val = (uint)input[0];
+      if (val >= 65 & val <= 90)
+      {
+        val += 32;
+      }
+
+      // Too bad we can't just set the stupid character.  Might be useful to do so in an
+      // unsafe context tho!
+      string res = (char)val + input.Substring(1);
+      return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    public string TranslateTypeName(string typeName)
+    {
+      // TODO: Add lookup tables as needed.
+      if (TypeNameTable.TryGetValue(typeName, out string res))
+      {
         return res;
       }
 
-
-      // --------------------------------------------------------------------------------------------------------------------------
-      [Obsolete("Use version from drewCo.Tools.StringTools > 1.3.3.6!")]
-      public static string LowerFirst(string input)
-      {
-        if (input.Length == 0) { return input; }
-
-        uint val = (uint)input[0];
-        if (val >= 65 & val <= 90)
-        {
-          val += 32;
-        }
-
-        // Too bad we can't just set the stupid character.  Might be useful to do so in an
-        // unsafe context tho!
-        string res = (char)val + input.Substring(1);
-        return res;
-      }
-
-      // --------------------------------------------------------------------------------------------------------------------------
-      public string TranslateTypeName(string typeName)
-      {
-        // TODO: Add lookup tables as needed.
-        if (TypeNameTable.TryGetValue(typeName, out string res))
-        {
-          return res;
-        }
-
-        // Unknown, use input!
-        return typeName;
-      }
+      // Unknown, use input!
+      return typeName;
     }
-
-
-    // ==============================================================================================================================
-    // NOTE: This is very much like a function, but not quite.....
-    // Depends on the language really....
-    // Perhaps there will be a way to unify them at some point?
-    class GetterSetter
-    {
-      public Declare BackingMember { get; set; }
-      public string Identifier { get; set; }
-      public bool UseGetter { get; set; }
-      public bool UseSetter { get; set; }
-    }
-
-    // ==============================================================================================================================
-    class ProcessDeclareResults
-    {
-      public List<Declare> Declares { get; set; }
-      public List<GetterSetter> GetterSetters { get; set; } = new List<GetterSetter>();
-    }
-
-    // ==============================================================================================================================
-    public enum EScope
-    {
-      Default = 0,
-      Public,
-      Private
-    }
-
   }
+
+
+  // ==============================================================================================================================
+  // NOTE: This is very much like a function, but not quite.....
+  // Depends on the language really....
+  // Perhaps there will be a way to unify them at some point?
+  class GetterSetter
+  {
+    public Declare BackingMember { get; set; }
+    public string Identifier { get; set; }
+    public bool UseGetter { get; set; }
+    public bool UseSetter { get; set; }
+  }
+
+  // ==============================================================================================================================
+  class ProcessDeclareResults
+  {
+    public List<Declare> Declares { get; set; }
+    public List<GetterSetter> GetterSetters { get; set; } = new List<GetterSetter>();
+  }
+
+  // ==============================================================================================================================
+  public enum EScope
+  {
+    Default = 0,
+    Public,
+    Private
+  }
+
+}

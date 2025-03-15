@@ -5,31 +5,65 @@ using dhll.Emitters;
 namespace dhll.v1;
 
 // ==============================================================================================================================
+/// <summary>
+/// Used to describe where a particular element appears in the raw text (file).
+/// This data can be used to provide context in error situations, language server features (maybe),
+/// and so on.
+/// </summary>
+public class SourceMetadata
+{
+  /// <summary>
+  /// Path to the file where this element is defined.
+  /// </summary>
+  public string FilePath { get; set; }
+
+  /// <summary>
+  /// The line where the element appears.
+  /// </summary>
+  public int LineNumber { get; set; }
+
+  /// <summary>
+  /// The column where the element appears.
+  /// </summary>
+  public int ColNumber { get; set; }
+}
+
+// ==============================================================================================================================
+public interface ISourceMetadata
+{
+  SourceMetadata SourceMeta { get; }
+}
+
+// ==============================================================================================================================
+public class TypeDef : ISourceMetadata
+{
+  // --------------------------------------------------------------------------------------------------------------------------
+  public TypeDef(string identifier_, SourceMetadata sourceMeta_)
+  {
+    Identifier = identifier_;
+    Members = new List<Declare>();
+    SourceMeta = sourceMeta_;
+  }
+
+  public string Identifier { get; set; }
+  public List<Declare> Members { get; set; }
+
+  public SourceMetadata SourceMeta { get; private set; }
+}
+
+// ==============================================================================================================================
 public class Declare
 {
   public EScope Scope { get; set; } = EScope.Public;
 
-  public string TypeName { get; set; }
-  public string Identifier { get; set; }
+  public string TypeName { get; set; } = default!;
+  public string Identifier { get; set; } = default!;
   public string? InitValue { get; set; }
 
   public bool IsProperty { get; set; }
 
   // FUTURE:
   // public bool IsAtomic { get; set; }
-}
-
-// ==============================================================================================================================
-public class TypeDef
-{
-  // --------------------------------------------------------------------------------------------------------------------------
-  public TypeDef(string identifier_)
-  {
-    Identifier = identifier_;
-    Declarations = new List<Declare>();
-  }
-  public string Identifier { get; set; }
-  public List<Declare> Declarations { get; set; }
 }
 
 
@@ -39,7 +73,7 @@ public class dhllFile
   /// <summary>
   /// The original file path...
   /// </summary>
-  public string Path { get; set; }
+  public string Path { get; set; } = default!;
 
   /// <summary>
   /// Every typedef that is contained in this file.
@@ -75,15 +109,18 @@ public class dhllVisitorImpl : dhllBaseVisitor<object>
   // --------------------------------------------------------------------------------------------------------------------------
   public override object VisitTypedef([Antlr4.Runtime.Misc.NotNull] dhllParser.TypedefContext context)
   {
-    var id = context.identifier().GetText();
+    var id = context.identifier();
+    string idText = id.GetText();
 
-    var res = new TypeDef(id);
+    // TODO: We can care about metadata later.
+    var meta = new SourceMetadata();
+    var res = new TypeDef(idText, meta);
 
     // Get the declarations:
     foreach (var item in context.decl())
     {
       var dr = (Declare)VisitDecl(item);
-      res.Declarations.Add(dr);
+      res.Members.Add(dr);
     }
 
     return res;
