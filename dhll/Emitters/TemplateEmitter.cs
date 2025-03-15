@@ -13,11 +13,19 @@ internal class TemplateEmitter
   private TemplateDynamics Dynamics = null!;
 
   private NamingContext NamingContext = new NamingContext();
+  private CompilerContext Context = null!;
+
+  /// <summary>
+  /// Name of the type that this template represents.
+  /// </summary>
+  private string TypeIdentifier = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateEmitter(TemplateDynamics dynamics_)
+  public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_)
   {
+    TypeIdentifier = typeIdentifier_;
     Dynamics = dynamics_;
+    Context = context_;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +84,7 @@ internal class TemplateEmitter
     cf.NextLine(1);
 
     // Set values for all nodes:
-    SetBoundNodesValue(boundNodes, cf, dynamics);
+    SetPropertyValues(boundNodes, cf, dynamics);
 
     cf.CloseBlock(1);
 
@@ -84,7 +92,7 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void SetBoundNodesValue(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
+  private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
   {
     // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     // walk the tree looking for dynamics.
@@ -100,6 +108,21 @@ internal class TemplateEmitter
                                                                       : $".innerText");
 
         // TODO: We need some way to cast to correct data type here....
+        string propType = Context.TypeIndex.GetMemberDataType(this.TypeIdentifier, p);
+
+        // HACK: This is typescript specific!  We will have to come up with a better way later.
+        // Also, we should come up with a generalized function to 'cast' to correct type in all cases.
+        if (propType != "string")
+        {
+          if (propType == "int" || propType == "float" || propType == "double")
+          {
+            // Cast to number type!
+            getBy = $"Number({getBy})"; 
+          }
+          else {
+            throw new NotSupportedException($"There is no supported cast for type: {propType}!");
+          }
+        }
 
         cf.WriteLine($"this._{p} = {getBy};");
       }

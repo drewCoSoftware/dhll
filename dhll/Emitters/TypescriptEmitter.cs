@@ -16,8 +16,6 @@ namespace dhll.Emitters
   internal class TypescriptEmitter : EmitterBase, IEmitter
   {
     private CodeFile CF = new CodeFile();
-    //  private TemplateIndex TemplateIndex = null!;
-    private CompilerContext CompilerContext = null!;
 
     private static Dictionary<string, string> TypeNameTable = new Dictionary<string, string>() {
       { "bool", "boolean" },
@@ -53,7 +51,7 @@ namespace dhll.Emitters
         if (dynamics != null)
         {
           Logger.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(dynamics);
+          templateEmitter = new TemplateEmitter(td.Identifier, dynamics, Context);
         }
         else
         {
@@ -104,7 +102,7 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     private TemplateDynamics? GetTemplateDynamics(TypeDef td)
     {
-      Context.TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
+      base.Context.TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
       return template;
     }
 
