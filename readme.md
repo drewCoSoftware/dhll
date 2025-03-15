@@ -22,7 +22,7 @@ Use this CLI syntax for parser output:
 // NOTE: This somehow outputs the files to ParserLexer/v1, which totally works for me.....
 // NOTE: Don't forget the 'package' argument so it all goes in the right namespace.
 cd Grammars
-antlr4 -package dhll.v1 -visitor -Dlanguage=CSharp -o ./v1/ParserLexer ./v1/TypeDef.g4 
+antlr4 -package dhll.v1 -visitor -Dlanguage=CSharp -o ./v1/ParserLexer ./v1/dhll.g4 
 ```
 
 To test some rules:

@@ -94,6 +94,8 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
   {
+  // throw new NotSupportedException("Convert this to look for data-* type values vs. reading them directly.  Otherwise, we will not be able to support more complex expressions in the future!  (NOTE: simple expressions that are property only will still work, so don't destroy the code outright, we can support both in the future..... actually, only support the data-* type expressions to keep it all consistent.  NOTE: Bindiners will destroy the data-* values on bind!  Errors for incompatible data / types!");
+
     // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     // walk the tree looking for dynamics.
     string[] propNames = dynamics.PropTargets.GetNames();

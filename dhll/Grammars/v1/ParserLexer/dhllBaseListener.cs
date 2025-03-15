@@ -49,18 +49,6 @@ public partial class dhllBaseListener : IdhllListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitFile([NotNull] dhllParser.FileContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="dhllParser.inlineComment"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterInlineComment([NotNull] dhllParser.InlineCommentContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="dhllParser.inlineComment"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitInlineComment([NotNull] dhllParser.InlineCommentContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

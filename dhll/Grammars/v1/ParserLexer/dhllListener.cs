@@ -42,16 +42,6 @@ public interface IdhllListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitFile([NotNull] dhllParser.FileContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="dhllParser.inlineComment"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterInlineComment([NotNull] dhllParser.InlineCommentContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="dhllParser.inlineComment"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitInlineComment([NotNull] dhllParser.InlineCommentContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="dhllParser.typedef"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
