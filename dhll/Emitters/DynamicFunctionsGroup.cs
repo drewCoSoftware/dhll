@@ -7,7 +7,7 @@ namespace dhll.Emitters;
 
 // ==============================================================================================================================
 /// <summary>
-/// Tracks our dynamic functions, names + their associated property names.
+/// Tracks the dynamic functions, names + their associated property names.
 /// </summary>
 internal class DynamicFunctionsGroup
 {
@@ -17,11 +17,13 @@ internal class DynamicFunctionsGroup
   private object DataLock = new object();
 
   private NamingContext NamingContext = null!;
+  private EmitterBase Emitter = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public DynamicFunctionsGroup(NamingContext namingContext_)
+  public DynamicFunctionsGroup(NamingContext namingContext_, EmitterBase emitter_)
   {
     NamingContext = namingContext_;
+    Emitter = emitter_;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -82,20 +84,25 @@ internal class DynamicFunctionsGroup
     var useParts = new List<string>();
     foreach (var x in dc.Parts)
     {
-      if (x.IsExpession) { 
+      if (x.IsExpession)
+      {
         // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
         useParts.Add($"(this.{x.Value})");
       }
-      else {
+      else
+      {
         string p = x.Value;
-        if (REMOVE_NEWLINES) {
+        if (REMOVE_NEWLINES)
+        {
           p = StripNewlines(p);
         }
-        if (REMOVE_EXCESS_WHITESPACE) { 
+        if (REMOVE_EXCESS_WHITESPACE)
+        {
           p = Regex.Replace(p, "[ ]*", " ");
           p = StringTools.Quote(p);
         }
-        if (p != string.Empty) { 
+        if (p != string.Empty)
+        {
           useParts.Add(p);
         }
       }
@@ -112,7 +119,8 @@ internal class DynamicFunctionsGroup
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private string StripNewlines(string input)
+  [Obsolete("Use drewco.tools.stringtools version > 1.3.3.6!")]
+  public static string StripNewlines(string input)
   {
     string res = input.Replace("\r", "").Replace("\n", "");
     return res;
@@ -121,27 +129,7 @@ internal class DynamicFunctionsGroup
   // --------------------------------------------------------------------------------------------------------------------------
   internal void EmitFunctionDefs(CodeFile cf)
   {
-    cf.NextLine(2);
-    foreach (var def in UniqueFunctions)
-    {
-      // TODO: We should have a typescript emitter squirt all of this out.
-      // We just don't have a fully functional DHLL implementation at this time to make that work.
-      string scope = TypescriptEmitter.GetScopeWord(def.Scope);
-      cf.WriteLine($"{scope} {def.Identifier}(): string ", 0);
-      cf.OpenBlock(false);
-      foreach (var item in def.Body)
-      {
-        cf.WriteLine(item);
-      }
-      cf.CloseBlock();
-      cf.NextLine(2);
-    }
-
-    //// TEST:
-    //foreach (var item in PropsToFunctions.Keys)
-    //{
-    //  cf.WriteLine($"PROP: {item}");
-    //}
+    Emitter.EmitFunctionDefs(UniqueFunctions, cf);
   }
 }
 

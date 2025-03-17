@@ -1,13 +1,10 @@
 ﻿using dhll.CodeGen;
 using dhll.Grammars.v1;
-using dhll.v1;
-using drewCo.Tools;
-using System.Diagnostics.Contracts;
-using System.Security.Cryptography.X509Certificates;
 
 namespace dhll.Emitters;
 
 // ==============================================================================================================================
+// REFACTOR:  This may need a base class as well, but it should certainly be called 'TypescriptTemplateEmitter!'
 internal class TemplateEmitter
 {
   private TemplateDynamics Dynamics = null!;

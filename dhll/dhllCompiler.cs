@@ -38,7 +38,7 @@ public class dhllCompiler
 
   private CompilerContext Context;
 
-  private Logger Logger { get { return Context.Logger; }}
+  private Logger Logger { get { return Context.Logger; } }
 
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +65,8 @@ public class dhllCompiler
     }
     else if (Options.InputFile.EndsWith(DHLL_EXT))
     {
-      ParseAndCompileDhllFile(Options.InputFile);
+      EmitterBase emitter = CreateEmitter();
+      ParseAndCompileDhllFile(Options.InputFile, emitter);
     }
     else
     {
@@ -107,19 +108,17 @@ public class dhllCompiler
 
     CreateTypeIndex(parsed);
 
+    var emitter = CreateEmitter();  
 
     var templateFiles = filesByType[DHLT_EXT];
-    ProcessTemplateFiles(templateFiles);
+    ProcessTemplateFiles(templateFiles, emitter);
 
     // Now that all of the template information is computed, we can find a way to hook this up to the
     // code file emitter....
     foreach (var f in parsed)
     {
-      CompileAndEmitFiles(f);
+      CompileAndEmitFiles(f, emitter);
     }
-
-
-    // throw new NotImplementedException();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -153,7 +152,7 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ProcessTemplateFiles(List<string> templateFiles)
+  private void ProcessTemplateFiles(List<string> templateFiles, EmitterBase emitter_)
   {
     // NOTE: Not all target languages can have templates, and we should probably validate this, or
     // at least spit out warnings.  At time of writing (3.7.2025) only typescript targets are able
@@ -179,7 +178,10 @@ public class dhllCompiler
           // to render / bind against the different versions....
           // if (item.Name != null) { useName += ("." + item.Name); }
 
-          var dynamics = new TemplateDynamics(item);
+          // NOTE: I don't think that we actually need the emitter here.....
+          // It proabably doesn't need to be stored in dynamics, rather it is invoked when we 
+          // doing the code emit step....
+          var dynamics = new TemplateDynamics(item, emitter_);
 
           Context.TemplateIndex.Add(useName, dynamics);
         }
@@ -278,22 +280,20 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ParseAndCompileDhllFile(string inputFile)
+  private void ParseAndCompileDhllFile(string inputFile, EmitterBase emitter)
   {
     Logger.Info($"Compiling dhll at path: {inputFile}");
 
     dhllFile parsed = ParseDhllFile(inputFile);
-    CompileAndEmitFiles(parsed);
+    CompileAndEmitFiles(parsed, emitter);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CompileAndEmitFiles(dhllFile file)
+  private void CompileAndEmitFiles(dhllFile file, EmitterBase emitter)
   {
     string outputDir = FileTools.GetLocalDir(Options.OutputDir);
     FileTools.CreateDirectory(outputDir);
 
-    // Load the emitter...
-    IEmitter emitter = LoadEmitter();
 
     // Run the emitter...
     EmitterResults results = emitter.Emit(outputDir, file);
@@ -358,15 +358,23 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private IEmitter LoadEmitter()
+  private EmitterBase CreateEmitter()
   {
     // NOTE: We will use a registration type approach in the future.
     // That will allow for all kinds of plugins + overrides if we wanted.
     switch (Options.OutputLang)
     {
       case "typescript":
-        var res = new TypescriptEmitter(this.Context);
-        return res;
+        {
+          var res = new TypescriptEmitter(this.Context);
+          return res;
+        }
+
+      case "C#":
+        {
+          var res = new CSharpEmitter(this.Context);
+          return res;
+        }
 
       default:
         throw new NotSupportedException();

@@ -19,6 +19,7 @@ internal class TemplateDynamics
 
   private TemplateDefinition Def = null!;
 
+  // NOTE: We are assuming that our template is represented as an HTML/browser type DOM!
   public Node DOM { get { return Def.DOM; } }
 
   /// <summary>
@@ -27,13 +28,16 @@ internal class TemplateDynamics
   /// </summary>
   private HashSet<string> ClassLevelNodeIdentifiers = null!;
 
+  private EmitterBase CodeEmitter = null!;
+
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDynamics(TemplateDefinition def_)
+  public TemplateDynamics(TemplateDefinition def_, EmitterBase codeEmitter_)
   {
     Def = def_;
+    CodeEmitter = codeEmitter_;
 
     NamingContext = new NamingContext();
-    DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
+    DynamicFunctions = new DynamicFunctionsGroup(NamingContext, CodeEmitter);
     PropTargets = new PropChangeTargets();
 
     Def.DOM.Identifier = NamingContext.GetUniqueNameFor(ROOT_NODE_IDENTIFIER);

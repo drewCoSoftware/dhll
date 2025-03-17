@@ -1,25 +1,16 @@
-﻿using Antlr4.Runtime;
-using dhll.CodeGen;
+﻿using dhll.CodeGen;
 using dhll.v1;
 using drewCo.Tools;
-using drewCo.Tools.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace dhll.Emitters
 {
-
-
   // ==============================================================================================================================
-  internal class TypescriptEmitter : EmitterBase
+  internal class CSharpEmitter : EmitterBase
   {
     private CodeFile CF = new CodeFile();
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public TypescriptEmitter(CompilerContext context_)
+    public CSharpEmitter(CompilerContext context_)
       : base(context_)
     { }
 
@@ -38,9 +29,9 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     public override EmitterResults Emit(string outputDir, dhllFile file)
     {
+
       var res = new EmitterResults();
       var outputFiles = new List<string>();
-
 
       // OPTIONS:
       // This is putting all types in the same file.
@@ -101,91 +92,48 @@ namespace dhll.Emitters
         CF.NextLine();
       }
 
+
+
+
+
+
       CF.Save(outputPath);
 
       outputFiles.Add(outputPath);
       res.OutputFiles = outputFiles.ToArray();
 
       return res;
+
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
     protected override void EmitGetterSetter(GetterSetter item, TemplateDynamics dynamics, CodeFile cf)
     {
+      string scope = GetScopeWord(item.Scope);
+      if (scope != string.Empty) { scope += " "; }
 
-      if (item.UseGetter)
+      // NOTE: C# can't directly interact with a template (DOM) like typescript can, at least not in
+      // this iteration, so we can simply ignore our template dynamics....
+      if (item.UseGetter && item.UseSetter)
       {
-        cf.Write($"public get {item.Identifier}() ");
-        cf.OpenBlock();
-        cf.WriteLine($"return this.{item.BackingMember.Identifier};");
-        cf.CloseBlock(2);
+        // C# style auto-prop.
+        cf.WriteLine($"{scope}{item.Identifier}{{get; set; }}");
       }
-
-      if (item.UseSetter)
+      else
       {
-        string typeName = TranslateTypeName(item.BackingMember.TypeName);
-        string bid = ConvertToArgumentName(item.Identifier) + "_";
-
-        cf.Write($"public set {item.Identifier}({bid}: {typeName}) ");
-        cf.OpenBlock();
-        cf.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
-
-        // This is where we do property target stuff...
-        var propTargets = dynamics.PropTargets.GetTargetsForProperty(item.Identifier);
-        if (propTargets != null)
+        EmitDeclaration(item.BackingMember, cf);
+        cf.Write($"{scope}{item.Identifier}");
+        cf.OpenBlock(true);
+        if (item.UseGetter)
         {
-          int attrIndex = 0;
-          foreach (var t in propTargets)
-          {
-            if (t.Attr != null)
-            {
-              string valId = $"val{attrIndex}";
-              cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
-              cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
-
-              ++attrIndex;
-            }
-            else
-            {
-              // We are setting content for this item.
-              cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
-            }
-          }
+          cf.WriteLine($"get {{ return {item.BackingMember.Identifier}; }}");
         }
-
-        cf.CloseBlock(2);
+        if (item.UseSetter)
+        {
+          cf.WriteLine($"set {{ {item.BackingMember.Identifier} = value; }}");
+        }
+        cf.CloseBlock(1);
       }
-
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    private string ConvertToArgumentName(string identifier)
-    {
-      string asWords = StringTools.DeCamelCase(identifier);
-      string[] parts = asWords.Split(' ');
-      parts[0] = LowerFirst(parts[0]);
-
-      string res = string.Join("", parts);
-      return res;
-    }
-
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    [Obsolete("Use version from drewCo.Tools.StringTools > 1.3.3.6!")]
-    public static string LowerFirst(string input)
-    {
-      if (input.Length == 0) { return input; }
-
-      uint val = (uint)input[0];
-      if (val >= 65 & val <= 90)
-      {
-        val += 32;
-      }
-
-      // Too bad we can't just set the stupid character.  Might be useful to do so in an
-      // unsafe context tho!
-      string res = (char)val + input.Substring(1);
-      return res;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -203,6 +151,7 @@ namespace dhll.Emitters
       cf.WriteLine(line);
     }
 
+
     // --------------------------------------------------------------------------------------------------------------------------
     public override void EmitFunctionDefs(IEnumerable<FunctionDef> defs, CodeFile cf)
     {
@@ -214,8 +163,11 @@ namespace dhll.Emitters
         string scope = GetScopeWord(def.Scope);
         string returnType = TranslateTypeName(def.ReturnType);
 
-        cf.WriteLine($"{scope}{def.Identifier}(): {returnType}", 0);
-        cf.OpenBlock(false);
+        cf.Write($"{scope}{returnType} {def.Identifier}()");
+        cf.OpenBlock(true);
+
+        // NOTE: As we improve the capability of dhll, the function def's body will contain actual
+        // dhll statements / expressions that can be emitted to the target language correctly.
         foreach (var item in def.Body)
         {
           cf.WriteLine(item);
@@ -225,35 +177,6 @@ namespace dhll.Emitters
       }
     }
 
-  }
-
-
-  // ==============================================================================================================================
-  // NOTE: This is very much like a function, but not quite.....
-  // Depends on the language really....
-  // Perhaps there will be a way to unify them at some point?
-  class GetterSetter
-  {
-    public EScope Scope { get; set; }
-    public Declare BackingMember { get; set; }
-    public string Identifier { get; set; }
-    public bool UseGetter { get; set; }
-    public bool UseSetter { get; set; }
-  }
-
-  // ==============================================================================================================================
-  class ProcessDeclareResults
-  {
-    public List<Declare> Declares { get; set; }
-    public List<GetterSetter> GetterSetters { get; set; } = new List<GetterSetter>();
-  }
-
-  // ==============================================================================================================================
-  public enum EScope
-  {
-    Default = 0,
-    Public,
-    Private
   }
 
 }
