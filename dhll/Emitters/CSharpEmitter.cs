@@ -4,6 +4,7 @@ using drewCo.Tools;
 
 namespace dhll.Emitters
 {
+
   // ==============================================================================================================================
   internal class CSharpEmitter : EmitterBase
   {
@@ -13,6 +14,8 @@ namespace dhll.Emitters
     public CSharpEmitter(CompilerContext context_)
       : base(context_)
     { }
+
+    public override string TargetLanguage => "C#";
 
     // --------------------------------------------------------------------------------------------------------------------------
     protected override Dictionary<string, string> LoadTypeNameTable()
@@ -39,7 +42,7 @@ namespace dhll.Emitters
       // If the language supports it, we can even use partials (one for def, one for templates), so
       // n-files per type.
       string fName = Path.GetFileNameWithoutExtension(file.Path);
-      string outputPath = FileTools.GetRootedPath(Path.Combine(outputDir, fName + ".ts"));
+      string outputPath = FileTools.GetRootedPath(Path.Combine(outputDir, fName + ".cs"));
 
       WriteCodeGenHeader(CF);
 
@@ -79,7 +82,7 @@ namespace dhll.Emitters
 
           templateEmitter.EmitBindFunction(CF, dynamics);
 
-          dynamics.EmitDynamicFunctionDefs(CF);
+          dynamics.EmitDynamicFunctionDefs(CF, this);
         }
 
         // Now emit all of the getters / setters.

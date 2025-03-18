@@ -14,20 +14,59 @@ namespace dhll
     // --------------------------------------------------------------------------------------------------------------------------
     static int Main(string[] args)
     {
-      int res = CmdParser.Default.ParseArguments<CommandLineOptions>(args)
-                                 .MapResult((CommandLineOptions ops) => Compile(ops),
+      int res = CmdParser.Default.ParseArguments<CompileFileOptions, CompileProjectOptions>(args)
+                                 .MapResult((CompileFileOptions ops) => Compile(ops),
+                                           (CompileProjectOptions ops) => CompileProject(ops),
                                  errs => -1);
       return res;
 
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private static int Compile(CommandLineOptions ops)
+    private static int Compile(CompileFileOptions ops)
     {
-      var compiler = new dhllCompiler(ops);
-      int res = compiler.Compile();
-      return res;
+      var logger = InitLogger();
+      try
+      {
+        var compiler = new dhllCompiler(ops, logger);
+        int res = compiler.CompileProject();
+        return res;
+      }
+      catch (Exception ex)
+      {
+        logger.LogException(ex);
+#if DEBUG
+        throw;
+#endif
+        return -1;
+      }
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------
+    private static int CompileProject(CompileProjectOptions ops)
+    {
+      var logger = InitLogger();
+      try
+      {
+        var compiler = new dhllCompiler(ops, logger);
+        int res = compiler.CompileProject();
+        return res;
+      }
+      catch (Exception ex)
+      {
+        logger.LogException(ex);
+#if DEBUG
+        throw;
+#endif
+        return -1;
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private static Logger InitLogger()
+    {
+      var res = new Logger();
+      return res;
+    }
   }
 }

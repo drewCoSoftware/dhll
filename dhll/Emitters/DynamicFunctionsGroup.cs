@@ -17,13 +17,11 @@ internal class DynamicFunctionsGroup
   private object DataLock = new object();
 
   private NamingContext NamingContext = null!;
-  private EmitterBase Emitter = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public DynamicFunctionsGroup(NamingContext namingContext_, EmitterBase emitter_)
+  public DynamicFunctionsGroup(NamingContext namingContext_)
   {
     NamingContext = namingContext_;
-    Emitter = emitter_;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -127,9 +125,9 @@ internal class DynamicFunctionsGroup
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  internal void EmitFunctionDefs(CodeFile cf)
+  internal void EmitFunctionDefs(CodeFile cf, EmitterBase emitter)
   {
-    Emitter.EmitFunctionDefs(UniqueFunctions, cf);
+    emitter.EmitFunctionDefs(UniqueFunctions, cf);
   }
 }
 

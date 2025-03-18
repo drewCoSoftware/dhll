@@ -1,39 +1,43 @@
-﻿using drewCo.Curations;
-using drewCo.Tools;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using drewCo.Tools;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using IOPath = System.IO.Path;
 
 namespace dhll;
+
 // ==============================================================================================================================
 /// <summary>
 /// A JSON file that describes a 'project' composed of many dhll files.
 /// All paths use unix stlye separators and are relative to this file.
 /// </summary>
-public class dhlprojFile
+public class dhllProjectDefinition
 {
+  public const string DEFAULT_OUTPUT_DIR = "build";
+
   /// <summary>
   /// The path of this file.
   /// </summary>
   [JsonIgnore]
   public string Path { get; private set; } = null!;
 
-  public List<string> Files { get; set; } = new List<string>();
-  //ExternalReadonlyList<string> _Files = new ExternalReadonlyList<string>();
-  //public ReadOnlyCollection<string> Files { get { return _Files.External; } }
+  public List<string> InputFiles { get; set; } = new List<string>();
+
+  /// <summary>
+  /// Global output directory for all OutputTargets that don't specify an OutputDir.
+  /// </summary>
+  public string OutputDir { get; set; } = DEFAULT_OUTPUT_DIR;
+
+  /// <summary>
+  /// We need a way to target multiple output targets...
+  /// </summary>
+  public Dictionary<string, OutputTarget> OutputTargets { get; set; } = null!;
+
 
   // --------------------------------------------------------------------------------------------------------------------------
   [JsonConstructor]
-  private dhlprojFile() { }
+  internal dhllProjectDefinition() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhlprojFile(string path_)
+  public dhllProjectDefinition(string path_)
   {
     if (path_ == null) { throw new ArgumentNullException(nameof(path_)); }
 
@@ -53,7 +57,7 @@ public class dhlprojFile
     if (dir == null) { throw new InvalidOperationException($"Could not resolve the directory from path: {Path}!"); }
 
     FileTools.CreateDirectory(dir);
-    FileTools.SaveJson<dhlprojFile>(this.Path, this);
+    FileTools.SaveJson<dhllProjectDefinition>(this.Path, this);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -65,18 +69,18 @@ public class dhlprojFile
     }
 
     string relPath = FileTools.GetRelativePath(this.Path, path);
-    Files.Add(relPath);
+    InputFiles.Add(relPath);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public static dhlprojFile Load(string path)
+  public static dhllProjectDefinition Load(string path)
   {
     if (!File.Exists(path)) { throw new FileNotFoundException($"The file at path: {path} does not exist!"); }
 
-    var res = FileTools.LoadJson<dhlprojFile>(path);
+    var res = FileTools.LoadJson<dhllProjectDefinition>(path);
     if (res == null)
     {
-      throw new InvalidOperationException($"The file at path: {path} could not be deserialized into an instance of: {typeof(dhlprojFile)}!");
+      throw new InvalidOperationException($"The file at path: {path} could not be deserialized into an instance of: {typeof(dhllProjectDefinition)}!");
     }
     res.Path = path;
 
@@ -94,6 +98,40 @@ public class dhlprojFile
     return res;
     // throw new NotImplementedException();
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Compute the output directory for the given output target.
+  /// </summary>
+  internal string ComputeOutputDir(OutputTarget target)
+  {
+    string res = target.OutputDir;
+    if (res == null)
+    {
+      res = FileTools.GetRootedPath(this.OutputDir);
+      res = IOPath.Combine(res, target.Name);
+    }
+
+    return res;
+  }
+}
+
+
+// ==============================================================================================================================
+public class OutputTarget
+{
+  /// <summary>
+  /// Unique name for this output target.
+  /// </summary>
+  // NOTE: Name and corresponding dictionary key in Project Def must match!
+  public string Name { get; set; } = default!;
+
+  public string TargetLanguage { get; set; } = default!;
+
+  /// <summary>
+  /// Optional output directory.  If this is not set, a default/global one will be used.
+  /// </summary>
+  public string? OutputDir { get; set; }
 }
 
 // ==============================================================================================================================

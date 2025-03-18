@@ -18,6 +18,8 @@ namespace dhll.Emitters
   {
     private CodeFile CF = new CodeFile();
 
+    public override string TargetLanguage => "typescript";
+
     // --------------------------------------------------------------------------------------------------------------------------
     public TypescriptEmitter(CompilerContext context_)
       : base(context_)
@@ -88,7 +90,7 @@ namespace dhll.Emitters
 
           templateEmitter.EmitBindFunction(CF, dynamics);
 
-          dynamics.EmitDynamicFunctionDefs(CF);
+          dynamics.EmitDynamicFunctionDefs(CF, this);
         }
 
         // Now emit all of the getters / setters.

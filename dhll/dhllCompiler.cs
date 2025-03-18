@@ -1,5 +1,4 @@
-﻿
-using Antlr4.Runtime;
+﻿using Antlr4.Runtime;
 using dhll.Emitters;
 using dhll.Grammars.v1;
 using dhll.v1;
@@ -31,63 +30,109 @@ public class dhllCompiler
   public const string DHLPROJ_EXT = ".dhlproj";
 
   private static string[] SupportedLanguages = new[] {
-      "typescript"
+      "typescript",
+      "C#"
   };
 
-  private CommandLineOptions Options;
+  private CompileProjectOptions ProjectOptions = null!;
+  private CompileFileOptions? FileOptions = null!;
 
-  private CompilerContext Context;
+  private CompilerContext Context = null!;
 
   private Logger Logger { get { return Context.Logger; } }
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CommandLineOptions ops_)
+  public dhllCompiler(CompileProjectOptions ops_, Logger logger_)
   {
-    Options = ops_;
+    ProjectOptions = ops_;
 
+    InitContext(logger_);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public dhllCompiler(CompileFileOptions options_, Logger logger_)
+  {
+    FileOptions = options_;
+    InitContext(logger_);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void InitContext(Logger logger_)
+  {
     Context = new CompilerContext()
     {
-      Logger = new Logger(),
+      Logger = logger_,
       TypeIndex = new TypeIndex(),
       TemplateIndex = new TemplateIndex(),
     };
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public int Compile()
+  public int CompileProject()
   {
-    ValidateOptions();
+    if (ProjectOptions == null)
+    {
+      var project = new dhllProjectDefinition()
+      {
+        OutputDir = FileOptions.OutputDir,
+        InputFiles = new List<string>() { FileOptions.InputFile },
+        OutputTargets = new Dictionary<string, OutputTarget>()
+        {
+          {
+            FileOptions.TargetLanguage,
+            new OutputTarget() {
+              Name = FileOptions.TargetLanguage,
+              OutputDir = FileOptions.OutputDir,
+            }
+          }
+        }
+      };
 
-    if (Options.InputFile.EndsWith(DHLPROJ_EXT))
-    {
-      CompileDhllProject(Options.InputFile);
-    }
-    else if (Options.InputFile.EndsWith(DHLL_EXT))
-    {
-      EmitterBase emitter = CreateEmitter();
-      ParseAndCompileDhllFile(Options.InputFile, emitter);
+      CompileDhllProject(project);
     }
     else
     {
-      Logger.Error($"Invalid file type!  Valid extensions are: {Environment.NewLine}{string.Join(Environment.NewLine, new[] { DHLL_EXT, DHLPROJ_EXT })}");
-      return -1;
+      string useInputFile = ProjectOptions.InputFile ?? ResolveProjectFilePath();
+      CompileDhllProject(useInputFile);
     }
 
     return 0;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
+  private string ResolveProjectFilePath()
+  {
+    string[] files = Directory.GetFiles(FileTools.GetAppDir(), "*.dhlt");
+    if (files.Length == 0)
+    {
+      throw new InvalidOperationException("Could not find a dhll project file in this directory!  Please specify one with the --file option!");
+    }
+    else if (files.Length > 1)
+    {
+      throw new InvalidOperationException("There is more than one dhll project file (.dhlt) in this directory!  Please specify one with the --file option!");
+    }
+    return files[0];
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
   private void CompileDhllProject(string projectFilePath)
   {
-    Logger.Info("loading project file...");
-    var projFile = dhlprojFile.Load(projectFilePath);
+    Logger.Info("Loading project file...");
+    var projFile = dhllProjectDefinition.Load(projectFilePath);
+
+    CompileDhllProject(projFile);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void CompileDhllProject(dhllProjectDefinition projFile)
+  {
+    ValidateProjectFile(projFile);
 
     Logger.Info("Compiling dhll Project.");
-    Logger.Info("Cleaning previous output.");
-    string outDir = FileTools.GetRootedPath(Options.OutputDir);
-    FileTools.CreateDirectory(outDir);
-    FileTools.EmptyDirectory(outDir);
+
+    // TODO: Add + check for a clean-on-build flag.
+    CleanPreviousOutput(projFile);
 
     Dictionary<string, List<string>> filesByType = ComputeFileGroups(projFile);
 
@@ -108,16 +153,42 @@ public class dhllCompiler
 
     CreateTypeIndex(parsed);
 
-    var emitter = CreateEmitter();  
-
     var templateFiles = filesByType[DHLT_EXT];
-    ProcessTemplateFiles(templateFiles, emitter);
+    ProcessTemplateFiles(templateFiles);
 
-    // Now that all of the template information is computed, we can find a way to hook this up to the
-    // code file emitter....
-    foreach (var f in parsed)
+
+    foreach (var target in projFile.OutputTargets.Values)
     {
-      CompileAndEmitFiles(f, emitter);
+      var emitter = CreateEmitter(target.TargetLanguage);
+      string outputDir = projFile.ComputeOutputDir(target);
+
+      // Now that all of the template information is computed, we can find a way to hook this up to the
+      // code file emitter....
+      foreach (var f in parsed)
+      {
+        CompileAndEmitFiles(f, emitter, outputDir);
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void CleanPreviousOutput(dhllProjectDefinition proj)
+  {
+    Logger.Info("Cleaning previous output.");
+
+    var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    //  string defaultDir = proj.OutputDir;
+    foreach (var item in proj.OutputTargets.Values)
+    {
+      string useOutputDir = proj.ComputeOutputDir(item);
+      if (used.Contains(useOutputDir))
+      {
+        continue;
+      }
+
+      Logger.Verbose($"Cleaning directory at: {useOutputDir}");
+      FileTools.EmptyDirectory(useOutputDir);
     }
   }
 
@@ -152,7 +223,7 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ProcessTemplateFiles(List<string> templateFiles, EmitterBase emitter_)
+  private void ProcessTemplateFiles(List<string> templateFiles)
   {
     // NOTE: Not all target languages can have templates, and we should probably validate this, or
     // at least spit out warnings.  At time of writing (3.7.2025) only typescript targets are able
@@ -181,7 +252,7 @@ public class dhllCompiler
           // NOTE: I don't think that we actually need the emitter here.....
           // It proabably doesn't need to be stored in dynamics, rather it is invoked when we 
           // doing the code emit step....
-          var dynamics = new TemplateDynamics(item, emitter_);
+          var dynamics = new TemplateDynamics(item);
 
           Context.TemplateIndex.Add(useName, dynamics);
         }
@@ -190,12 +261,12 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private static Dictionary<string, List<string>> ComputeFileGroups(dhlprojFile projFile)
+  private static Dictionary<string, List<string>> ComputeFileGroups(dhllProjectDefinition projFile)
   {
     // Scan all of the files, and sort them by extension.  We will want to process all of the
     // template files first.
     // Multiple passes may be required to resolve + verify all symbols.
-    var filesByType = Partition(projFile.Files, x => Path.GetExtension(x), x => projFile.GetFullPath(x));
+    var filesByType = Partition(projFile.InputFiles, x => Path.GetExtension(x), x => projFile.GetFullPath(x));
 
     // NOTE: The empty lists are being added as a convenience so that we can have cleaner code downstream.
     var allTypes = new[] { DHLT_EXT, DHLL_EXT };
@@ -261,6 +332,7 @@ public class dhllCompiler
   /// <summary>
   /// Partitions the inputs into lists grouped by property value.
   /// </summary>
+  [Obsolete("Use version from drewco.Tools > 1.3.3.6!")]
   public static Dictionary<TKey, List<TInput>> PartitionIntoDictionary<TInput, TKey>(List<TInput> input, Expression<Func<TInput, TKey>> keyPropExp)
   {
     var res = new Dictionary<TKey, List<TInput>>();
@@ -280,18 +352,18 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ParseAndCompileDhllFile(string inputFile, EmitterBase emitter)
+  private void CompileDhllFile(string inputFile, EmitterBase emitter, string outputDir)
   {
-    Logger.Info($"Compiling dhll at path: {inputFile}");
+    Logger.Info($"Compiling dhll at path: {inputFile} to language: {emitter.TargetLanguage}");
 
     dhllFile parsed = ParseDhllFile(inputFile);
-    CompileAndEmitFiles(parsed, emitter);
+    CompileAndEmitFiles(parsed, emitter, outputDir);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CompileAndEmitFiles(dhllFile file, EmitterBase emitter)
+  private void CompileAndEmitFiles(dhllFile file, EmitterBase emitter, string outputDir)
   {
-    string outputDir = FileTools.GetLocalDir(Options.OutputDir);
+    outputDir = FileTools.GetRootedPath(outputDir);
     FileTools.CreateDirectory(outputDir);
 
 
@@ -358,11 +430,11 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private EmitterBase CreateEmitter()
+  private EmitterBase CreateEmitter(string targetLang)
   {
     // NOTE: We will use a registration type approach in the future.
     // That will allow for all kinds of plugins + overrides if we wanted.
-    switch (Options.OutputLang)
+    switch (targetLang)
     {
       case "typescript":
         {
@@ -383,25 +455,48 @@ public class dhllCompiler
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ValidateOptions()
+  private void ValidateProjectFile(dhllProjectDefinition Options)
   {
-    if (!SupportedLanguages.Contains(Options.OutputLang))
-    {
-      // TODO: Show valid
-      string msg = $"The language: {Options.OutputLang} is not supported!";
-      msg += (Environment.NewLine + "Valid Options are:" + Environment.NewLine);
-      msg += string.Join(Environment.NewLine, SupportedLanguages);
+    Logger.Verbose("Validating project...");
 
-      throw new InvalidOperationException(msg);
+    if (Options.OutputTargets == null || Options.OutputTargets.Count == 0)
+    {
+      throw new InvalidOperationException($"The project file must contain at least one output target!");
     }
 
-    string usePath = FileTools.GetRootedPath(Options.InputFile);
-    if (!File.Exists(usePath))
+    string baseDir = FileTools.GetRootedPath(Path.GetDirectoryName(Options.Path));
+    Logger.Verbose($"The base directory is: {baseDir}");
+
+    foreach (var inputPath in Options.InputFiles)
     {
-      string msg = $"The input file at path: {Options.InputFile} does not exist!";
-      throw new FileNotFoundException(msg);
+      string path = FileTools.GetRootedPath(Path.Combine(baseDir, inputPath));
+      if (!File.Exists(path))
+      {
+        string msg = $"The input file at path: {inputPath} does not exist!";
+        throw new FileNotFoundException(msg);
+      }
     }
-    Options.InputFile = FileTools.GetRootedPath(Options.InputFile);
+
+    foreach (var key in Options.OutputTargets.Keys)
+    {
+      var t = Options.OutputTargets[key];
+      if (key != t.Name) {
+        throw new InvalidOperationException($"key/name mismatch in output targets: {key}/{t.Name}!  Values must be the same!");
+      }
+
+      Logger.Verbose($"Validating output target: {key}");
+      if (!SupportedLanguages.Contains(t.TargetLanguage))
+      {
+        // TODO: Show valid
+        string msg = $"Target:{key} - The language: {t.TargetLanguage} is not supported!";
+        msg += (Environment.NewLine + "Valid Options are:" + Environment.NewLine);
+        msg += string.Join(Environment.NewLine, SupportedLanguages);
+
+        throw new InvalidOperationException(msg);
+      }
+    }
+
+
 
   }
 }

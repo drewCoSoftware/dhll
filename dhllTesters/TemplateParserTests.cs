@@ -21,7 +21,7 @@ namespace dhllTesters
     [Test]
     public void CanParseBasicTemplate()
     {
-      var compiler = new dhllCompiler(null);
+      var compiler = new dhllCompiler((CompileFileOptions)null);
 
       string inputPath = GetTestInputPath("Template1.dhlt");
 

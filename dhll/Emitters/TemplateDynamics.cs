@@ -28,16 +28,13 @@ internal class TemplateDynamics
   /// </summary>
   private HashSet<string> ClassLevelNodeIdentifiers = null!;
 
-  private EmitterBase CodeEmitter = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDynamics(TemplateDefinition def_, EmitterBase codeEmitter_)
+  public TemplateDynamics(TemplateDefinition def_)
   {
     Def = def_;
-    CodeEmitter = codeEmitter_;
-
     NamingContext = new NamingContext();
-    DynamicFunctions = new DynamicFunctionsGroup(NamingContext, CodeEmitter);
+    DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
     PropTargets = new PropChangeTargets();
 
     Def.DOM.Identifier = NamingContext.GetUniqueNameFor(ROOT_NODE_IDENTIFIER);
@@ -61,9 +58,9 @@ internal class TemplateDynamics
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public void EmitDynamicFunctionDefs(CodeFile cf)
+  public void EmitDynamicFunctionDefs(CodeFile cf, EmitterBase emitter)
   {
-    DynamicFunctions.EmitFunctionDefs(cf);
+    DynamicFunctions.EmitFunctionDefs(cf, emitter);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
