@@ -21,10 +21,10 @@ namespace dhll.Emitters
     protected override Dictionary<string, string> LoadTypeNameTable()
     {
       var res = new Dictionary<string, string>() {
-        { "bool", "boolean" },
-        { "int", "number" },
-        { "float", "number" },
-        { "double", "number" },
+        { "bool", "bool" },
+        { "int", "int" },
+        { "float", "float" },
+        { "double", "double" },
       };
       return res;
     }
@@ -62,34 +62,35 @@ namespace dhll.Emitters
           Logger.Verbose($"There is no template for type: {td.Identifier}");
         }
 
-        var preProcResults = PreProcessDeclarations(td);
-
         CF.Write($"class {td.Identifier} ");
-        CF.OpenBlock();
+        CF.OpenBlock(true);
         CF.NextLine();
 
-        foreach (var item in preProcResults.Declares)
+        foreach (var dec in td.Members)
         {
-          EmitDeclaration(item, CF);
+          EmitDeclaration(dec, CF);
         }
         CF.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
         if (dynamics != null)
         {
-          dynamics.EmitDOMDeclarations(CF);
-          templateEmitter.EmitCreateDOMFunction(CF);
+          // NOTE: Currently for C# we don't bind to any kind of template, so I am just going
+          // to skip this step.  Future versions of the code will of course have to care (say we
+          // want to bind to WPF or something...)
 
-          templateEmitter.EmitBindFunction(CF, dynamics);
-
+          //dynamics.EmitDOMDeclarations(CF);
+          templateEmitter.EmitCreateDOMFunctionForCSharp(CF);
+          //templateEmitter.EmitBindFunction(CF, dynamics);
           dynamics.EmitDynamicFunctionDefs(CF, this);
         }
 
-        // Now emit all of the getters / setters.
-        foreach (var item in preProcResults.GetterSetters)
-        {
-          EmitGetterSetter(item, dynamics, CF);
-        }
+
+        //// Now emit all of the getters / setters.
+        //foreach (var item in preProcResults.GetterSetters)
+        //{
+        //  EmitGetterSetter(item, dynamics, CF);
+        //}
 
         CF.CloseBlock();
         CF.NextLine();
@@ -143,8 +144,14 @@ namespace dhll.Emitters
     protected override void EmitDeclaration(Declare dec, CodeFile cf)
     {
       var useType = TranslateTypeName(dec.TypeName);
+      string scope = GetScopeWord(dec.Scope);
 
-      string line = $"{dec.Identifier}: {useType}";
+      string getset = string.Empty;
+      if (dec.IsProperty)
+      {
+        getset = " { get; set; }";
+      }
+      string line = $"{scope}{useType} {dec.Identifier}{getset}";
       if (dec.InitValue != null)
       {
         line += $" = {dec.InitValue}";
@@ -161,8 +168,7 @@ namespace dhll.Emitters
       cf.NextLine(2);
       foreach (var def in defs)
       {
-        // TODO: We should have a typescript emitter squirt all of this out.
-        // We just don't have a fully functional DHLL implementation at this time to make that work.
+
         string scope = GetScopeWord(def.Scope);
         string returnType = TranslateTypeName(def.ReturnType);
 
@@ -171,10 +177,14 @@ namespace dhll.Emitters
 
         // NOTE: As we improve the capability of dhll, the function def's body will contain actual
         // dhll statements / expressions that can be emitted to the target language correctly.
-        foreach (var item in def.Body)
+        foreach (var text in def.Body)
         {
-          cf.WriteLine(item);
+          // HACK:  I am doing a find + replace to patch up the code while we generalize the 'FunctionDef' type + add expression support.
+          string useText = text;
+          useText = useText.Replace("toString()", "ToString()");
+          cf.WriteLine(useText);
         }
+
         cf.CloseBlock();
         cf.NextLine(2);
       }

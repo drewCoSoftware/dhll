@@ -43,7 +43,10 @@ internal class DynamicFunctionsGroup
         ReturnType = "string"
       };
 
-      funcDef.Body.Add(ComputeStringFunction(dc));
+      // NOTE: We should just be composing some dhll constructs here, and emitting them later...
+      // For now we will just use a functor....
+      string func = ComputeStringFunction(dc);
+      funcDef.Body.Add(func);
 
       // Now we will associate the dynamic function with all of the implicated properties.
       foreach (var item in dc.PropertyNames)
@@ -79,6 +82,7 @@ internal class DynamicFunctionsGroup
     const bool REMOVE_EXCESS_WHITESPACE = true;
     const bool REMOVE_NEWLINES = true;
 
+    
     var useParts = new List<string>();
     foreach (var x in dc.Parts)
     {

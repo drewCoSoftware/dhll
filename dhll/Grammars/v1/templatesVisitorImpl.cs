@@ -1,8 +1,10 @@
 ﻿using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
+using dhll.Emitters;
 using dhll.v1;
 using drewCo.Tools;
+using drewCo.Web;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -39,6 +41,9 @@ public class CodeGenAttribute : System.Attribute
 // ==============================================================================================================================
 public partial class Node
 {
+
+  public bool IsTextNode { get { return Name == HTMLNode.TEXT_NAME; } }
+
   /// <summary>
   /// The parent node, or null if this is the root node.
   /// </summary>

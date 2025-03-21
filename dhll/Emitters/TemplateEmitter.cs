@@ -1,12 +1,21 @@
-﻿using dhll.CodeGen;
+﻿using Antlr4.Runtime.Tree;
+using dhll.CodeGen;
 using dhll.Grammars.v1;
+using System.ComponentModel.DataAnnotations;
+
+
 
 namespace dhll.Emitters;
 
+
 // ==============================================================================================================================
 // REFACTOR:  This may need a base class as well, but it should certainly be called 'TypescriptTemplateEmitter!'
+// NOTE: The create DOM functions might have to create some kind of dhll construct which then get transpiled...
 internal class TemplateEmitter
 {
+  const string DEFAULT_VAL_ID = "val";
+  const string DEFAULT_TEXT_NODE_ID = "textNode";
+
   private TemplateDynamics Dynamics = null!;
 
   private NamingContext NamingContext = new NamingContext();
@@ -26,8 +35,86 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public void EmitCreateDOMFunction(CodeFile cf)
+  // HACK: I don't really have a way to emit templates to different language targets at this time, so this will have to do.
+  public void EmitCreateDOMFunctionForCSharp(CodeFile cf)
   {
+
+    const string TEMPLATE_TYPE = "string";
+    cf.WriteLine($"public {TEMPLATE_TYPE} CreateDOM()");
+    cf.OpenBlock(true);
+
+    // We are going to use the 'HTMLNode' syntax since I know that code already works.
+
+    const string ROOT_NAME = "root";
+
+    Node root = Dynamics.DOM;
+    cf.WriteLine($"var {ROOT_NAME} = new HTMLNode(\"{root.Name}\");");
+    AddAttributesForCsharp(cf, root, ROOT_NAME);
+
+    CreateChildElementsForCsharp(cf, root, ROOT_NAME);
+
+    cf.WriteLine($"{TEMPLATE_TYPE} res = {ROOT_NAME}.ToHTMLString();");
+
+
+    cf.WriteLine("return res;");
+
+    cf.CloseBlock();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void CreateChildElementsForCsharp(CodeFile cf, Node parent, string parentVarId)
+  {
+    foreach (var item in parent.Children)
+    {
+      if (item.IsTextNode)
+      {
+
+        string? useText = FormatText(item.Value);
+        string? valLine = !string.IsNullOrWhiteSpace(useText) ? $"\"{useText}\"" : null;
+
+
+        if (item.DynamicContent != null)
+        {
+          string valId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+          // We need to know all of the variable names....
+          // HACK: We are assuming that the dynamic functions are all at class level!
+          string funcName = item.DynamicFunction;
+          valLine = $"var {valId} = this.{funcName}();";
+          cf.WriteLine(valLine);
+
+          string nodeName = NamingContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
+          cf.WriteLine($"var {nodeName} = HTMLNode.CreateTextNode({valId});");
+          cf.WriteLine($"{parentVarId}.AddChild({nodeName});");
+
+          continue;
+        }
+
+      }
+      else
+      {
+        cf.NextLine();
+
+        string nodeId = NamingContext.GetUniqueNameFor("node");
+        cf.WriteLine($"var {nodeId} = new HTMLNode(\"{item.Name}\");");
+        cf.WriteLine($"{parentVarId}.AddChild({nodeId});");
+
+        // Attributes.
+        AddAttributesForCsharp(cf, item, nodeId);
+
+        // Now its child elements too....
+        CreateChildElementsForCsharp(cf, item, nodeId);
+
+        // Add the child node to the parent....
+        //cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+      }
+
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public void EmitCreateDOMFunctionForTypescript(CodeFile cf)
+  {
+
     // Walk the tree and create elements + children as we go....
     Node root = Dynamics.DOM;
 
@@ -36,7 +123,7 @@ internal class TemplateEmitter
 
     // Special name.
 
-    string assignTo = GetAssignSyntax(root);
+    string assignTo = GetTypescriptAssignSyntax(root);
     cf.WriteLine($"{QualifyIdentifier(assignTo)} = document.createElement('{root.Name}');");
 
     AddAttributes(cf, root, root.Identifier!);
@@ -91,7 +178,7 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
   {
-  // throw new NotSupportedException("Convert this to look for data-* type values vs. reading them directly.  Otherwise, we will not be able to support more complex expressions in the future!  (NOTE: simple expressions that are property only will still work, so don't destroy the code outright, we can support both in the future..... actually, only support the data-* type expressions to keep it all consistent.  NOTE: Bindiners will destroy the data-* values on bind!  Errors for incompatible data / types!");
+    // throw new NotSupportedException("Convert this to look for data-* type values vs. reading them directly.  Otherwise, we will not be able to support more complex expressions in the future!  (NOTE: simple expressions that are property only will still work, so don't destroy the code outright, we can support both in the future..... actually, only support the data-* type expressions to keep it all consistent.  NOTE: Bindiners will destroy the data-* values on bind!  Errors for incompatible data / types!");
 
     // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     // walk the tree looking for dynamics.
@@ -116,9 +203,10 @@ internal class TemplateEmitter
           if (propType == "int" || propType == "float" || propType == "double")
           {
             // Cast to number type!
-            getBy = $"Number({getBy})"; 
+            getBy = $"Number({getBy})";
           }
-          else {
+          else
+          {
             throw new NotSupportedException($"There is no supported cast for type: {propType}!");
           }
         }
@@ -155,11 +243,8 @@ internal class TemplateEmitter
     return res;
   }
 
-
-
-
   // --------------------------------------------------------------------------------------------------------------------------
-  private string GetAssignSyntax(Node node)
+  private string GetTypescriptAssignSyntax(Node node)
   {
     string res = $"let {node.Identifier}";
     if (Dynamics.IdentifierIsClassLevel(node.Identifier))
@@ -167,6 +252,28 @@ internal class TemplateEmitter
       res = $"this.{node.Identifier!}";
     }
     return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void AddAttributesForCsharp(CodeFile cf, Node srcNode, string parentSymbol)
+  {
+    foreach (var item in srcNode.Attributes)
+    {
+
+      if (item.DynamicContent != null)
+      {
+        string useValId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+        string valLine = $"var {useValId} = \"{item.Value}\";";
+
+        // The attribute value is created via expression.
+        string funcName = item.DynamicFunction;
+        valLine = $"var {useValId} = {funcName}();";
+
+        cf.WriteLine(valLine);
+        cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {useValId});");
+      }
+
+    }
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -215,7 +322,7 @@ internal class TemplateEmitter
       else
       {
         cf.NextLine(2);
-        string assignTo = GetAssignSyntax(item);
+        string assignTo = GetTypescriptAssignSyntax(item);
         cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
 
         // Attributes.
@@ -229,8 +336,6 @@ internal class TemplateEmitter
       }
 
     }
-
-    // throw new NotImplementedException();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

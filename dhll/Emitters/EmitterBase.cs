@@ -48,7 +48,7 @@ internal abstract class EmitterBase
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  protected TemplateDynamics? GetTemplateDynamics(TypeDef td)
+  protected virtual TemplateDynamics? GetTemplateDynamics(TypeDef td)
   {
     Context.TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
     return template;
@@ -110,7 +110,7 @@ internal abstract class EmitterBase
   /// Scans all declarations in the given typedef.  In particular, we want to generate the correct code for
   /// getters/setters + setup the correct backing members, etc.
   /// </summary>
-  protected ProcessDeclareResults PreProcessDeclarations(TypeDef td)
+  protected virtual ProcessDeclareResults PreProcessDeclarations(TypeDef td)
   {
     var declares = new List<Declare>();
     var getterSetters = new List<GetterSetter>();

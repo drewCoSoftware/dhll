@@ -86,7 +86,7 @@ namespace dhll.Emitters
         if (dynamics != null)
         {
           dynamics.EmitDOMDeclarations(CF);
-          templateEmitter.EmitCreateDOMFunction(CF);
+          templateEmitter.EmitCreateDOMFunctionForTypescript(CF);
 
           templateEmitter.EmitBindFunction(CF, dynamics);
 

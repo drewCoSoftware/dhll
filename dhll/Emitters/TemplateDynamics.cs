@@ -27,11 +27,13 @@ internal class TemplateDynamics
   /// This is used so that we can keep persistent references to nodes that have dynamic content.
   /// </summary>
   private HashSet<string> ClassLevelNodeIdentifiers = null!;
+  private CompilerContext Context = null!;
 
 
   // --------------------------------------------------------------------------------------------------------------------------
   public TemplateDynamics(TemplateDefinition def_)
   {
+
     Def = def_;
     NamingContext = new NamingContext();
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
