@@ -37,23 +37,25 @@ public partial class templateParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		SEA_WS=1, TAG_OPEN=2, HTML_TEXT=3, TAG_CLOSE=4, TAG_SLASH_CLOSE=5, TAG_SLASH=6, 
-		TAG_EQUALS=7, TAG_NAME=8, TAG_WHITESPACE=9, ATTVALUE_VALUE=10, ATTRIBUTE=11;
+		HTML_COMMENT=1, SEA_WS=2, TAG_OPEN=3, HTML_TEXT=4, TAG_CLOSE=5, TAG_SLASH_CLOSE=6, 
+		TAG_SLASH=7, TAG_EQUALS=8, TAG_NAME=9, TAG_WHITESPACE=10, ATTVALUE_VALUE=11, 
+		ATTRIBUTE=12;
 	public const int
 		RULE_templates = 0, RULE_htmlElements = 1, RULE_htmlMisc = 2, RULE_entityName = 3, 
-		RULE_htmlElement = 4, RULE_htmlContent = 5, RULE_htmlAttribute = 6, RULE_htmlChardata = 7;
+		RULE_htmlElement = 4, RULE_htmlContent = 5, RULE_htmlAttribute = 6, RULE_htmlChardata = 7, 
+		RULE_htmlComment = 8;
 	public static readonly string[] ruleNames = {
 		"templates", "htmlElements", "htmlMisc", "entityName", "htmlElement", 
-		"htmlContent", "htmlAttribute", "htmlChardata"
+		"htmlContent", "htmlAttribute", "htmlChardata", "htmlComment"
 	};
 
 	private static readonly string[] _LiteralNames = {
-		null, null, "'<'", null, "'>'", "'/>'", "'/'", "'='"
+		null, null, null, "'<'", null, "'>'", "'/>'", "'/'", "'='"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, "SEA_WS", "TAG_OPEN", "HTML_TEXT", "TAG_CLOSE", "TAG_SLASH_CLOSE", 
-		"TAG_SLASH", "TAG_EQUALS", "TAG_NAME", "TAG_WHITESPACE", "ATTVALUE_VALUE", 
-		"ATTRIBUTE"
+		null, "HTML_COMMENT", "SEA_WS", "TAG_OPEN", "HTML_TEXT", "TAG_CLOSE", 
+		"TAG_SLASH_CLOSE", "TAG_SLASH", "TAG_EQUALS", "TAG_NAME", "TAG_WHITESPACE", 
+		"ATTVALUE_VALUE", "ATTRIBUTE"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -126,21 +128,21 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 19;
+			State = 21;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==SEA_WS || _la==TAG_OPEN) {
 				{
 				{
-				State = 16;
+				State = 18;
 				htmlElements();
 				}
 				}
-				State = 21;
+				State = 23;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 22;
+			State = 24;
 			Match(Eof);
 			}
 		}
@@ -197,35 +199,35 @@ public partial class templateParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 27;
+			State = 29;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==SEA_WS) {
 				{
 				{
-				State = 24;
+				State = 26;
 				htmlMisc();
 				}
 				}
-				State = 29;
+				State = 31;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 30;
+			State = 32;
 			htmlElement();
-			State = 34;
+			State = 36;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,2,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
-					State = 31;
+					State = 33;
 					htmlMisc();
 					}
 					} 
 				}
-				State = 36;
+				State = 38;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,2,Context);
 			}
@@ -274,7 +276,7 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 37;
+			State = 39;
 			Match(SEA_WS);
 			}
 		}
@@ -321,7 +323,7 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 39;
+			State = 41;
 			Match(TAG_NAME);
 			}
 		}
@@ -391,45 +393,45 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 41;
+			State = 43;
 			Match(TAG_OPEN);
-			State = 42;
+			State = 44;
 			entityName();
-			State = 46;
+			State = 48;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			while (_la==TAG_NAME) {
 				{
 				{
-				State = 43;
+				State = 45;
 				htmlAttribute();
 				}
 				}
-				State = 48;
+				State = 50;
 				ErrorHandler.Sync(this);
 				_la = TokenStream.LA(1);
 			}
-			State = 59;
+			State = 61;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case TAG_CLOSE:
 				{
-				State = 49;
+				State = 51;
 				Match(TAG_CLOSE);
-				State = 56;
+				State = 58;
 				ErrorHandler.Sync(this);
 				switch ( Interpreter.AdaptivePredict(TokenStream,4,Context) ) {
 				case 1:
 					{
-					State = 50;
-					htmlContent();
-					State = 51;
-					Match(TAG_OPEN);
 					State = 52;
-					Match(TAG_SLASH);
+					htmlContent();
 					State = 53;
-					Match(TAG_NAME);
+					Match(TAG_OPEN);
 					State = 54;
+					Match(TAG_SLASH);
+					State = 55;
+					Match(TAG_NAME);
+					State = 56;
 					Match(TAG_CLOSE);
 					}
 					break;
@@ -438,7 +440,7 @@ public partial class templateParser : Parser {
 				break;
 			case TAG_SLASH_CLOSE:
 				{
-				State = 58;
+				State = 60;
 				Match(TAG_SLASH_CLOSE);
 				}
 				break;
@@ -503,17 +505,17 @@ public partial class templateParser : Parser {
 			int _alt;
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 62;
+			State = 64;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==SEA_WS || _la==HTML_TEXT) {
 				{
-				State = 61;
+				State = 63;
 				htmlChardata();
 				}
 			}
 
-			State = 70;
+			State = 72;
 			ErrorHandler.Sync(this);
 			_alt = Interpreter.AdaptivePredict(TokenStream,8,Context);
 			while ( _alt!=2 && _alt!=global::Antlr4.Runtime.Atn.ATN.INVALID_ALT_NUMBER ) {
@@ -521,15 +523,15 @@ public partial class templateParser : Parser {
 					{
 					{
 					{
-					State = 64;
+					State = 66;
 					htmlElement();
 					}
-					State = 66;
+					State = 68;
 					ErrorHandler.Sync(this);
 					_la = TokenStream.LA(1);
 					if (_la==SEA_WS || _la==HTML_TEXT) {
 						{
-						State = 65;
+						State = 67;
 						htmlChardata();
 						}
 					}
@@ -537,7 +539,7 @@ public partial class templateParser : Parser {
 					}
 					} 
 				}
-				State = 72;
+				State = 74;
 				ErrorHandler.Sync(this);
 				_alt = Interpreter.AdaptivePredict(TokenStream,8,Context);
 			}
@@ -591,16 +593,16 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 73;
+			State = 75;
 			entityName();
-			State = 76;
+			State = 78;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
 			if (_la==TAG_EQUALS) {
 				{
-				State = 74;
+				State = 76;
 				Match(TAG_EQUALS);
-				State = 75;
+				State = 77;
 				Match(ATTVALUE_VALUE);
 				}
 			}
@@ -652,7 +654,7 @@ public partial class templateParser : Parser {
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 78;
+			State = 80;
 			_la = TokenStream.LA(1);
 			if ( !(_la==SEA_WS || _la==HTML_TEXT) ) {
 			ErrorHandler.RecoverInline(this);
@@ -674,30 +676,78 @@ public partial class templateParser : Parser {
 		return _localctx;
 	}
 
+	public partial class HtmlCommentContext : ParserRuleContext {
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode HTML_COMMENT() { return GetToken(templateParser.HTML_COMMENT, 0); }
+		public HtmlCommentContext(ParserRuleContext parent, int invokingState)
+			: base(parent, invokingState)
+		{
+		}
+		public override int RuleIndex { get { return RULE_htmlComment; } }
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void EnterRule(IParseTreeListener listener) {
+			ItemplateParserListener typedListener = listener as ItemplateParserListener;
+			if (typedListener != null) typedListener.EnterHtmlComment(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override void ExitRule(IParseTreeListener listener) {
+			ItemplateParserListener typedListener = listener as ItemplateParserListener;
+			if (typedListener != null) typedListener.ExitHtmlComment(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ItemplateParserVisitor<TResult> typedVisitor = visitor as ItemplateParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitHtmlComment(this);
+			else return visitor.VisitChildren(this);
+		}
+	}
+
+	[RuleVersion(0)]
+	public HtmlCommentContext htmlComment() {
+		HtmlCommentContext _localctx = new HtmlCommentContext(Context, State);
+		EnterRule(_localctx, 16, RULE_htmlComment);
+		try {
+			EnterOuterAlt(_localctx, 1);
+			{
+			State = 82;
+			Match(HTML_COMMENT);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			ErrorHandler.ReportError(this, re);
+			ErrorHandler.Recover(this, re);
+		}
+		finally {
+			ExitRule();
+		}
+		return _localctx;
+	}
+
 	private static int[] _serializedATN = {
-		4,1,11,81,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
-		7,7,1,0,5,0,18,8,0,10,0,12,0,21,9,0,1,0,1,0,1,1,5,1,26,8,1,10,1,12,1,29,
-		9,1,1,1,1,1,5,1,33,8,1,10,1,12,1,36,9,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,5,
-		4,45,8,4,10,4,12,4,48,9,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,57,8,4,1,4,3,
-		4,60,8,4,1,5,3,5,63,8,5,1,5,1,5,3,5,67,8,5,5,5,69,8,5,10,5,12,5,72,9,5,
-		1,6,1,6,1,6,3,6,77,8,6,1,7,1,7,1,7,0,0,8,0,2,4,6,8,10,12,14,0,1,2,0,1,
-		1,3,3,82,0,19,1,0,0,0,2,27,1,0,0,0,4,37,1,0,0,0,6,39,1,0,0,0,8,41,1,0,
-		0,0,10,62,1,0,0,0,12,73,1,0,0,0,14,78,1,0,0,0,16,18,3,2,1,0,17,16,1,0,
-		0,0,18,21,1,0,0,0,19,17,1,0,0,0,19,20,1,0,0,0,20,22,1,0,0,0,21,19,1,0,
-		0,0,22,23,5,0,0,1,23,1,1,0,0,0,24,26,3,4,2,0,25,24,1,0,0,0,26,29,1,0,0,
-		0,27,25,1,0,0,0,27,28,1,0,0,0,28,30,1,0,0,0,29,27,1,0,0,0,30,34,3,8,4,
-		0,31,33,3,4,2,0,32,31,1,0,0,0,33,36,1,0,0,0,34,32,1,0,0,0,34,35,1,0,0,
-		0,35,3,1,0,0,0,36,34,1,0,0,0,37,38,5,1,0,0,38,5,1,0,0,0,39,40,5,8,0,0,
-		40,7,1,0,0,0,41,42,5,2,0,0,42,46,3,6,3,0,43,45,3,12,6,0,44,43,1,0,0,0,
-		45,48,1,0,0,0,46,44,1,0,0,0,46,47,1,0,0,0,47,59,1,0,0,0,48,46,1,0,0,0,
-		49,56,5,4,0,0,50,51,3,10,5,0,51,52,5,2,0,0,52,53,5,6,0,0,53,54,5,8,0,0,
-		54,55,5,4,0,0,55,57,1,0,0,0,56,50,1,0,0,0,56,57,1,0,0,0,57,60,1,0,0,0,
-		58,60,5,5,0,0,59,49,1,0,0,0,59,58,1,0,0,0,60,9,1,0,0,0,61,63,3,14,7,0,
-		62,61,1,0,0,0,62,63,1,0,0,0,63,70,1,0,0,0,64,66,3,8,4,0,65,67,3,14,7,0,
-		66,65,1,0,0,0,66,67,1,0,0,0,67,69,1,0,0,0,68,64,1,0,0,0,69,72,1,0,0,0,
-		70,68,1,0,0,0,70,71,1,0,0,0,71,11,1,0,0,0,72,70,1,0,0,0,73,76,3,6,3,0,
-		74,75,5,7,0,0,75,77,5,10,0,0,76,74,1,0,0,0,76,77,1,0,0,0,77,13,1,0,0,0,
-		78,79,7,0,0,0,79,15,1,0,0,0,10,19,27,34,46,56,59,62,66,70,76
+		4,1,12,85,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+		7,7,2,8,7,8,1,0,5,0,20,8,0,10,0,12,0,23,9,0,1,0,1,0,1,1,5,1,28,8,1,10,
+		1,12,1,31,9,1,1,1,1,1,5,1,35,8,1,10,1,12,1,38,9,1,1,2,1,2,1,3,1,3,1,4,
+		1,4,1,4,5,4,47,8,4,10,4,12,4,50,9,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,59,
+		8,4,1,4,3,4,62,8,4,1,5,3,5,65,8,5,1,5,1,5,3,5,69,8,5,5,5,71,8,5,10,5,12,
+		5,74,9,5,1,6,1,6,1,6,3,6,79,8,6,1,7,1,7,1,8,1,8,1,8,0,0,9,0,2,4,6,8,10,
+		12,14,16,0,1,2,0,2,2,4,4,85,0,21,1,0,0,0,2,29,1,0,0,0,4,39,1,0,0,0,6,41,
+		1,0,0,0,8,43,1,0,0,0,10,64,1,0,0,0,12,75,1,0,0,0,14,80,1,0,0,0,16,82,1,
+		0,0,0,18,20,3,2,1,0,19,18,1,0,0,0,20,23,1,0,0,0,21,19,1,0,0,0,21,22,1,
+		0,0,0,22,24,1,0,0,0,23,21,1,0,0,0,24,25,5,0,0,1,25,1,1,0,0,0,26,28,3,4,
+		2,0,27,26,1,0,0,0,28,31,1,0,0,0,29,27,1,0,0,0,29,30,1,0,0,0,30,32,1,0,
+		0,0,31,29,1,0,0,0,32,36,3,8,4,0,33,35,3,4,2,0,34,33,1,0,0,0,35,38,1,0,
+		0,0,36,34,1,0,0,0,36,37,1,0,0,0,37,3,1,0,0,0,38,36,1,0,0,0,39,40,5,2,0,
+		0,40,5,1,0,0,0,41,42,5,9,0,0,42,7,1,0,0,0,43,44,5,3,0,0,44,48,3,6,3,0,
+		45,47,3,12,6,0,46,45,1,0,0,0,47,50,1,0,0,0,48,46,1,0,0,0,48,49,1,0,0,0,
+		49,61,1,0,0,0,50,48,1,0,0,0,51,58,5,5,0,0,52,53,3,10,5,0,53,54,5,3,0,0,
+		54,55,5,7,0,0,55,56,5,9,0,0,56,57,5,5,0,0,57,59,1,0,0,0,58,52,1,0,0,0,
+		58,59,1,0,0,0,59,62,1,0,0,0,60,62,5,6,0,0,61,51,1,0,0,0,61,60,1,0,0,0,
+		62,9,1,0,0,0,63,65,3,14,7,0,64,63,1,0,0,0,64,65,1,0,0,0,65,72,1,0,0,0,
+		66,68,3,8,4,0,67,69,3,14,7,0,68,67,1,0,0,0,68,69,1,0,0,0,69,71,1,0,0,0,
+		70,66,1,0,0,0,71,74,1,0,0,0,72,70,1,0,0,0,72,73,1,0,0,0,73,11,1,0,0,0,
+		74,72,1,0,0,0,75,78,3,6,3,0,76,77,5,8,0,0,77,79,5,11,0,0,78,76,1,0,0,0,
+		78,79,1,0,0,0,79,13,1,0,0,0,80,81,7,0,0,0,81,15,1,0,0,0,82,83,5,1,0,0,
+		83,17,1,0,0,0,10,21,29,36,48,58,61,64,68,72,78
 	};
 
 	public static readonly ATN _ATN =

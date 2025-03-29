@@ -4,6 +4,7 @@ lexer grammar templateLexer;
 
 
 // template: tag* EOF;
+HTML_COMMENT: '<!--' .*? '-->';
 
 
 // tag: TAG_OPEN TAG_NAME TAG_CLOSE;

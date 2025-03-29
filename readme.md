@@ -24,6 +24,9 @@ Use this CLI syntax for parser output:
 cd Grammars
 antlr4 -package dhll.v1 -visitor -Dlanguage=CSharp -o ./v1/ParserLexer ./v1/dhll.g4 
 
+// For the template parser....
+antlr4 -package dhll.v1 -visitor -Dlanguage=CSharp -o ./v1/ParserLexer ./v1/templateLexer.g4 ./v1/templateParser.g4
+
 // NOTE: This call will output the files to different locations if you are on MacOS / Windows, which is
 // very on-brand for a Java program.  YAY!
 ```

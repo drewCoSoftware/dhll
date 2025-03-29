@@ -132,6 +132,18 @@ public partial class templateParserBaseListener : ItemplateParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitHtmlChardata([NotNull] templateParser.HtmlChardataContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterHtmlComment([NotNull] templateParser.HtmlCommentContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitHtmlComment([NotNull] templateParser.HtmlCommentContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

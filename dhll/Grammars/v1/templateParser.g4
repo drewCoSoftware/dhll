@@ -4,6 +4,7 @@ options {
     tokenVocab = templateLexer;
 }
 
+
 templates: htmlElements* EOF;
 
 htmlElements
@@ -32,3 +33,9 @@ htmlChardata
     : HTML_TEXT
     | SEA_WS
     ;
+
+
+htmlComment
+    : HTML_COMMENT
+    ;
+

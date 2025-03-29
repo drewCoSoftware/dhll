@@ -12,6 +12,12 @@ using System.Text.RegularExpressions;
 
 namespace dhll.Grammars.v1;
 
+// ==============================================================================================================================
+public class TemplateParseException : Exception
+{
+  public TemplateParseException(string message) : base(message) { }
+  public TemplateParseException(string message, Exception innerException) : base(message, innerException) { }
+}
 
 // ==============================================================================================================================
 public class FormatPart
@@ -165,7 +171,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
     if (childElemCount != 1)
     {
-      throw new Exception("Every template MUST have a single child element!");
+      throw new TemplateParseException("Every template MUST have a single child element!");
     }
     var rootElem = content.htmlElement()[0];
 

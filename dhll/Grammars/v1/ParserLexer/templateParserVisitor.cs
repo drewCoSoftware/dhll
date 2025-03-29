@@ -80,5 +80,11 @@ public interface ItemplateParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitHtmlChardata([NotNull] templateParser.HtmlChardataContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitHtmlComment([NotNull] templateParser.HtmlCommentContext context);
 }
 } // namespace dhll.v1

@@ -111,5 +111,15 @@ public interface ItemplateParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitHtmlChardata([NotNull] templateParser.HtmlChardataContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterHtmlComment([NotNull] templateParser.HtmlCommentContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitHtmlComment([NotNull] templateParser.HtmlCommentContext context);
 }
 } // namespace dhll.v1

@@ -14,18 +14,21 @@ namespace dhllTesters
   public class TemplateParserTests : TestBase
   {
 
-/// <summary>
-/// This test case shows that templates with more than one 'root' will not be parsed!
-/// </summary>
+    // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// This test case shows that templates with more than one 'root' will not be parsed!
+    /// </summary>
     [Test]
-  public void TemplateCanOnlyHaveOneRoot()
-  {
+    public void TemplateCanOnlyHaveOneRoot()
+    {
       var compiler = new dhllCompiler(null);
       string inputPath = GetTestInputPath("MultiRootTemplate.dhlt");
 
-      TemplateDefinition[] defs = compiler.ParseTemplates(inputPath);
-
-  }
+      Assert.Throws<TemplateParseException>(() =>
+      {
+        TemplateDefinition[] defs = compiler.ParseTemplates(inputPath);
+      }, $"A {nameof(TemplateParseException)} should have been thrown!");
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <summary>
