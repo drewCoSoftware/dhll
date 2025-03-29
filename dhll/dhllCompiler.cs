@@ -4,6 +4,7 @@ using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using static dhll.v1.dhllParser;
 using static dhll.v1.templateParser;
@@ -51,9 +52,15 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileFileOptions options_, ILogger logger_)
+  public dhllCompiler(CompileFileOptions options_, ILogger? logger_ = null)
   {
     FileOptions = options_;
+
+    if (logger_ == null)
+    {
+      Debug.WriteLine("No logger was provided, using NullLogger as a default!");
+      logger_ = new NullLogger();
+    }
     InitContext(logger_);
   }
 
@@ -480,7 +487,8 @@ public class dhllCompiler
     foreach (var key in Options.OutputTargets.Keys)
     {
       var t = Options.OutputTargets[key];
-      if (key != t.Name) {
+      if (key != t.Name)
+      {
         throw new InvalidOperationException($"key/name mismatch in output targets: {key}/{t.Name}!  Values must be the same!");
       }
 
