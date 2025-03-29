@@ -1,5 +1,6 @@
 ﻿using dhll;
 using dhll.Grammars.v1;
+using drewCo.Tools.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace dhllTesters
     [Test]
     public void CanParseBasicTemplate()
     {
-      var compiler = new dhllCompiler((CompileFileOptions)null);
+      var compiler = new dhllCompiler((CompileFileOptions)null, new NullLogger());
 
       string inputPath = GetTestInputPath("Template1.dhlt");
 

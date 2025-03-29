@@ -39,11 +39,11 @@ public class dhllCompiler
 
   private CompilerContext Context = null!;
 
-  private Logger Logger { get { return Context.Logger; } }
+  private ILogger Logger { get { return Context.Logger; } }
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileProjectOptions ops_, Logger logger_)
+  public dhllCompiler(CompileProjectOptions ops_, ILogger logger_)
   {
     ProjectOptions = ops_;
 
@@ -51,14 +51,14 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileFileOptions options_, Logger logger_)
+  public dhllCompiler(CompileFileOptions options_, ILogger logger_)
   {
     FileOptions = options_;
     InitContext(logger_);
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void InitContext(Logger logger_)
+  private void InitContext(ILogger logger_)
   {
     Context = new CompilerContext()
     {
@@ -505,7 +505,7 @@ public class dhllCompiler
 // ==============================================================================================================================
 internal class CompilerContext
 {
-  public Logger Logger { get; set; } = default!;
+  public ILogger Logger { get; set; } = default!;
   public TemplateIndex TemplateIndex { get; set; } = default!;
   public TypeIndex TypeIndex { get; set; } = default!;
 }

@@ -8,7 +8,7 @@ namespace dhll.Emitters;
 // ==============================================================================================================================
 internal abstract class EmitterBase
 {
-  protected Logger Logger { get { return Context.Logger; } }
+  protected ILogger Logger { get { return Context.Logger; } }
   protected CompilerContext Context { get; set; } = default!;
 
   protected Dictionary<string, string> TypeNameTable = null!;
