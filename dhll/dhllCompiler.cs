@@ -42,9 +42,13 @@ public class dhllCompiler
 
   private ILogger Logger { get { return Context.Logger; } }
 
+  // --------------------------------------------------------------------------------------------------------------------------
+  // NOTE: This may need to be internal only?
+  public dhllCompiler()
+  {  }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileProjectOptions ops_, ILogger logger_)
+  public dhllCompiler(CompileProjectOptions ops_, ILogger? logger_ = null)
   {
     ProjectOptions = ops_;
 
@@ -56,17 +60,18 @@ public class dhllCompiler
   {
     FileOptions = options_;
 
+    InitContext(logger_);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void InitContext(ILogger? logger_)
+  {
     if (logger_ == null)
     {
       Debug.WriteLine("No logger was provided, using NullLogger as a default!");
       logger_ = new NullLogger();
     }
-    InitContext(logger_);
-  }
 
-  // --------------------------------------------------------------------------------------------------------------------------
-  private void InitContext(ILogger logger_)
-  {
     Context = new CompilerContext()
     {
       Logger = logger_,
@@ -110,14 +115,14 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private string ResolveProjectFilePath()
   {
-    string[] files = Directory.GetFiles(FileTools.GetAppDir(), "*.dhlt");
+    string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.dhlproj");
     if (files.Length == 0)
     {
       throw new InvalidOperationException("Could not find a dhll project file in this directory!  Please specify one with the --file option!");
     }
     else if (files.Length > 1)
     {
-      throw new InvalidOperationException("There is more than one dhll project file (.dhlt) in this directory!  Please specify one with the --file option!");
+      throw new InvalidOperationException("There is more than one dhll project file (.dhlproj) in this directory!  Please specify one with the --file option!");
     }
     return files[0];
   }

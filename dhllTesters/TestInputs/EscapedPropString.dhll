@@ -1,0 +1,4 @@
+
+typedef MyType { 
+  prop string Name = "TheName"
+} 

@@ -344,7 +344,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   // --------------------------------------------------------------------------------------------------------------------------
   private List<Node> ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
-    List<Node> res = null!;
+    List<Node> res = new List<Node>();
 
     // TODO: Implement me!
     var elems = elem.children;
@@ -415,7 +415,11 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   /// </summary>
   public static bool HasPropString(string input)
   {
-    bool res = Regex.IsMatch(input, "\\{.*\\}");
+    // input = input.Replace("\\{", "_").Replace("\\}", "_"))
+    const string PAT = @"(?<!\\)\{(.*?)(?<!\\)\}";
+    //const string PAT = @"\{.*\}";
+
+    bool res = Regex.IsMatch(input, PAT);
     return res;
   }
 

@@ -29,12 +29,12 @@ public class dhllProjectDefinition
   /// <summary>
   /// We need a way to target multiple output targets...
   /// </summary>
-  public Dictionary<string, OutputTarget> OutputTargets { get; set; } = null!;
+  public Dictionary<string, OutputTarget> OutputTargets { get; set; } = new Dictionary<string, OutputTarget>();
 
 
   // --------------------------------------------------------------------------------------------------------------------------
   [JsonConstructor]
-  internal dhllProjectDefinition() { }
+  public dhllProjectDefinition() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
   public dhllProjectDefinition(string path_)

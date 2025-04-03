@@ -1,0 +1,6 @@
+﻿<template for="MyType">
+  <div class="\{the-value}\">
+    <div>\{MyText\}</div>
+    <div>{Name}</div>
+  </div>
+</template>

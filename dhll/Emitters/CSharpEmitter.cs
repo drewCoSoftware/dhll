@@ -42,7 +42,7 @@ namespace dhll.Emitters
       // If the language supports it, we can even use partials (one for def, one for templates), so
       // n-files per type.
       string fName = Path.GetFileNameWithoutExtension(file.Path);
-      string outputPath = FileTools.GetRootedPath(Path.Combine(outputDir, fName + ".cs"));
+      string outputPath = Path.Combine(Directory.GetCurrentDirectory(), outputDir, fName + ".cs");
 
       WriteCodeGenHeader(CF);
 

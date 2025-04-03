@@ -6,7 +6,7 @@ namespace dhllTesters
   // ==============================================================================================================================
   public class TestBase
   {
-    protected string TestDir = null!;
+    public string TestDir { get; protected set; } = null!;
 
     // --------------------------------------------------------------------------------------------------------------------------
     public TestBase()
@@ -25,7 +25,7 @@ namespace dhllTesters
     // --------------------------------------------------------------------------------------------------------------------------
     protected string LoadTestInput(string name)
     {
-      string inputPath = GetTestInputPath(name);  
+      string inputPath = GetTestInputPath(name);
       if (!File.Exists(inputPath))
       {
         throw new FileNotFoundException($"The input file at path: {inputPath} does not exist!");

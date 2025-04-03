@@ -7,6 +7,10 @@
     "dhlt": {
       "commandName": "Project",
       "commandLineArgs": "compile-project --file \"..\\..\\..\\..\\TestInputs\\TestProject.dhlproj\""
+    },
+    "debug": {
+      "commandName": "Project",
+      "commandLineArgs": "compile-project --file C:\\code\\repos\\StatusMonitor\\StatusMonitorServer\\dhll\\build.dhlproj"
     }
   }
 }
