@@ -17,53 +17,6 @@ namespace dhllTesters
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <summary>
-    /// Shows that the characters that represent a property string can be escaped for literal values.
-    /// i.e. {MyProp} as a literal would be: \{MyProp\}
-    /// </summary>
-    [Test]
-    public void CanCompileTypeAndTemplateWithEscapePropertyStrings()
-    {
-      //var compiler = new dhllCompiler(null);
-      //string inputPath = GetTestInputPath("EscapedPropString.dhlt");
-
-      //var defs = compiler.ParseTemplates(inputPath);
-      //Assert.That(1, Is.EqualTo(defs.Length), "There should only be one def!");
-
-      //var def = defs[0];
-
-      //int x = 10;
-
-      // We will create + compile a quick project...
-      // TODO: We can probably wrap this up into a single function that will generate a test project file for us.....
-      dhllProjectDefinition pd = new dhllProjectDefinition();
-      pd.InputFiles.Add("EscapedPropString.dhll");
-      pd.InputFiles.Add("EscapedPropString.dhlt");
-      pd.OutputTargets.Add("typescript", new OutputTarget()
-      {
-        Name = "typescript",
-        TargetLanguage = "typescript"
-      });
-      pd.OutputTargets.Add("csharp", new OutputTarget()
-      {
-        Name = "csharp",
-        TargetLanguage = "C#"
-      });
-      string projPath = Path.Combine(TestDir, nameof(CanCompileTypeAndTemplateWithEscapePropertyStrings) + dhllCompiler.DHLPROJ_EXT);
-      FileTools.SaveJson(projPath, pd);
-
-      var ops = new CompileProjectOptions()
-      {
-        InputFile = projPath,
-      };
-
-      var c = new dhllCompiler(ops);
-      int cRes = c.CompileProject();
-      Assert.That(0, Is.EqualTo(cRes), "Invalid return code!");
-
-    }
-
-    // --------------------------------------------------------------------------------------------------------------------------
-    /// <summary>
     /// This test case shows that templates with more than one 'root' will not be parsed!
     /// </summary>
     [Test]

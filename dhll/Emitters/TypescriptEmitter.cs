@@ -16,7 +16,6 @@ namespace dhll.Emitters
   // ==============================================================================================================================
   internal class TypescriptEmitter : EmitterBase
   {
-    private CodeFile CF = new CodeFile();
 
     public override string TargetLanguage => "typescript";
 
@@ -40,6 +39,9 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     public override EmitterResults Emit(string outputDir, dhllFile file)
     {
+      var cf = new CodeFile();
+
+
       var res = new EmitterResults();
       var outputFiles = new List<string>();
 
@@ -52,7 +54,7 @@ namespace dhll.Emitters
       string fName = Path.GetFileNameWithoutExtension(file.Path);
       string outputPath = FileTools.GetRootedPath(Path.Combine(outputDir, fName + ".ts"));
 
-      WriteCodeGenHeader(CF);
+      WriteCodeGenHeader(cf);
 
       foreach (var td in file.TypeDefs)
       {
@@ -72,38 +74,38 @@ namespace dhll.Emitters
 
         var preProcResults = PreProcessDeclarations(td);
 
-        CF.Write($"class {td.Identifier} ");
-        CF.OpenBlock();
-        CF.NextLine();
+        cf.Write($"class {td.Identifier} ");
+        cf.OpenBlock();
+        cf.NextLine();
 
         foreach (var item in preProcResults.Declares)
         {
-          EmitDeclaration(item, CF);
+          EmitDeclaration(item, cf);
         }
-        CF.NextLine();
+        cf.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
         if (dynamics != null)
         {
-          dynamics.EmitDOMDeclarations(CF);
-          templateEmitter.EmitCreateDOMFunctionForTypescript(CF);
+          dynamics.EmitDOMDeclarations(cf);
+          templateEmitter.EmitCreateDOMFunctionForTypescript(cf);
 
-          templateEmitter.EmitBindFunction(CF, dynamics);
+          templateEmitter.EmitBindFunction(cf, dynamics);
 
-          dynamics.EmitDynamicFunctionDefs(CF, this);
+          dynamics.EmitDynamicFunctionDefs(cf, this);
         }
 
         // Now emit all of the getters / setters.
         foreach (var item in preProcResults.GetterSetters)
         {
-          EmitGetterSetter(item, dynamics, CF);
+          EmitGetterSetter(item, dynamics, cf);
         }
 
-        CF.CloseBlock();
-        CF.NextLine();
+        cf.CloseBlock();
+        cf.NextLine();
       }
 
-      CF.Save(outputPath);
+      cf.Save(outputPath);
 
       outputFiles.Add(outputPath);
       res.OutputFiles = outputFiles.ToArray();

@@ -8,7 +8,7 @@ namespace dhll.Emitters
   // ==============================================================================================================================
   internal class CSharpEmitter : EmitterBase
   {
-    private CodeFile CF = new CodeFile();
+    //private CodeFile CF = new CodeFile();
 
     // --------------------------------------------------------------------------------------------------------------------------
     public CSharpEmitter(CompilerContext context_)
@@ -32,6 +32,7 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     public override EmitterResults Emit(string outputDir, dhllFile file)
     {
+      var cf = new CodeFile();
 
       var res = new EmitterResults();
       var outputFiles = new List<string>();
@@ -44,7 +45,7 @@ namespace dhll.Emitters
       string fName = Path.GetFileNameWithoutExtension(file.Path);
       string outputPath = Path.Combine(Directory.GetCurrentDirectory(), outputDir, fName + ".cs");
 
-      WriteCodeGenHeader(CF);
+      WriteCodeGenHeader(cf);
 
       foreach (var td in file.TypeDefs)
       {
@@ -62,15 +63,15 @@ namespace dhll.Emitters
           Logger.Verbose($"There is no template for type: {td.Identifier}");
         }
 
-        CF.Write($"class {td.Identifier} ");
-        CF.OpenBlock(true);
-        CF.NextLine();
+        cf.Write($"class {td.Identifier} ");
+        cf.OpenBlock(true);
+        cf.NextLine();
 
         foreach (var dec in td.Members)
         {
-          EmitDeclaration(dec, CF);
+          EmitDeclaration(dec, cf);
         }
-        CF.NextLine();
+        cf.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
         if (dynamics != null)
@@ -80,9 +81,9 @@ namespace dhll.Emitters
           // want to bind to WPF or something...)
 
           //dynamics.EmitDOMDeclarations(CF);
-          templateEmitter.EmitCreateDOMFunctionForCSharp(CF);
+          templateEmitter.EmitCreateDOMFunctionForCSharp(cf);
           //templateEmitter.EmitBindFunction(CF, dynamics);
-          dynamics.EmitDynamicFunctionDefs(CF, this);
+          dynamics.EmitDynamicFunctionDefs(cf, this);
         }
 
 
@@ -92,8 +93,8 @@ namespace dhll.Emitters
         //  EmitGetterSetter(item, dynamics, CF);
         //}
 
-        CF.CloseBlock();
-        CF.NextLine();
+        cf.CloseBlock();
+        cf.NextLine();
       }
 
 
@@ -101,7 +102,7 @@ namespace dhll.Emitters
 
 
 
-      CF.Save(outputPath);
+      cf.Save(outputPath);
 
       outputFiles.Add(outputPath);
       res.OutputFiles = outputFiles.ToArray();
