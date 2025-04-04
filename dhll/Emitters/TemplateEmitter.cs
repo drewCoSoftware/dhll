@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime.Tree;
 using dhll.CodeGen;
 using dhll.Grammars.v1;
+using drewCo.Tools;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -25,6 +26,10 @@ internal class TemplateEmitter
   /// Name of the type that this template represents.
   /// </summary>
   private string TypeIdentifier = null!;
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  // This version is mostly meant for test cases....
+  internal TemplateEmitter() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
   public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_)
@@ -178,7 +183,6 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
   {
-    // throw new NotSupportedException("Convert this to look for data-* type values vs. reading them directly.  Otherwise, we will not be able to support more complex expressions in the future!  (NOTE: simple expressions that are property only will still work, so don't destroy the code outright, we can support both in the future..... actually, only support the data-* type expressions to keep it all consistent.  NOTE: Bindiners will destroy the data-* values on bind!  Errors for incompatible data / types!");
 
     // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     // walk the tree looking for dynamics.
@@ -189,18 +193,35 @@ internal class TemplateEmitter
       var targets = dynamics.PropTargets.GetTargetsForProperty(p);
       foreach (var t in targets)
       {
+
+        // HACK: This is typescript specific!  We will have to come up with a better way later.
+        // Best way is to probably ask the current emitter directly.
         string useId = QualifyIdentifier(t.TargetNode.Identifier);
         string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
                                                                       : $".innerText");
 
-        // TODO: We need some way to cast to correct data type here....
+        // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
         string propType = Context.TypeIndex.GetMemberDataType(this.TypeIdentifier, p);
 
+        // Some extra coercion so we produce typesafe code....
+        // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
         // HACK: This is typescript specific!  We will have to come up with a better way later.
-        // Also, we should come up with a generalized function to 'cast' to correct type in all cases.
+        // Best way is to probably ask the current emitter directly.
+        if (t.Attr != null)
+        {
+          if (IsNumberType(propType))
+          {
+            getBy += " ?? \"0\"";
+          }
+          else if (propType == "string")
+          {
+            getBy += " ?? \"\"";
+          }
+        }
+
         if (propType != "string")
         {
-          if (propType == "int" || propType == "float" || propType == "double")
+          if (IsNumberType(propType))
           {
             // Cast to number type!
             getBy = $"Number({getBy})";
@@ -214,6 +235,15 @@ internal class TemplateEmitter
         cf.WriteLine($"this._{p} = {getBy};");
       }
     }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  // HACK: This is typescript specific!  We will have to come up with a better way later.
+  // Best way is to probably ask the current emitter directly.
+  private bool IsNumberType(string propType)
+  {
+    bool res = propType == "int" || propType == "float" || propType == "double";
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -281,17 +311,39 @@ internal class TemplateEmitter
   {
     foreach (var item in toNode.Attributes)
     {
-      string useValue = $"'{item.Value}'";
 
-      if (item.DynamicContent != null)
-      {
-        // The attribute value is created via expression.
-        string funcName = item.DynamicFunction;
-        useValue = $"this.{funcName}()";
-      }
+      string useValue = FormatValue(item);
+
 
       cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute('{item.Name}', {useValue});");
     }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal string FormatValue(Grammars.v1.Attribute item)
+  {
+    string useValue = $"'{item.Value}'";
+
+    if (item.DynamicContent != null)
+    {
+      // The attribute value is created via expression.
+      string funcName = item.DynamicFunction;
+      useValue = $"this.{funcName}()";
+    }
+    else
+    {
+      useValue = UnescapeBackslash(useValue);
+    }
+
+    return useValue;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  // TODO: Share in tools lib!
+  public static string UnescapeBackslash(string useValue)
+  {
+    string res = useValue.Replace("\\", "");
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
