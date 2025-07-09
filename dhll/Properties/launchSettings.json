@@ -10,7 +10,8 @@
     },
     "debug": {
       "commandName": "Project",
-      "commandLineArgs": "compile-project --file C:\\code\\repos\\StatusMonitor\\StatusMonitorServer\\dhll\\build.dhlproj"
+      "commandLineArgs": "compile-project",
+      "workingDirectory": "C:\\code\\repos\\ChatRat\\ChatRatWeb\\src"
     }
   }
 }

@@ -1,4 +1,9 @@
 # Simple script to publish dhll to some local directory.
+# With no options, this will publist to './dist'
+# example:
+# python publish.py  // default directory is ""./dist"
+# python publish.py "c:\apps\dhll"
+
 import subprocess
 import sys
 

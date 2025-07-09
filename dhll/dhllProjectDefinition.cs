@@ -108,7 +108,7 @@ public class dhllProjectDefinition
     string res = target.OutputDir;
     if (res == null)
     {
-      res = FileTools.GetRootedPath(this.OutputDir);
+      res = IOPath.GetFullPath(IOPath.Combine(Directory.GetCurrentDirectory(), this.OutputDir));
       res = IOPath.Combine(res, target.Name);
     }
 

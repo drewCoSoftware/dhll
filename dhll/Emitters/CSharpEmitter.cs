@@ -1,6 +1,7 @@
 ﻿using dhll.CodeGen;
 using dhll.v1;
 using drewCo.Tools;
+using System.Text;
 
 namespace dhll.Emitters
 {
@@ -148,16 +149,19 @@ namespace dhll.Emitters
       string scope = GetScopeWord(dec.Scope);
 
       string getset = string.Empty;
+      string lineEnder = ";";
+
       if (dec.IsProperty)
       {
         getset = " { get; set; }";
+        lineEnder = string.Empty;
       }
       string line = $"{scope}{useType} {dec.Identifier}{getset}";
       if (dec.InitValue != null)
       {
         line += $" = {dec.InitValue}";
       }
-      line += ";";
+      line += lineEnder;
 
       cf.WriteLine(line);
     }

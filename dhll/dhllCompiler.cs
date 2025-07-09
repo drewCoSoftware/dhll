@@ -375,7 +375,7 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private void CompileAndEmitFiles(dhllFile file, EmitterBase emitter, string outputDir)
   {
-    outputDir = FileTools.GetRootedPath(outputDir);
+    outputDir = Path.Combine(Directory.GetCurrentDirectory(), outputDir);
     FileTools.CreateDirectory(outputDir);
 
 
@@ -467,19 +467,19 @@ public class dhllCompiler
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ValidateProjectFile(dhllProjectDefinition Options)
+  private void ValidateProjectFile(dhllProjectDefinition projectDef)
   {
     Logger.Verbose("Validating project...");
 
-    if (Options.OutputTargets == null || Options.OutputTargets.Count == 0)
+    if (projectDef.OutputTargets == null || projectDef.OutputTargets.Count == 0)
     {
       throw new InvalidOperationException($"The project file must contain at least one output target!");
     }
 
-    string baseDir = FileTools.GetRootedPath(Path.GetDirectoryName(Options.Path));
+    string baseDir = FileTools.GetRootedPath(Path.GetDirectoryName(projectDef.Path));
     Logger.Verbose($"The base directory is: {baseDir}");
 
-    foreach (var inputPath in Options.InputFiles)
+    foreach (var inputPath in projectDef.InputFiles)
     {
       string path = FileTools.GetRootedPath(Path.Combine(baseDir, inputPath));
       if (!File.Exists(path))
@@ -489,9 +489,9 @@ public class dhllCompiler
       }
     }
 
-    foreach (var key in Options.OutputTargets.Keys)
+    foreach (var key in projectDef.OutputTargets.Keys)
     {
-      var t = Options.OutputTargets[key];
+      var t = projectDef.OutputTargets[key];
       if (key != t.Name)
       {
         throw new InvalidOperationException($"key/name mismatch in output targets: {key}/{t.Name}!  Values must be the same!");

@@ -190,9 +190,19 @@ internal class TemplateEmitter
     var targetNodes = dynamics.PropTargets.GetAllTargetNodes();
     foreach (var p in propNames)
     {
+      // Get the name plus any options!
+      string[] pParts = p.Split(':');
+      string useName = pParts[0];
+
+      if (pParts.Length > 1) {
+        throw new NotSupportedException("Property options in templates are not yet supported!");
+      }
+
       var targets = dynamics.PropTargets.GetTargetsForProperty(p);
       foreach (var t in targets)
       {
+
+        
 
         // HACK: This is typescript specific!  We will have to come up with a better way later.
         // Best way is to probably ask the current emitter directly.
@@ -201,7 +211,7 @@ internal class TemplateEmitter
                                                                       : $".innerText");
 
         // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
-        string propType = Context.TypeIndex.GetMemberDataType(this.TypeIdentifier, p);
+        string propType = Context.TypeIndex.GetMemberDataType(this.TypeIdentifier, useName);
 
         // Some extra coercion so we produce typesafe code....
         // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
