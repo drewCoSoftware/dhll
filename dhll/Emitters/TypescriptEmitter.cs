@@ -6,8 +6,10 @@ using drewCo.Tools.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace dhll.Emitters
 {
@@ -198,13 +200,38 @@ namespace dhll.Emitters
       var useType = TranslateTypeName(dec.TypeName);
 
       string line = $"{dec.Identifier}: {useType}";
-      if (dec.InitValue != null)
+
+      // OPTION? --> AlwaysInitialize == true
+      string useInitial = dec.InitValue ?? GetInitialFor(useType);
+      if (useInitial != null)
       {
-        line += $" = {dec.InitValue}";
+        line += $" = {useInitial}";
       }
       line += ";";
 
       cf.WriteLine(line);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private string? GetInitialFor(string useType)
+    {
+      // OPTION: Check the option here.....
+      const bool ALWAYS_INITIALIZE = true;
+      if (ALWAYS_INITIALIZE)
+      {
+        switch (useType)
+        {
+          case "string": return "\"\"";
+          case "number": return "0";
+          default:
+            throw new NotSupportedException($"The value: {useType} is not supported!");
+        }
+      }
+      else
+      {
+        throw new NotImplementedException();
+      }
+
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
