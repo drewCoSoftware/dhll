@@ -5,14 +5,17 @@ options {
 }
 
 expression : EXP_OPEN 
-            value 
-            | value OPERATOR value
+            exp
             EXP_CLOSE;
 
-value: str_literal | number;
+exp: MINUS exp              #NEGATE
+    | exp OPERATOR exp      #OPERATED
+    | constant              #CONST
+    ;
+
+constant: str_literal | number;
+
 number: INT | REAL;
 str_literal: DOUBLE_QUOTED_STRING;
 
-
-// TODO: Make a lexer file?
 

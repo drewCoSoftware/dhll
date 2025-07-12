@@ -1,6 +1,8 @@
 lexer grammar t2Lexer;
 
 
+
+
 EXP_OPEN: '{' ->pushMode(EXPRESSION);
 
 // ==== EXPRESSION MODE ===========
@@ -18,6 +20,7 @@ EQUALS: '=';
 
 OPERATOR: PLUS | MULT | DIVIDE;
 PLUS: '+';
+MINUS: '-';
 MULT: '*';
 DIVIDE: '/';
 
@@ -33,4 +36,4 @@ fragment DIGIT: [0-9];
 EXP_WS: [ \r\n\t] -> skip;
 
 // Catch leftover inputs that may not be processed otherwise....
-// ANY: .;
+ANY: .;
