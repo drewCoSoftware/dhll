@@ -15,6 +15,9 @@ CMD = r"C:\users\drew\.pyenv\pyenv-win\shims\antlr4-parse.bat"
 
 
 TESTS = [
+    # ("str_literal", '"string literal"', "String Literal"),        # Seems that I can't do both string literal inside and outside of the expression....
+    ("expression", '{"val" + 123}', "Literal + number"),
+    ("expression", '{"string literal"}', "String Literal Expression"),
     ("expression", "{123}", "Expression: Literal Number"),
     ("expression", "{123+456}", "Expression: Add Numbers"),
     ("expression", "{123 + 456}", "Expression: Add Numbers w/ space"),
