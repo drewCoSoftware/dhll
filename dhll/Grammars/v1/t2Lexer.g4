@@ -1,25 +1,12 @@
-grammar template2;
+lexer grammar t2Lexer;
 
+// ==== EXPRESSION RULES ===========
 
+ EXP_OPEN: '{' ->pushMode(EXPRESSION);
 
+mode EXPRESSION;
 
-
-
-expression
-    : value 
-    | value OPERATOR value
-    ;
-
-value: number;
-number: INT | REAL;
-
-
-
-
-
-
-
-// TODO: Make a lexer file?
+EXP_CLOSE: '}' -> popMode;
 
 ASSIGN: EQUALS;
 EQUALS: '=';
@@ -37,3 +24,6 @@ INT: DIGIT+;
 REAL: DIGIT+? '.' DIGIT+;
 
 fragment DIGIT: [0-9];
+
+// Expressions don't care about whitespace.
+EXP_WS: [ \r\n\t] -> skip;
