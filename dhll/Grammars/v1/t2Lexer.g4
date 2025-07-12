@@ -1,6 +1,7 @@
 lexer grammar t2Lexer;
 
-
+// # TEMP:
+WS: [ \r\n\t] -> skip;
 
 
 EXP_OPEN: '{' ->pushMode(EXPRESSION);
@@ -14,11 +15,14 @@ DOUBLE_QUOTED_STRING: DBL_QUOTE ~["]* DBL_QUOTE;
 fragment DBL_QUOTE: '"';
 
 
+OPEN_PAREN: '(';
+CLOSE_PAREN: ')';
+
 ASSIGN: EQUALS;
 EQUALS: '=';
 
 
-OPERATOR: PLUS | MULT | DIVIDE;
+// OPERATOR: PLUS | MULT | DIVIDE | MINUS;
 PLUS: '+';
 MINUS: '-';
 MULT: '*';

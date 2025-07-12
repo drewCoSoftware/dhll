@@ -4,14 +4,24 @@ options {
     tokenVocab = t2Lexer;
 }
 
+// TEMP:
+file: expression* EOF;
+
+
 expression : EXP_OPEN 
             exp
             EXP_CLOSE;
 
-exp: MINUS exp              #NEGATE
-    | exp OPERATOR exp      #OPERATED
-    | constant              #CONST
+exp: MINUS exp                          #NEGATE
+    | OPEN_PAREN exp CLOSE_PAREN        #PARENTHETICAL
+    | exp PLUS exp                      #ADD
+    | constant                          #CONST
     ;
+
+// addExp: (exp PLUS exp);
+// minusExp: (exp MINUS exp);
+
+// OPERATOR: PLUS 
 
 constant: str_literal | number;
 
