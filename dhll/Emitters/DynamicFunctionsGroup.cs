@@ -31,6 +31,9 @@ internal class DynamicFunctionsGroup
   /// </summary>
   public string AddDynamicFunction(DynamicContent dc)
   {
+    //int x = 123 + 346;
+    //int y = -123 + -456;
+
     lock (DataLock)
     {
       string name = NamingContext.GetUniqueNameFor("getValue");
