@@ -15,25 +15,25 @@ DOUBLE_QUOTED_STRING: DBL_QUOTE ~["]* DBL_QUOTE;
 fragment DBL_QUOTE: '"';
 
 
+// Operators
+PLUS    : '+' ;
+MINUS   : '-' ;
+MULT    : '*' ;
+DIVIDE  : '/' ;
+
+// IDENTIFIER
+ID      : [a-zA-Z_] [a-zA-Z_0-9]* ;
+
+// Delimiters
 OPEN_PAREN: '(';
 CLOSE_PAREN: ')';
-
-ASSIGN: EQUALS;
-EQUALS: '=';
-
-
-//OPERATOR: PLUS | MULT | DIVIDE;
-PLUS: '+';
-MINUS: '-';
-MULT: '*';
-DIVIDE: '/';
+COMMA   : ',' ;
 
 // NOTE: don't try to use this kind of token, a lexer rule is better!
 // NUMBER: INT | REAL;
 // --> do this ... number : INT | REAL;
 INT: DIGIT+;
 REAL: DIGIT+? '.' DIGIT+;
-
 fragment DIGIT: [0-9];
 
 // Expressions don't care about whitespace.
