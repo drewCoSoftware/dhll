@@ -9,7 +9,7 @@ SEA_WS: (' ' | '\t' | '\r'? '\n')+;
 
 TAG_OPEN: '<' ->pushMode(TAG);
 
-HTML_TEXT: ~'<'+;
+HTML_TEXT: ~('<' | '{')+;
 
 EXP_OPEN: '{' -> pushMode(EXPRESSION);
 
@@ -20,7 +20,7 @@ TAG_CLOSE: '>' -> popMode;
 TAG_SLASH_CLOSE: '/>' -> popMode;
 TAG_SLASH: '/';
 
-TAG_EQUALS: '='; // -> pushMode(ATTVAL);
+TAG_EQUALS: '='; 
 
 TAG_NAME: TAG_NameStartChar TAG_NameChar*;
 TAG_WHITESPACE: [ \t\r\n] -> channel(HIDDEN);

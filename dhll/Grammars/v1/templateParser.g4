@@ -22,10 +22,11 @@ htmlElement: TAG_OPEN entityName htmlAttribute* (TAG_CLOSE
 
 
 htmlContent
-    : htmlChardata? ((htmlElement) htmlChardata?)*
+    : htmlChardata? ((htmlElement | expression) htmlChardata?)*
     ;
 
-// NOTE: Because we are in a certain mode 
+expression: EXP_OPEN expr EXP_CLOSE;
+
 htmlAttribute
     : entityName (TAG_EQUALS attrValue)?
     ;
@@ -36,11 +37,11 @@ htmlChardata
     ;
 
 attrValue
-    : TAG_DBL_QUOTE expression TAG_DBL_QUOTE
-    | expression
+    : TAG_DBL_QUOTE tag_expression TAG_DBL_QUOTE
+    | tag_expression
     | TAG_DQ_STR;
 
-expression: TAG_EXP_OPEN expr EXP_CLOSE;
+tag_expression: TAG_EXP_OPEN expr EXP_CLOSE;
 
 expr: additiveExpr;
 

@@ -1,3 +1,9 @@
+<template for="x">
+    <div>{123 + 456}</div>
+    <div>This is some text {withAnExpression} or {more + than + one}<em>OK?</em></div>
+    <div>Can we have inline curly tho: <em>&lbrace;<em> is probably easiest tho!</div>
+</template>
+
 <template for="999" next="{123}" other={999} complex={abc + 123 + call_("abc")}>
     <div>
         {TheContent}
