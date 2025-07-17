@@ -2,8 +2,7 @@
 // I didn't just copy it all verbatim as this is also a learning opportunity for me.
 lexer grammar templateLexer;
 
-// DOUBLE_QUOTED_STRING: DBL_QUOTE ~["]* DBL_QUOTE;
-//fragment DBL_QUOTE: '"';
+// NOTE: Comments will have to be added later.  ANTLR is a pain in the dick sometimes, lol.
 
 SEA_WS: (' ' | '\t' | '\r'? '\n')+;
 
@@ -12,6 +11,7 @@ TAG_OPEN: '<' ->pushMode(TAG);
 HTML_TEXT: ~('<' | '{')+;
 
 EXP_OPEN: '{' -> pushMode(EXPRESSION);
+
 
 // TAG MODE ------------------------------------------------------------------------------------------
 mode TAG;

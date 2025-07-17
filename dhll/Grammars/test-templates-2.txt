@@ -1,0 +1,4 @@
+/* I am a block comment */
+<template for="x">
+    <p>an unclosed element...</p>
+</template>
