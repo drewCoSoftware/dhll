@@ -2,39 +2,10 @@
 // I didn't just copy it all verbatim as this is also a learning opportunity for me.
 lexer grammar templateLexer;
 
+// DOUBLE_QUOTED_STRING: DBL_QUOTE ~["]* DBL_QUOTE;
+//fragment DBL_QUOTE: '"';
 
-// template: tag* EOF;
-HTML_COMMENT: '<!--' .*? '-->';
-
-
-// tag: TAG_OPEN TAG_NAME TAG_CLOSE;
-
-// htmlElement
-//     : TAG_OPEN TAG_NAME htmlAttribute* (
-//         TAG_CLOSE (htmlContent TAG_OPEN TAG_SLASH TAG_NAME TAG_CLOSE)?
-//         | TAG_SLASH_CLOSE
-//     )
-//     ;
-
-// htmlAttribute
-//     : TAG_NAME (TAG_EQUALS ATTVALUE_VALUE)?
-//     ;
-
-
-// htmlContent
-//     : htmlChardata? ((htmlElement  htmlComment) htmlChardata?)*
-//     ;
-
-// htmlComment
-//     : HTML_COMMENT
-//     | HTML_CONDITIONAL_COMMENT
-//     ;
-
-// htmlAttribute
-//     : TAG_NAME (TAG_EQUALS ATTVALUE_VALUE)?
-//     ;
 SEA_WS: (' ' | '\t' | '\r'? '\n')+;
-
 
 TAG_OPEN: '<' ->pushMode(TAG);
 
@@ -47,7 +18,8 @@ TAG_CLOSE: '>' -> popMode;
 TAG_SLASH_CLOSE: '/>' -> popMode;
 TAG_SLASH: '/';
 
-TAG_EQUALS: '=' -> pushMode(ATTVALUE);
+TAG_EQUALS: '='; // -> pushMode(ATTVAL);
+
 TAG_NAME: TAG_NameStartChar TAG_NameChar*;
 TAG_WHITESPACE: [ \t\r\n] -> channel(HIDDEN);
 
@@ -75,27 +47,70 @@ fragment TAG_NameStartChar:
     | '\uFDF0' ..'\uFFFD'
 ;
 
-// ATTRIBUTE VALUES MODE ------------------------------------------------------------------------------------------
-mode ATTVALUE;
+TAG_DBL_QUOTE: '"';
+TAG_DQ_STR: TAG_DBL_QUOTE ~["]* TAG_DBL_QUOTE;
 
-// an attribute value may have spaces b/t the '=' and the value
-ATTVALUE_VALUE: ' '* ATTRIBUTE -> popMode;
 
-ATTRIBUTE: DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING | ATTCHARS | HEXCHARS | DECCHARS | PROP_STRING;
+EXP_OPEN: '{' ->pushMode(EXPRESSION);
 
-fragment ATTCHARS: ATTCHAR+ ' '?;
+// ==== EXPRESSION MODE ===========
+mode EXPRESSION;
 
-fragment ATTCHAR: '-' | '_' | '.' | '/' | '+' | ',' | '?' | '=' | ':' | ';' | '#' | [0-9a-zA-Z];
+EXP_CLOSE: '}' -> popMode;
 
-fragment HEXCHARS: '#' [0-9a-fA-F]+;
+// Operators
+PLUS    : '+' ;
+MINUS   : '-' ;
+MULT    : '*' ;
+DIVIDE  : '/' ;
 
-fragment DECCHARS: [0-9]+ '%'?;
+// IDENTIFIER
+ID      : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
-fragment DOUBLE_QUOTE_STRING: '"' ~[<"]* '"';
+// Delimiters
+OPEN_PAREN: '(';
+CLOSE_PAREN: ')';
+COMMA   : ',' ;
 
-fragment SINGLE_QUOTE_STRING: '\'' ~[<']* '\'';
+// NOTE: don't try to use this kind of token, a lexer rule is better!
+// NUMBER: INT | REAL;
+// --> do this ... number : INT | REAL;
+INT: DIGIT+;
+REAL: DIGIT+? '.' DIGIT+;
+// fragment DIGIT: [0-9];
 
-fragment PROP_STRING: '{' ~[<']* '}';
+EXP_DBL_QUOTE: '"';
+EXP_DQ_STR: TAG_DBL_QUOTE ~["]* TAG_DBL_QUOTE;
+
+// Expressions don't care about whitespace.
+EXP_WS: [ \r\n\t] -> skip;
+
+// Catch leftover inputs that may not be processed otherwise....
+ANY: .;
+
+
+// // ATTRIBUTE VALUES MODE ------------------------------------------------------------------------------------------
+// mode ATTVALUE;
+
+// // an attribute value may have spaces b/t the '=' and the value
+// ATTVALUE_VALUE: ' '* ATTRIBUTE -> popMode;
+
+// ATTRIBUTE: DOUBLE_QUOTE_STRING | SINGLE_QUOTE_STRING | ATTCHARS | HEXCHARS | DECCHARS | PROP_STRING;
+
+// fragment ATTCHARS: ATTCHAR+ ' '?;
+
+// fragment ATTCHAR: '-' | '_' | '.' | '/' | '+' | ',' | '?' | '=' | ':' | ';' | '#' | [0-9a-zA-Z];
+
+// fragment HEXCHARS: '#' [0-9a-fA-F]+;
+
+// fragment DECCHARS: [0-9]+ '%'?;
+
+// fragment DOUBLE_QUOTE_STRING: '"' ~[<"]* '"';
+
+// fragment SINGLE_QUOTE_STRING: '\'' ~[<']* '\'';
+
+// fragment PROP_STRING: '{' ~[<']* '}';
+
 
 // // XML: '<?xml' .*? '>';
 

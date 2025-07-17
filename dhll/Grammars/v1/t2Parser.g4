@@ -17,9 +17,9 @@ expression : EXP_OPEN
 // exp:
 // 	 NEGATIVE exp                   # NEGATE
 // 	| OPEN_PAREN exp CLOSE_PAREN	# PARENTHETICAL
-//     | exp OPERATOR exp              # OPERATOR 
+//  | exp OPERATOR exp              # OPERATOR 
 // 	| constant						# CONST
-//     ;   
+//  ;   
 
 
 // Newer version with proper nesting:
