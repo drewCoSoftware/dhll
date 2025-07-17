@@ -11,6 +11,8 @@ TAG_OPEN: '<' ->pushMode(TAG);
 
 HTML_TEXT: ~'<'+;
 
+EXP_OPEN: '{' -> pushMode(EXPRESSION);
+
 // TAG MODE ------------------------------------------------------------------------------------------
 mode TAG;
 
@@ -51,7 +53,7 @@ TAG_DBL_QUOTE: '"';
 TAG_DQ_STR: TAG_DBL_QUOTE ~["]* TAG_DBL_QUOTE;
 
 
-EXP_OPEN: '{' ->pushMode(EXPRESSION);
+TAG_EXP_OPEN: '{' ->pushMode(EXPRESSION);
 
 // ==== EXPRESSION MODE ===========
 mode EXPRESSION;

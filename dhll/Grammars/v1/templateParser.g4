@@ -36,9 +36,11 @@ htmlChardata
     ;
 
 attrValue
-    : TAG_DBL_QUOTE EXP_OPEN expr EXP_CLOSE TAG_DBL_QUOTE
-    | EXP_OPEN expr EXP_CLOSE
+    : TAG_DBL_QUOTE expression TAG_DBL_QUOTE
+    | expression
     | TAG_DQ_STR;
+
+expression: TAG_EXP_OPEN expr EXP_CLOSE;
 
 expr: additiveExpr;
 
