@@ -109,6 +109,18 @@ public partial class templateParserBaseListener : ItemplateParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitHtmlContent([NotNull] templateParser.HtmlContentContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterExpression([NotNull] templateParser.ExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitExpression([NotNull] templateParser.ExpressionContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="templateParser.htmlAttribute"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -133,17 +145,279 @@ public partial class templateParserBaseListener : ItemplateParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitHtmlChardata([NotNull] templateParser.HtmlChardataContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// Enter a parse tree produced by the <c>DBL_QUOTE_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterHtmlComment([NotNull] templateParser.HtmlCommentContext context) { }
+	public virtual void EnterDBL_QUOTE_EXPRESSION([NotNull] templateParser.DBL_QUOTE_EXPRESSIONContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// Exit a parse tree produced by the <c>DBL_QUOTE_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitHtmlComment([NotNull] templateParser.HtmlCommentContext context) { }
+	public virtual void ExitDBL_QUOTE_EXPRESSION([NotNull] templateParser.DBL_QUOTE_EXPRESSIONContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>RAW_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterRAW_EXPRESSION([NotNull] templateParser.RAW_EXPRESSIONContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>RAW_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitRAW_EXPRESSION([NotNull] templateParser.RAW_EXPRESSIONContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>DBL_QUOTE_STRING</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterDBL_QUOTE_STRING([NotNull] templateParser.DBL_QUOTE_STRINGContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>DBL_QUOTE_STRING</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitDBL_QUOTE_STRING([NotNull] templateParser.DBL_QUOTE_STRINGContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.tag_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTag_expression([NotNull] templateParser.Tag_expressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.tag_expression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTag_expression([NotNull] templateParser.Tag_expressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.expr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterExpr([NotNull] templateParser.ExprContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.expr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitExpr([NotNull] templateParser.ExprContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>ADD</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterADD([NotNull] templateParser.ADDContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>ADD</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitADD([NotNull] templateParser.ADDContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_MULT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTO_MULT([NotNull] templateParser.TO_MULTContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_MULT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTO_MULT([NotNull] templateParser.TO_MULTContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>SUBTRACT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterSUBTRACT([NotNull] templateParser.SUBTRACTContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>SUBTRACT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitSUBTRACT([NotNull] templateParser.SUBTRACTContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_UNARY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTO_UNARY([NotNull] templateParser.TO_UNARYContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_UNARY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTO_UNARY([NotNull] templateParser.TO_UNARYContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MULTIPLY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMULTIPLY([NotNull] templateParser.MULTIPLYContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MULTIPLY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMULTIPLY([NotNull] templateParser.MULTIPLYContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>DIVIDE</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterDIVIDE([NotNull] templateParser.DIVIDEContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>DIVIDE</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitDIVIDE([NotNull] templateParser.DIVIDEContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>NEGATE</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterNEGATE([NotNull] templateParser.NEGATEContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>NEGATE</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitNEGATE([NotNull] templateParser.NEGATEContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_PRIMARY</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterTO_PRIMARY([NotNull] templateParser.TO_PRIMARYContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_PRIMARY</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitTO_PRIMARY([NotNull] templateParser.TO_PRIMARYContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MAGIC_NUMBER</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMAGIC_NUMBER([NotNull] templateParser.MAGIC_NUMBERContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MAGIC_NUMBER</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMAGIC_NUMBER([NotNull] templateParser.MAGIC_NUMBERContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MAGIC_STRING</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMAGIC_STRING([NotNull] templateParser.MAGIC_STRINGContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MAGIC_STRING</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMAGIC_STRING([NotNull] templateParser.MAGIC_STRINGContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>VARIABLE</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterVARIABLE([NotNull] templateParser.VARIABLEContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>VARIABLE</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitVARIABLE([NotNull] templateParser.VARIABLEContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>CALL</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterCALL([NotNull] templateParser.CALLContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>CALL</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitCALL([NotNull] templateParser.CALLContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>PARENS</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterPARENS([NotNull] templateParser.PARENSContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>PARENS</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitPARENS([NotNull] templateParser.PARENSContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by the <c>ARGS</c>
+	/// labeled alternative in <see cref="templateParser.argList"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterARGS([NotNull] templateParser.ARGSContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by the <c>ARGS</c>
+	/// labeled alternative in <see cref="templateParser.argList"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitARGS([NotNull] templateParser.ARGSContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.number"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterNumber([NotNull] templateParser.NumberContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.number"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitNumber([NotNull] templateParser.NumberContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

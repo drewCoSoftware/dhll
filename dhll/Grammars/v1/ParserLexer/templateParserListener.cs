@@ -92,6 +92,16 @@ public interface ItemplateParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitHtmlContent([NotNull] templateParser.HtmlContentContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterExpression([NotNull] templateParser.ExpressionContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitExpression([NotNull] templateParser.ExpressionContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="templateParser.htmlAttribute"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -112,14 +122,238 @@ public interface ItemplateParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitHtmlChardata([NotNull] templateParser.HtmlChardataContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// Enter a parse tree produced by the <c>DBL_QUOTE_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void EnterHtmlComment([NotNull] templateParser.HtmlCommentContext context);
+	void EnterDBL_QUOTE_EXPRESSION([NotNull] templateParser.DBL_QUOTE_EXPRESSIONContext context);
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="templateParser.htmlComment"/>.
+	/// Exit a parse tree produced by the <c>DBL_QUOTE_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	void ExitHtmlComment([NotNull] templateParser.HtmlCommentContext context);
+	void ExitDBL_QUOTE_EXPRESSION([NotNull] templateParser.DBL_QUOTE_EXPRESSIONContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>RAW_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterRAW_EXPRESSION([NotNull] templateParser.RAW_EXPRESSIONContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>RAW_EXPRESSION</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitRAW_EXPRESSION([NotNull] templateParser.RAW_EXPRESSIONContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>DBL_QUOTE_STRING</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterDBL_QUOTE_STRING([NotNull] templateParser.DBL_QUOTE_STRINGContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>DBL_QUOTE_STRING</c>
+	/// labeled alternative in <see cref="templateParser.attrValue"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitDBL_QUOTE_STRING([NotNull] templateParser.DBL_QUOTE_STRINGContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.tag_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTag_expression([NotNull] templateParser.Tag_expressionContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.tag_expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTag_expression([NotNull] templateParser.Tag_expressionContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterExpr([NotNull] templateParser.ExprContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.expr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitExpr([NotNull] templateParser.ExprContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>ADD</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterADD([NotNull] templateParser.ADDContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>ADD</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitADD([NotNull] templateParser.ADDContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_MULT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTO_MULT([NotNull] templateParser.TO_MULTContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_MULT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTO_MULT([NotNull] templateParser.TO_MULTContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>SUBTRACT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterSUBTRACT([NotNull] templateParser.SUBTRACTContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>SUBTRACT</c>
+	/// labeled alternative in <see cref="templateParser.additiveExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitSUBTRACT([NotNull] templateParser.SUBTRACTContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_UNARY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTO_UNARY([NotNull] templateParser.TO_UNARYContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_UNARY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTO_UNARY([NotNull] templateParser.TO_UNARYContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MULTIPLY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMULTIPLY([NotNull] templateParser.MULTIPLYContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MULTIPLY</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMULTIPLY([NotNull] templateParser.MULTIPLYContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>DIVIDE</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterDIVIDE([NotNull] templateParser.DIVIDEContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>DIVIDE</c>
+	/// labeled alternative in <see cref="templateParser.multiplicativeExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitDIVIDE([NotNull] templateParser.DIVIDEContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>NEGATE</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterNEGATE([NotNull] templateParser.NEGATEContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>NEGATE</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitNEGATE([NotNull] templateParser.NEGATEContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>TO_PRIMARY</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterTO_PRIMARY([NotNull] templateParser.TO_PRIMARYContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>TO_PRIMARY</c>
+	/// labeled alternative in <see cref="templateParser.unaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitTO_PRIMARY([NotNull] templateParser.TO_PRIMARYContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MAGIC_NUMBER</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMAGIC_NUMBER([NotNull] templateParser.MAGIC_NUMBERContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MAGIC_NUMBER</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMAGIC_NUMBER([NotNull] templateParser.MAGIC_NUMBERContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>MAGIC_STRING</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterMAGIC_STRING([NotNull] templateParser.MAGIC_STRINGContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>MAGIC_STRING</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitMAGIC_STRING([NotNull] templateParser.MAGIC_STRINGContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>VARIABLE</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterVARIABLE([NotNull] templateParser.VARIABLEContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>VARIABLE</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitVARIABLE([NotNull] templateParser.VARIABLEContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>CALL</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterCALL([NotNull] templateParser.CALLContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>CALL</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitCALL([NotNull] templateParser.CALLContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>PARENS</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterPARENS([NotNull] templateParser.PARENSContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>PARENS</c>
+	/// labeled alternative in <see cref="templateParser.primaryExpr"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitPARENS([NotNull] templateParser.PARENSContext context);
+	/// <summary>
+	/// Enter a parse tree produced by the <c>ARGS</c>
+	/// labeled alternative in <see cref="templateParser.argList"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterARGS([NotNull] templateParser.ARGSContext context);
+	/// <summary>
+	/// Exit a parse tree produced by the <c>ARGS</c>
+	/// labeled alternative in <see cref="templateParser.argList"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitARGS([NotNull] templateParser.ARGSContext context);
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="templateParser.number"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterNumber([NotNull] templateParser.NumberContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="templateParser.number"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitNumber([NotNull] templateParser.NumberContext context);
 }
 } // namespace dhll.v1

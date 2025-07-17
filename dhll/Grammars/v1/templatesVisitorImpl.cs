@@ -8,7 +8,9 @@ using drewCo.Web;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.RegularExpressions;
+using static dhll.v1.templateParser;
 
 namespace dhll.Grammars.v1;
 
@@ -131,6 +133,8 @@ public class TemplateDefinition
 }
 
 
+// internal class attributeVisitorImpl : a
+
 // ==============================================================================================================================
 internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 {
@@ -185,7 +189,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     foreach (var item in attrs)
     {
       string attrName = item.entityName().GetText();
-      string? attrVal = item.ATTVALUE_VALUE()?.GetText();
+      string? attrVal = item.attrValue()?.GetText(); // ATTVALUE_VALUE()?.GetText();
       attrToVal[attrName] = attrVal;
     }
 
@@ -247,7 +251,12 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     foreach (var attr in attrs)
     {
       string name = ExtractQuotedValue(attr.entityName().GetText())!;
-      string? val = ExtractQuotedValue(attr.ATTVALUE_VALUE()?.GetText());
+      string? val = ExtractQuotedValue(attr.attrValue()?.GetText());
+
+
+      var atv = attr.attrValue();
+      VisitAttribute(atv);
+      // atv.children[0].
 
       DynamicContent? dc = null;
       List<string> propNames = new List<string>();
@@ -278,6 +287,47 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     }
     return res;
   }
+
+  private void VisitAttribute(templateParser.AttrValueContext atv)
+  {
+    // So this is how we can figure it out?
+    var dblQuote = atv as DBL_QUOTE_STRINGContext;
+    var x = atv as DBL_QUOTE_EXPRESSIONContext;
+    var y = atv as RAW_EXPRESSIONContext;
+
+    if (x != null)
+    {
+      int abc = 10;
+    }
+
+    else if (y != null)
+    {
+      string yText = atv.GetText();
+
+      var child = y.children[0]; // as ExpressionContext;
+      var exp = child as Tag_expressionContext;
+      if (exp != null) {
+        VisitExpr(exp.children[1] as ExprContext);
+      }
+      int def = 10;
+
+    }
+    else
+    {
+      string text = atv.GetText();
+      Console.WriteLine(text);
+    }
+    //throw new NotImplementedException();
+  }
+
+  public override object VisitExpr([NotNull] ExprContext context)
+  {
+    return base.VisitExpr(context);
+  }
+  //public override object VisitExpression([NotNull] ExpressionContext context)
+  //{
+  //  return base.VisitExpression(context);
+  //}
 
   // --------------------------------------------------------------------------------------------------------------------------
   private DynamicContent ParseDynamicContent(string val)
