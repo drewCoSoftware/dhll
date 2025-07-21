@@ -37,42 +37,60 @@ htmlChardata
     ;
 
 attrValue
-    : TAG_DBL_QUOTE tag_expression TAG_DBL_QUOTE    #DBL_QUOTE_EXPRESSION
-    | tag_expression                                #RAW_EXPRESSION
+    : tag_expression                                #RAW_EXPRESSION
     | TAG_DQ_STR                                    #DBL_QUOTE_STRING
     ;
 
 tag_expression: TAG_EXP_OPEN expr EXP_CLOSE;
 
-expr: additiveExpr;
+expr: addExp;
 
-// + and -
-additiveExpr
-    : additiveExpr PLUS multiplicativeExpr   # ADD
-    | additiveExpr MINUS multiplicativeExpr  # SUBTRACT
-    | multiplicativeExpr                     # TO_MULT
+// Addition
+addExp
+    : addExp PLUS subExp   # ADD
+    | subExp               # TO_SUB
     ;
 
-// * and /
-multiplicativeExpr
-    : multiplicativeExpr MULT unaryExpr      # MULTIPLY
-    | multiplicativeExpr DIVIDE unaryExpr    # DIVIDE
-    | unaryExpr                              # TO_UNARY
+// Subtraction
+subExp
+    : subExp MINUS multExp  # SUBTRACT
+    | multExp               # TO_MULT
+    ;
+
+// Multiply
+multExp
+    : multExp MULT divExp # MULTIPLY
+    | divExp              # TO_DIV
+    ;
+
+// Divide
+divExp
+    : divExp DIVIDE unaryExpr   # DIVIDE
+    | unaryExpr                 # TO_UNARY
     ;
 
 // unary negation
 unaryExpr
     : MINUS unaryExpr                       # NEGATE
+    | parensExp                             # TO_PARENS
+    ;
+
+parensExp
+    : OPEN_PAREN expr CLOSE_PAREN           # PARENS 
+    | callExp                               # TO_CALL
+    ;
+
+callExp
+    : ID OPEN_PAREN argList? CLOSE_PAREN    # CALL
     | primaryExpr                           # TO_PRIMARY
     ;
+
 
 // numbers, variables, parentheses, function calls
 primaryExpr
     : number                                # MAGIC_NUMBER
     | EXP_DQ_STR                            # MAGIC_STRING
     | ID                                    # VARIABLE
-    | ID OPEN_PAREN argList? CLOSE_PAREN    # CALL
-    | OPEN_PAREN expr CLOSE_PAREN           # PARENS
     ;
 
 // comma-separated arguments

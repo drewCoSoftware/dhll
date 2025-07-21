@@ -1,4 +1,3 @@
-/* I am a block comment */
-<template for="x">
-    <p>an unclosed element...</p>
-</template>
+ <template for="X">
+     <div a="string_val" class={MyClass} style={x + 123}>ABC</div>
+ </template>

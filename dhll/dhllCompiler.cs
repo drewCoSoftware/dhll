@@ -250,7 +250,7 @@ public class dhllCompiler
       {
         Logger.Info($"Processing template at path: {path}");
 
-        var templateDefs = ParseTemplates(path);
+        var templateDefs = ParseTemplatesFromFile(path);
 
         foreach (var item in templateDefs)
         {
@@ -422,27 +422,32 @@ public class dhllCompiler
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDefinition[] ParseTemplates(string inputFilePath)
+  public TemplateDefinition[] ParseTemplatesFromFile(string inputFilePath)
   {
     string input = File.ReadAllText(inputFilePath);
-
-    AntlrInputStream s = new AntlrInputStream(input);
-    var lexer = new templateLexer(s);
-
-    var ts = new CommonTokenStream(lexer);
-    var parser = new templateParser(ts);
-
-    TemplatesContext context = parser.templates();
-    var v = new templatesVisitorImpl();
-
-    v.VisitTemplates(context);
-
-    return v.TemplateDefs.ToArray();
+    return ParseTemplates(input);
 
   }
 
-  // --------------------------------------------------------------------------------------------------------------------------
-  private EmitterBase CreateEmitter(string targetLang)
+    // --------------------------------------------------------------------------------------------------------------------------
+    public TemplateDefinition[] ParseTemplates(string input)
+    {
+            AntlrInputStream s = new AntlrInputStream(input);
+        var lexer = new templateLexer(s);
+
+        var ts = new CommonTokenStream(lexer);
+        var parser = new templateParser(ts);
+
+        TemplatesContext context = parser.templates();
+        var v = new templatesVisitorImpl();
+
+        v.VisitTemplates(context);
+
+        return v.TemplateDefs.ToArray();
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private EmitterBase CreateEmitter(string targetLang)
   {
     // NOTE: We will use a registration type approach in the future.
     // That will allow for all kinds of plugins + overrides if we wanted.

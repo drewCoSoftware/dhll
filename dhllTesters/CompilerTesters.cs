@@ -1,5 +1,6 @@
 ﻿using dhll;
 using dhll.Emitters;
+using dhll.Grammars.v1;
 using drewCo.Tools;
 using System;
 using System.Collections.Generic;
@@ -26,8 +27,9 @@ namespace dhllTesters
       const string EXPECTED = "'{escaped-value}'";        // Note that it is single quoted + curly braces are escaped!
       var te = new TemplateEmitter();
 
-      string formatted = te.FormatValue(new dhll.Grammars.v1.Attribute() {
-       Value = TEST_STRING,
+      string formatted = te.FormatValue(new dhll.Grammars.v1.Attribute()
+      {
+        Value = new AttributeValue(TEST_STRING),
       });
 
       Assert.That(formatted, Is.EqualTo(EXPECTED), "The formatted value is not correct!");

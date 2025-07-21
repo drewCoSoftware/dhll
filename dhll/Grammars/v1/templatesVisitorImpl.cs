@@ -1,7 +1,9 @@
-﻿using Antlr4.Runtime.Atn;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using dhll.Emitters;
+using dhll.Expressions;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Web;
@@ -9,6 +11,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Net.WebSockets;
 using System.Text.RegularExpressions;
 using static dhll.v1.templateParser;
 
@@ -33,6 +36,11 @@ public class DynamicContent
 {
   // Some way (function) to represent the interpolated string....
   public List<FormatPart> Parts { get; set; }
+
+  /// <summary>
+  /// All of the property names (identifiers) that appear in the expression.
+  /// </summary>
+  /// REFACTOR: Rename to 'identifiers' or something similar.
   public List<string> PropertyNames { get; set; } = new List<string>();
 }
 
@@ -102,10 +110,41 @@ public partial class Node
 }
 
 // ==============================================================================================================================
+public enum EAttrValType
+{
+  Invalid = 0,
+  String,
+  Expression
+}
+
+
+// ==============================================================================================================================
+public class AttributeValue
+{
+  // --------------------------------------------------------------------------------------------------------------------------
+  public AttributeValue(Expression expresion_)
+  {
+    Type = EAttrValType.Expression;
+    Expression = expresion_;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public AttributeValue(string value)
+  {
+    Type = EAttrValType.String;
+    StringVal = value;
+  }
+
+  public EAttrValType Type { get; set; }
+  public string? StringVal { get; set; }
+  public Expression? Expression { get; set; }
+}
+
+// ==============================================================================================================================
 public class Attribute
 {
   public string Name { get; set; } = default!;
-  public string? Value { get; set; } = default!;
+  public AttributeValue Value { get; set; } = default!;
 
   public DynamicContent? DynamicContent { get; set; } = null;
 
@@ -251,29 +290,37 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     foreach (var attr in attrs)
     {
       string name = ExtractQuotedValue(attr.entityName().GetText())!;
-      string? val = ExtractQuotedValue(attr.attrValue()?.GetText());
 
 
       var atv = attr.attrValue();
-      VisitAttribute(atv);
+      AttributeValue val = VisitAttribute(atv);
       // atv.children[0].
 
-      DynamicContent? dc = null;
-      List<string> propNames = new List<string>();
-      if (val != null && HasPropString(val))
-      {
-        dc = ParseDynamicContent(val);
+      // string? val = ExtractQuotedValue(attr.attrValue()?.GetText());
 
-        // Any value, be it class or text must be representable as a string.
-        // This means that any time an implicated property changes, then we will compute a string (like sprintf) and then slap in into the DOM at the correct place.
-        // Correct places can be:
-        // - An attribute
-        // - Inner text/html of an element.
-        // - That's about it!
-        // so we need:
-        // --> The selector for the element.
-        // --> what property we are affecting....
-      }
+
+      // We need to figure this out...
+      // throw new NotImplementedException();
+
+      // DynamicContent? dc = null;
+      // List<string> propNames = new List<string>();
+
+
+
+      //if (val != null && HasPropString(val))
+      //{
+      DynamicContent? dc = ParseDynamicContent(val);
+
+      //  // Any value, be it class or text must be representable as a string.
+      //  // This means that any time an implicated property changes, then we will compute a string (like sprintf) and then slap in into the DOM at the correct place.
+      //  // Correct places can be:
+      //  // - An attribute
+      //  // - Inner text/html of an element.
+      //  // - That's about it!
+      //  // so we need:
+      //  // --> The selector for the element.
+      //  // --> what property we are affecting....
+      //}
 
       var toAdd = new Attribute()
       {
@@ -288,107 +335,314 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     return res;
   }
 
-  private void VisitAttribute(templateParser.AttrValueContext atv)
+  // --------------------------------------------------------------------------------------------------------------------------
+  private AttributeValue VisitAttribute(templateParser.AttrValueContext atv)
   {
-    // So this is how we can figure it out?
-    var dblQuote = atv as DBL_QUOTE_STRINGContext;
-    var x = atv as DBL_QUOTE_EXPRESSIONContext;
-    var y = atv as RAW_EXPRESSIONContext;
-
-    if (x != null)
+    var expr = atv as RAW_EXPRESSIONContext;
+    if (expr != null)
     {
-      int abc = 10;
-    }
-
-    else if (y != null)
-    {
-      string yText = atv.GetText();
-
-      var child = y.children[0]; // as ExpressionContext;
+      var child = expr.children[0];
       var exp = child as Tag_expressionContext;
-      if (exp != null) {
-        VisitExpr(exp.children[1] as ExprContext);
+      if (exp == null)
+      {
+        throw new InvalidOperationException("unknown expression sub-type!");
       }
-      int def = 10;
+
+      Expression e = ParseTagExpression(exp);
+      var res = new AttributeValue(e);
+      return res;
 
     }
     else
     {
+      if (!(atv is DBL_QUOTE_STRINGContext))
+      {
+        throw new InvalidOperationException("Expressin value is not supported!  Can't parse!");
+      }
       string text = atv.GetText();
-      Console.WriteLine(text);
+      var res = new AttributeValue(text);
+      return res;
     }
-    //throw new NotImplementedException();
+
+
+    // We should not get here!
+    throw new NotImplementedException();
   }
 
-  public override object VisitExpr([NotNull] ExprContext context)
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseTagExpression(Tag_expressionContext tagExpr)
   {
-    return base.VisitExpr(context);
+
+    // We have to walk down the treee......
+    ExprContext expression = tagExpr.expr();
+
+    var res = ParseExpresion(expression);
+    return res;
+
+    throw new NotImplementedException();
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseExpresion(ExprContext expression)
+  {
+    var add = expression.addExp();
+
+    Expression res = ParseIt(add);
+    return res;
+
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseIt(IParseTree rule)
+  {
+    var useRule = rule as ParserRuleContext;
+    return ParseIt(useRule!);
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseIt(ParserRuleContext rule)
+  {
+    if (rule == null)
+    {
+      throw new ArgumentNullException($"{nameof(rule)} may not be null!");
+    }
+
+    if (rule is AddExpContext ||
+        rule is SubExpContext ||
+        rule is MultExpContext ||
+        rule is DivExpContext)
+    {
+      if (rule.ChildCount == 3)
+      {
+        var res = ParseBinaryExpression(rule);
+        return res;
+      }
+      else if (rule.ChildCount == 1)
+      {
+        var res = ParseIt((rule.children[0] as ParserRuleContext)!);
+        return res;
+      }
+      else
+      {
+        throw new NotSupportedException("The add expression appears to be malformed...");
+      }
+    }
+    else
+    {
+      // This will be a primary expression...
+      var parens = rule as TO_PARENSContext;
+      if (parens == null)
+      {
+        throw new InvalidOperationException($"This should be an {nameof(TO_PARENSContext)}!");
+      }
+
+      return ParseParens(parens);
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseParens(TO_PARENSContext parens)
+  {
+    var p = parens.children[0];
+    var call = p as TO_CALLContext;
+    if (call != null)
+    {
+      return ParseCall(call);
+    }
+
+    // Deal with the children of parenthesis....
+
+    throw new NotImplementedException();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseCall(TO_CALLContext call)
+  {
+    var c = call.children[0];
+    var primary = c as TO_PRIMARYContext;
+    if (primary != null)
+    {
+      return ParsePrimaryExpression(primary);
+    }
+
+    // Deal with the calling of functions.
+    throw new NotImplementedException();
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParsePrimaryExpression(TO_PRIMARYContext primaryExp)
+  {
+    int x = 10;
+
+    var p = primaryExp.children[0] as PrimaryExprContext;
+    if (p == null)
+    {
+      throw new InvalidOperationException("Why isn't this a primary expression?");
+    }
+
+    var vc = p as VARIABLEContext;
+    if (vc != null)
+    {
+      return new PrimaryExpression(vc);
+    }
+
+    var ms = p as MAGIC_STRINGContext;
+    if (ms != null)
+    {
+      return new PrimaryExpression(ms);
+    }
+
+    var mn = p as MAGIC_NUMBERContext;
+    if (mn != null)
+    {
+      return new PrimaryExpression(mn);
+    }
+
+    throw new NotSupportedException("This is some other kind of primary that we don't have support for!");
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private Expression ParseBinaryExpression(ParserRuleContext context)
+  {
+    // This is a binary expression!
+    var left = ParseIt(context.children[0]);
+
+    // TODO: We could test this, but who cares?
+    string opString = context.children[1].GetText();
+    EOperator useOp = ComputeOperator(opString);
+
+    var right = ParseIt(context.children[2]);
+    var ae = new BinaryExpression(left, right, EOperator.Add);
+
+    return ae;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private EOperator ComputeOperator(string opString)
+  {
+    switch (opString)
+    {
+      case "+":
+        return EOperator.Add;
+      case "-":
+        return EOperator.Subtract;
+      case "*":
+        return EOperator.Multiply;
+      case "/":
+        return EOperator.Divide;
+
+      default:
+        throw new NotSupportedException($"The operator value: {opString} is not supported!");
+    }
+    throw new NotImplementedException();
+  }
+
+  //// --------------------------------------------------------------------------------------------------------------------------
+  //  /// <summary>
+  //  /// This is kind of annoying, but I guess we have to?
+  //  /// </summary>
+  //private Expression ParseExpression(IParseTree parseTree)
+  //{
+  //  var add = parseTree as AddExpContext;
+  //  if (add != null)
+  //  {
+  //    return ParseIt(add);
+  //  }
+  //  var sub = parseTree as SubExpContext;
+  //  if (sub != null)
+  //  {
+  //  }
+  //  var mult = parseTree as SubExpContext;
+  //  if (mult != null)
+  //  {
+  //  }
+  //  var div = parseTree as SubExpContext;
+  //  if (div != null)
+  //  {
+  //  }
+  //  var primary = parseTree as SubExpContext;
+  //  if (primary != null)
+  //  {
+
+  //  }
+
+
+  //  throw new NotImplementedException();
+  //}
+
+  //// --------------------------------------------------------------------------------------------------------------------------
+  //public override object VisitExpr([NotNull] ExprContext context)
+  //{
+  //  return base.VisitExpr(context);
+  //}
   //public override object VisitExpression([NotNull] ExpressionContext context)
   //{
   //  return base.VisitExpression(context);
   //}
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private DynamicContent ParseDynamicContent(string val)
+  private DynamicContent ParseDynamicContent(AttributeValue val)
   {
-    int start = 0;
+    return null;
 
-    var parts = new List<FormatPart>();
-    var propNames = new List<string>();
+    //// OLD: String only based approach....
+    //  int start = 0;
 
-    MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
-    foreach (Match m in matches)
-    {
-      int index = m.Captures[0].Index;
-      string prevPart = val.Substring(start, index - start);
-      if (prevPart != string.Empty)
-      {
-        parts.Add(new FormatPart()
-        {
-          Value = prevPart,
-        });
-      }
+    //  var parts = new List<FormatPart>();
+    //  var propNames = new List<string>();
+
+    //  MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
+    //  foreach (Match m in matches)
+    //  {
+    //    int index = m.Captures[0].Index;
+    //    string prevPart = val.Substring(start, index - start);
+    //    if (prevPart != string.Empty)
+    //    {
+    //      parts.Add(new FormatPart()
+    //      {
+    //        Value = prevPart,
+    //      });
+    //    }
 
 
-      string expValue = m.Value.Substring(1, m.Value.Length - 2);
-      // NOTE: If we have some kind of expression for our properties, then we have to have a way
-      // to extract all of the named properties..  At this time we don't have a way to really do that
-      // outside of updating the grammar, so for now, we will just assume that the expression is a single
-      // property name....
-      propNames.Add(expValue.Trim());
+    //    string expValue = m.Value.Substring(1, m.Value.Length - 2);
+    //    // NOTE: If we have some kind of expression for our properties, then we have to have a way
+    //    // to extract all of the named properties..  At this time we don't have a way to really do that
+    //    // outside of updating the grammar, so for now, we will just assume that the expression is a single
+    //    // property name....
+    //    propNames.Add(expValue.Trim());
 
-      parts.Add(new FormatPart()
-      {
-        Value = expValue,
-        IsExpession = true
-      });
+    //    parts.Add(new FormatPart()
+    //    {
+    //      Value = expValue,
+    //      IsExpession = true
+    //    });
 
-      start = index + m.Length;
-    }
+    //    start = index + m.Length;
+    //  }
 
-    // Leftover string?
-    if (val.Length > start)
-    {
-      parts.Add(new FormatPart()
-      {
-        Value = val.Substring(start)
-      });
-    }
+    //  // Leftover string?
+    //  if (val.Length > start)
+    //  {
+    //    parts.Add(new FormatPart()
+    //    {
+    //      Value = val.Substring(start)
+    //    });
+    //  }
 
-    var res = new DynamicContent()
-    {
-      Parts = parts,
-      PropertyNames = propNames.Distinct().ToList()
-    };
+    //  var res = new DynamicContent()
+    //  {
+    //    Parts = parts,
+    //    PropertyNames = propNames.Distinct().ToList()
+    //  };
 
-    if (res.PropertyNames.Count == 0)
-    {
-      // NOTE: A future version could allow for const expressions....
-      throw new Exception("There are no named properties in the expression!");
-    }
+    //  if (res.PropertyNames.Count == 0)
+    //  {
+    //    // NOTE: A future version could allow for const expressions....
+    //    throw new Exception("There are no named properties in the expression!");
+    //  }
 
-    return res;
+    //  return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -416,34 +670,38 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     var res = new List<Node>();
 
     var kids = parent.children;
-    foreach (var kid in kids)
+    if (kids != null)
     {
-      if (kid is templateParser.HtmlElementContext)
+      foreach (var kid in kids)
       {
-        var n = ComputeDOM(kid as templateParser.HtmlElementContext);
-        res.Add(n);
-      }
-      else if (kid is templateParser.HtmlChardataContext)
-      {
-        var charData = (kid as templateParser.HtmlChardataContext)!;
-
-        string text = charData.GetText();
-        bool hasDynamic = HasPropString(text);
-        DynamicContent? dc = null;
-        if (hasDynamic)
+        if (kid is templateParser.HtmlElementContext)
         {
-          dc = ParseDynamicContent(text);
+          var n = ComputeDOM(kid as templateParser.HtmlElementContext);
+          res.Add(n);
         }
-
-        var n = new Node()
+        else if (kid is templateParser.HtmlChardataContext)
         {
-          Parent = parentNode,
-          Name = "<text>",
-          Value = text,
-          DynamicContent = dc
-        };
-        res.Add(n);
-        int z = 10;
+          var charData = (kid as templateParser.HtmlChardataContext)!;
+
+          string text = charData.GetText();
+          bool hasDynamic = HasPropString(text);
+          DynamicContent? dc = null;
+          if (hasDynamic)
+          {
+            throw new NotImplementedException("please get this fixed up!");
+            // dc = ParseDynamicContent(text);
+          }
+
+          var n = new Node()
+          {
+            Parent = parentNode,
+            Name = "<text>",
+            Value = text,
+            DynamicContent = dc
+          };
+          res.Add(n);
+          int z = 10;
+        }
       }
     }
 
