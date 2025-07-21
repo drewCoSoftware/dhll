@@ -194,7 +194,8 @@ internal class TemplateEmitter
       string[] pParts = p.Split(':');
       string useName = pParts[0];
 
-      if (pParts.Length > 1) {
+      if (pParts.Length > 1)
+      {
         throw new NotSupportedException("Property options in templates are not yet supported!");
       }
 
@@ -202,7 +203,7 @@ internal class TemplateEmitter
       foreach (var t in targets)
       {
 
-        
+
 
         // HACK: This is typescript specific!  We will have to come up with a better way later.
         // Best way is to probably ask the current emitter directly.
@@ -332,7 +333,11 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   internal string FormatValue(Grammars.v1.Attribute item)
   {
-    string useValue = $"'{item.Value}'";
+    if (item.Value.Type != EAttrValType.String)
+    {
+      throw new InvalidOperationException("Can't format a non-string attribute value!");
+    }
+    string useValue = $"'{item.Value.StringVal}'";
 
     if (item.DynamicContent != null)
     {

@@ -1,3 +1,5 @@
- <template for="X">
-     <div a="string_val" class={MyClass} style={x + 123}>ABC</div>
- </template>
+<template for="x">
+  <div>
+    This is some text but I want to have {dynamic} sections in that text, and even {computed + values}.
+  <div>
+</template>
