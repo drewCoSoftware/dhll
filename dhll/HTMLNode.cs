@@ -19,6 +19,7 @@ public class HTMLNode
   };
 
   public const string TEXT_NAME = "<text>";
+  public const string EXPRESSION_NAME = "<expression>";
 
   public HTMLNode? Parent { get; set; } = null;
 

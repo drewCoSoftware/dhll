@@ -1,14 +1,7 @@
 ﻿using dhll;
 using dhll.Expressions;
 using dhll.Grammars.v1;
-using drewCo.Tools;
-using drewCo.Tools.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-// using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using drewCo.Web;
 
 namespace dhllTesters
 {
@@ -47,6 +40,12 @@ namespace dhllTesters
       var c3 = dom.Children[2];
       var c4 = dom.Children[3];
       var c5 = dom.Children[4];
+
+      Assert.IsTrue(c1.Name == HTMLNode.TEXT_NAME);
+      Assert.IsTrue(c2.Name == HTMLNode.EXPRESSION_NAME);
+      Assert.IsTrue(c3.Name == HTMLNode.TEXT_NAME);
+      Assert.IsTrue(c4.Name == HTMLNode.EXPRESSION_NAME);
+      Assert.IsTrue(c5.Name == HTMLNode.TEXT_NAME);
 
       int x = 10;
     }

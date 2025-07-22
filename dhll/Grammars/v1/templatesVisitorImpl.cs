@@ -59,6 +59,7 @@ public partial class Node
 {
 
   public bool IsTextNode { get { return Name == HTMLNode.TEXT_NAME; } }
+  public bool IsExpressionNode { get { return Name == HTMLNode.EXPRESSION_NAME; } }
 
   /// <summary>
   /// The parent node, or null if this is the root node.
@@ -537,120 +538,90 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     throw new NotImplementedException();
   }
 
-  //// --------------------------------------------------------------------------------------------------------------------------
-  //  /// <summary>
-  //  /// This is kind of annoying, but I guess we have to?
-  //  /// </summary>
-  //private Expression ParseExpression(IParseTree parseTree)
-  //{
-  //  var add = parseTree as AddExpContext;
-  //  if (add != null)
-  //  {
-  //    return ParseIt(add);
-  //  }
-  //  var sub = parseTree as SubExpContext;
-  //  if (sub != null)
-  //  {
-  //  }
-  //  var mult = parseTree as SubExpContext;
-  //  if (mult != null)
-  //  {
-  //  }
-  //  var div = parseTree as SubExpContext;
-  //  if (div != null)
-  //  {
-  //  }
-  //  var primary = parseTree as SubExpContext;
-  //  if (primary != null)
-  //  {
-
-  //  }
-
-
-  //  throw new NotImplementedException();
-  //}
-
-  //// --------------------------------------------------------------------------------------------------------------------------
-  //public override object VisitExpr([NotNull] ExprContext context)
-  //{
-  //  return base.VisitExpr(context);
-  //}
-  //public override object VisitExpression([NotNull] ExpressionContext context)
-  //{
-  //  return base.VisitExpression(context);
-  //}
 
   // --------------------------------------------------------------------------------------------------------------------------
   private DynamicContent ParseDynamicContent(AttributeValue val)
   {
-    return null;
-
-    //// OLD: String only based approach....
-    //  int start = 0;
-
-    //  var parts = new List<FormatPart>();
-    //  var propNames = new List<string>();
-
-    //  MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
-    //  foreach (Match m in matches)
-    //  {
-    //    int index = m.Captures[0].Index;
-    //    string prevPart = val.Substring(start, index - start);
-    //    if (prevPart != string.Empty)
-    //    {
-    //      parts.Add(new FormatPart()
-    //      {
-    //        Value = prevPart,
-    //      });
-    //    }
-
-
-    //    string expValue = m.Value.Substring(1, m.Value.Length - 2);
-    //    // NOTE: If we have some kind of expression for our properties, then we have to have a way
-    //    // to extract all of the named properties..  At this time we don't have a way to really do that
-    //    // outside of updating the grammar, so for now, we will just assume that the expression is a single
-    //    // property name....
-    //    propNames.Add(expValue.Trim());
-
-    //    parts.Add(new FormatPart()
-    //    {
-    //      Value = expValue,
-    //      IsExpession = true
-    //    });
-
-    //    start = index + m.Length;
-    //  }
-
-    //  // Leftover string?
-    //  if (val.Length > start)
-    //  {
-    //    parts.Add(new FormatPart()
-    //    {
-    //      Value = val.Substring(start)
-    //    });
-    //  }
-
-    //  var res = new DynamicContent()
-    //  {
-    //    Parts = parts,
-    //    PropertyNames = propNames.Distinct().ToList()
-    //  };
-
-    //  if (res.PropertyNames.Count == 0)
-    //  {
-    //    // NOTE: A future version could allow for const expressions....
-    //    throw new Exception("There are no named properties in the expression!");
-    //  }
-
-    //  return res;
+    return ParseDynamicContent(val.Expression);
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private DynamicContent ParseDynamicContent(Expression val)
+  {
+    Debug.WriteLine("DYNAMIC CONTENT SUPPORT PLEASE!  TEST CASES TOO!");
+    return null;
+  }
+
+  //// --------------------------------------------------------------------------------------------------------------------------
+  //private DynamicContent ParseDynamicContent(AttributeValue val)
+  //{
+  //  return null;
+
+  //  //// OLD: String only based approach....
+  //  //  int start = 0;
+
+  //  //  var parts = new List<FormatPart>();
+  //  //  var propNames = new List<string>();
+
+  //  //  MatchCollection matches = Regex.Matches(val, "\\{.*\\}");
+  //  //  foreach (Match m in matches)
+  //  //  {
+  //  //    int index = m.Captures[0].Index;
+  //  //    string prevPart = val.Substring(start, index - start);
+  //  //    if (prevPart != string.Empty)
+  //  //    {
+  //  //      parts.Add(new FormatPart()
+  //  //      {
+  //  //        Value = prevPart,
+  //  //      });
+  //  //    }
+
+
+  //  //    string expValue = m.Value.Substring(1, m.Value.Length - 2);
+  //  //    // NOTE: If we have some kind of expression for our properties, then we have to have a way
+  //  //    // to extract all of the named properties..  At this time we don't have a way to really do that
+  //  //    // outside of updating the grammar, so for now, we will just assume that the expression is a single
+  //  //    // property name....
+  //  //    propNames.Add(expValue.Trim());
+
+  //  //    parts.Add(new FormatPart()
+  //  //    {
+  //  //      Value = expValue,
+  //  //      IsExpession = true
+  //  //    });
+
+  //  //    start = index + m.Length;
+  //  //  }
+
+  //  //  // Leftover string?
+  //  //  if (val.Length > start)
+  //  //  {
+  //  //    parts.Add(new FormatPart()
+  //  //    {
+  //  //      Value = val.Substring(start)
+  //  //    });
+  //  //  }
+
+  //  //  var res = new DynamicContent()
+  //  //  {
+  //  //    Parts = parts,
+  //  //    PropertyNames = propNames.Distinct().ToList()
+  //  //  };
+
+  //  //  if (res.PropertyNames.Count == 0)
+  //  //  {
+  //  //    // NOTE: A future version could allow for const expressions....
+  //  //    throw new Exception("There are no named properties in the expression!");
+  //  //  }
+
+  //  //  return res;
+  //}
 
   // --------------------------------------------------------------------------------------------------------------------------
   private List<Node> ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
     List<Node> res = new List<Node>();
 
-    // TODO: Implement me!
     var elems = elem.children;
     foreach (var child in elems)
     {
@@ -676,7 +647,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       {
         if (kid is templateParser.HtmlElementContext)
         {
-          var n = ComputeDOM(kid as templateParser.HtmlElementContext);
+          var n = ComputeDOM((kid as templateParser.HtmlElementContext)!);
           res.Add(n);
         }
         else if (kid is templateParser.HtmlChardataContext)
@@ -684,23 +655,42 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
           var charData = (kid as templateParser.HtmlChardataContext)!;
 
           string text = charData.GetText();
-          bool hasDynamic = HasPropString(text);
-          DynamicContent? dc = null;
-          if (hasDynamic)
-          {
-            throw new NotImplementedException("please get this fixed up!");
-            // dc = ParseDynamicContent(text);
-          }
 
           var n = new Node()
           {
             Parent = parentNode,
-            Name = "<text>",
+            Name = HTMLNode.TEXT_NAME,
             Value = text,
-            DynamicContent = dc
           };
           res.Add(n);
           int z = 10;
+        }
+        else if (kid is templateParser.ExpressionContext)
+        {
+          var context = kid as templateParser.ExpressionContext;
+          Expression expr = ParseExpresion(context.expr());
+
+          // NOTE / TODO:
+          // If this expression is just a string literal, then we should convert it to a text node,
+          // and then have a second pass to combine all adjacent text nodes into one.
+          // NOTE: --> Such a feature should be an option that we enable by default.
+
+          var dc = ParseDynamicContent(expr);
+          var n = new Node()
+          {
+            Parent = parentNode,
+            Name = HTMLNode.EXPRESSION_NAME,
+            Value = null,
+            DynamicContent = dc,
+          };
+          res.Add(n);
+
+          int x = 10;
+        }
+        else
+        {
+          var t = kid.GetType();
+          throw new NotImplementedException($"A handler for the parser rule (type: {t}) is not implemented!");
         }
       }
     }
