@@ -25,27 +25,6 @@ public class TemplateParseException : Exception
 }
 
 // ==============================================================================================================================
-public class FormatPart
-{
-  public string Value { get; set; }
-  public bool IsExpession { get; set; }
-}
-
-// ==============================================================================================================================
-public class DynamicContent
-{
-  // Some way (function) to represent the interpolated string....
-  public List<FormatPart> Parts { get; set; }
-
-  /// <summary>
-  /// All of the property names (identifiers) that appear in the expression.
-  /// </summary>
-  /// REFACTOR: Rename to 'identifiers' or something similar.
-  public List<string> PropertyNames { get; set; } = new List<string>();
-}
-
-
-// ==============================================================================================================================
 /// <summary>
 /// This attribute is really only used to make it clear that a certain property is only used for codegen
 /// purposes, and shouldn't be messed with.
@@ -53,6 +32,20 @@ public class DynamicContent
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
 public class CodeGenAttribute : System.Attribute
 { }
+
+// ==============================================================================================================================
+public class NodeList
+{
+  // --------------------------------------------------------------------------------------------------------------------------
+  public NodeList(IEnumerable<Node> nodes, DynamicContent? dynamicContent_)
+  {
+    Nodes.AddRange(nodes);
+    DynamicContent = dynamicContent_;
+  }
+
+  public DynamicContent? DynamicContent { get; set; } = null;
+  public List<Node> Nodes { get; set; } = new List<Node>();
+}
 
 // ==============================================================================================================================
 public partial class Node
@@ -72,7 +65,9 @@ public partial class Node
   /// </summary>
   public string Name { get; set; } = default!;
   public List<Attribute> Attributes { get; set; } = new List<Attribute>();
-  public List<Node> Children { get; set; } = new List<Node>();
+  public NodeList? Children { get; set; } = null;
+
+  // public List<Node> Children { get; set; } = new List<Node>();
 
   /// <summary>
   /// Text/HTML content.  Used for text nodes.
@@ -80,17 +75,20 @@ public partial class Node
   public string? Value { get; set; } = default;
 
   /// <summary>
-  /// If there is any dynamic content / prop expressions in the content, we will use this.
+  /// Expressions content.  Used for expression nodes.
   /// </summary>
-  public DynamicContent? DynamicContent { get; set; } = null;
+  public Expression? Expression { get; set; } = null!;
+
+  ///// <summary>
+  ///// If there is any dynamic content / prop expressions in the content, we will use this.
+  ///// </summary>
+  //public DynamicContent? DynamicContent { get; set; } = null;
 
   public bool HasDynamicContent
   {
     get
     {
-      bool res = this.DynamicContent != null ||
-      this.Attributes.Any(x => x.DynamicContent != null);
-      return res;
+      return Children?.DynamicContent != null;
     }
   }
 
@@ -276,7 +274,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       Attributes = attributes,
     };
 
-    List<Node> children = ComputeChildren(elem, res);
+    NodeList children = ComputeChildren(elem, res);
 
     res.Children = children;
 
@@ -546,10 +544,68 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private DynamicContent ParseDynamicContent(Expression val)
+  /// <summary>
+  /// Dynamic content in an HTMLContent node is represented as interleaved 'text' and 'expression' nodes.
+  /// </summary>
+  private DynamicContent ParseDynamicContent(IEnumerable<Node> nodes)
   {
-    Debug.WriteLine("DYNAMIC CONTENT SUPPORT PLEASE!  TEST CASES TOO!");
-    return null;
+    List<string> allIdentifiers = new List<string>();
+    foreach (Node n in nodes)
+    {
+      if (n.IsExpressionNode)
+      {
+        var ids = GetIdentifiersFromExpresion(n.Expression);
+        allIdentifiers.AddRange(ids);
+      }
+    }
+
+    var res = new DynamicContent()
+    {
+      PropertyNames = allIdentifiers
+      // NOTE: I don't think that 'parts' really matters as this is already covered by the node list....
+    };
+
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private DynamicContent ParseDynamicContent(Expression epxr)
+  {
+    DynamicContent res = new DynamicContent();
+
+    var ids = GetIdentifiersFromExpresion(epxr);
+    return new DynamicContent()
+    {
+      PropertyNames = ids.ToList()
+    };
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private string[] GetIdentifiersFromExpresion(Expression val)
+  {
+    var primary = val as PrimaryExpression;
+    if (primary != null)
+    {
+      return new[] { primary.Content };
+    }
+
+    var res = new List<string>();
+    foreach (var item in val.Children.External)
+    {
+      var childIds = GetIdentifiersFromExpresion(item);
+      res.AddRange(childIds);
+
+      //PrimaryExpression? e = item as PrimaryExpression;
+      //if (e != null && e.Type == EPrimaryType.Identifier)
+      //{
+      //  res.Add(e.Content);
+      //}
+      //else { 
+      //}
+      //// else if (item is Prin
+    }
+
+    return res.ToArray();
   }
 
   //// --------------------------------------------------------------------------------------------------------------------------
@@ -618,9 +674,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   //}
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private List<Node> ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
+  private NodeList ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
-    List<Node> res = new List<Node>();
+    NodeList res = default!;
 
     var elems = elem.children;
     foreach (var child in elems)
@@ -628,17 +684,17 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       var content = child as templateParser.HtmlContentContext;
       if (content != null)
       {
-        res = GetChildNodesFromContent(content, parentNode);
+        res = GetChildNodesFromHTMLContent(content, parentNode);
+
       }
     }
-
     return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private List<Node> GetChildNodesFromContent(templateParser.HtmlContentContext parent, Node parentNode)
+  private NodeList GetChildNodesFromHTMLContent(templateParser.HtmlContentContext parent, Node parentNode)
   {
-    var res = new List<Node>();
+    var nodes = new List<Node>();
 
     var kids = parent.children;
     if (kids != null)
@@ -648,7 +704,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
         if (kid is templateParser.HtmlElementContext)
         {
           var n = ComputeDOM((kid as templateParser.HtmlElementContext)!);
-          res.Add(n);
+          nodes.Add(n);
         }
         else if (kid is templateParser.HtmlChardataContext)
         {
@@ -662,30 +718,21 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
             Name = HTMLNode.TEXT_NAME,
             Value = text,
           };
-          res.Add(n);
-          int z = 10;
+          nodes.Add(n);
         }
         else if (kid is templateParser.ExpressionContext)
         {
           var context = kid as templateParser.ExpressionContext;
           Expression expr = ParseExpresion(context.expr());
 
-          // NOTE / TODO:
-          // If this expression is just a string literal, then we should convert it to a text node,
-          // and then have a second pass to combine all adjacent text nodes into one.
-          // NOTE: --> Such a feature should be an option that we enable by default.
-
-          var dc = ParseDynamicContent(expr);
           var n = new Node()
           {
             Parent = parentNode,
             Name = HTMLNode.EXPRESSION_NAME,
             Value = null,
-            DynamicContent = dc,
+            Expression = expr,
           };
-          res.Add(n);
-
-          int x = 10;
+          nodes.Add(n);
         }
         else
         {
@@ -696,7 +743,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     }
 
     // NOTE: We could combine contiguous text nodes at this point to simplify the tree a bit.
+    var dc = ParseDynamicContent(nodes);
 
+    var res = new NodeList(nodes, dc);
     return res;
   }
 

@@ -33,13 +33,13 @@ namespace dhllTesters
 
       // We should have three text, and two expression nodes interleaved:
       // text - exp - text - exp - text
-      Assert.That(dom.Children.Count, Is.EqualTo(5));
+      Assert.That(dom.Children.Nodes.Count, Is.EqualTo(5));
 
-      var c1=  dom.Children[0];
-      var c2 = dom.Children[1];
-      var c3 = dom.Children[2];
-      var c4 = dom.Children[3];
-      var c5 = dom.Children[4];
+      var c1=  dom.Children.Nodes[0];
+      var c2 = dom.Children.Nodes[1];
+      var c3 = dom.Children.Nodes[2];
+      var c4 = dom.Children.Nodes[3];
+      var c5 = dom.Children.Nodes[4];
 
       Assert.IsTrue(c1.Name == HTMLNode.TEXT_NAME);
       Assert.IsTrue(c2.Name == HTMLNode.EXPRESSION_NAME);
@@ -47,6 +47,9 @@ namespace dhllTesters
       Assert.IsTrue(c4.Name == HTMLNode.EXPRESSION_NAME);
       Assert.IsTrue(c5.Name == HTMLNode.TEXT_NAME);
 
+
+      // Also show that we have some dynamic content for the child nodes....
+      Assert.IsTrue(dom.HasDynamicContent, "The dynamic content flag should be set!");
       int x = 10;
     }
 

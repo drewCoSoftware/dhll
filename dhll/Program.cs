@@ -25,16 +25,16 @@ namespace dhll
     // --------------------------------------------------------------------------------------------------------------------------
     private static int Compile(CompileFileOptions ops)
     {
-      var logger = InitLogger();
+      InitLogger();
       try
       {
-        var compiler = new dhllCompiler(ops, logger);
+        var compiler = new dhllCompiler(ops);
         int res = compiler.CompileProject();
         return res;
       }
       catch (Exception ex)
       {
-        logger.LogException(ex);
+        Log.Exception(ex);
 #if DEBUG
         throw;
 #endif
@@ -45,16 +45,16 @@ namespace dhll
     // --------------------------------------------------------------------------------------------------------------------------
     private static int CompileProject(CompileProjectOptions ops)
     {
-      var logger = InitLogger();
+      InitLogger();
       try
       {
-        var compiler = new dhllCompiler(ops, logger);
+        var compiler = new dhllCompiler(ops);
         int res = compiler.CompileProject();
         return res;
       }
       catch (Exception ex)
       {
-        logger.LogException(ex);
+        Log.Exception(ex);
 #if DEBUG
         throw;
 #endif
@@ -63,10 +63,15 @@ namespace dhll
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    private static Logger InitLogger()
-    {
-      var res = new Logger();
-      return res;
+    private static void InitLogger() {
+    
+      var consoleLogger = new ConsoleLogger();
+      Log.AddLogger(consoleLogger);
+
+      var levels = new[] { ELogLevel.EXCEPTION.ToString() };
+      var ops = new FileLoggerOptions(levels, "./logs", "runlog", "./logs/exceptions", EFileLoggerMode.Overwrite);
+      Log.AddLogger(new FileLogger(ops));
     }
+
   }
 }

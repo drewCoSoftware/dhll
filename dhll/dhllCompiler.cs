@@ -48,33 +48,27 @@ public class dhllCompiler
   {  }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileProjectOptions ops_, ILogger? logger_ = null)
+  public dhllCompiler(CompileProjectOptions ops_)
   {
     ProjectOptions = ops_;
 
-    InitContext(logger_);
+    InitContext();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public dhllCompiler(CompileFileOptions options_, ILogger? logger_ = null)
+  public dhllCompiler(CompileFileOptions options_)
   {
     FileOptions = options_;
 
-    InitContext(logger_);
+    InitContext();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void InitContext(ILogger? logger_)
+  private void InitContext()
   {
-    if (logger_ == null)
-    {
-      Debug.WriteLine("No logger was provided, using NullLogger as a default!");
-      logger_ = new NullLogger();
-    }
 
     Context = new CompilerContext()
     {
-      Logger = logger_,
       TypeIndex = new TypeIndex(),
       TemplateIndex = new TemplateIndex(),
     };

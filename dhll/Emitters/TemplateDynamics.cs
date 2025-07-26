@@ -1,6 +1,7 @@
 ﻿using dhll.CodeGen;
 using dhll.Grammars.v1;
 using dhll.Emitters;
+using drewCo.Tools.Logging;
 
 namespace dhll;
 
@@ -73,63 +74,67 @@ internal class TemplateDynamics
   /// </summary>
   private void SetNodeIdentifiers(Node node)
   {
-    bool isTextNode = node.Name == "<text>";
+    throw new NotImplementedException();
 
-    if (node.Identifier == null && !isTextNode)
-    {
+    //bool isTextNode = node.Name == "<text>";
 
-      // NOTE: In a future version we could probably use some kind of 'hinting' system to have
-      // more meaningful names for the nodes.
-      string baseName = PropTargets.HasNode(node) ? "_Node" : "node";
-      node.Identifier = NamingContext.GetUniqueNameFor(baseName);
-    }
+    //if (node.Identifier == null && !isTextNode)
+    //{
 
-    foreach (var child in node.Children)
-    {
-      SetNodeIdentifiers(child);
-    }
+    //  // NOTE: In a future version we could probably use some kind of 'hinting' system to have
+    //  // more meaningful names for the nodes.
+    //  string baseName = PropTargets.HasNode(node) ? "_Node" : "node";
+    //  node.Identifier = NamingContext.GetUniqueNameFor(baseName);
+    //}
+
+    //foreach (var child in node.Children)
+    //{
+    //  SetNodeIdentifiers(child);
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetDynamicContent(Node node)
   {
-    bool isTextNode = node.Name == "<text>";
+    throw new NotImplementedException();
 
-    if (isTextNode && node.DynamicContent != null)
-    {
-      // NOTE: This check should probably happen elsewhere....
-      if (node.Parent == null)
-      {
-        throw new InvalidOperationException("<text> nodes must have a parent!");
-      }
+    //bool isTextNode = node.Name == "<text>";
 
-      string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
-      node.DynamicFunction = funcName;
+    //if (isTextNode && node.DynamicContent != null)
+    //{
+    //  // NOTE: This check should probably happen elsewhere....
+    //  if (node.Parent == null)
+    //  {
+    //    throw new InvalidOperationException("<text> nodes must have a parent!");
+    //  }
 
-      // We need to make note that this is a target...
-      // So if every content function is unique, then we can make a 1:1 association with a DOM element....
-      // soo....  --> elem.innerText = contentFunc();
-      // Every time we set a value on the associated list of properties, then we need to call this func....
-      // --> We already have a unique name for the DOM element as it is created....
-      // So then each function is associated with a unique target....
-      PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
-    }
+    //  string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
+    //  node.DynamicFunction = funcName;
 
-    foreach (var attr in node.Attributes)
-    {
-      if (attr.DynamicContent != null)
-      {
-        string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
-        attr.DynamicFunction = funcName;
+    //  // We need to make note that this is a target...
+    //  // So if every content function is unique, then we can make a 1:1 association with a DOM element....
+    //  // soo....  --> elem.innerText = contentFunc();
+    //  // Every time we set a value on the associated list of properties, then we need to call this func....
+    //  // --> We already have a unique name for the DOM element as it is created....
+    //  // So then each function is associated with a unique target....
+    //  PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
+    //}
 
-        PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
-      }
-    }
+    //foreach (var attr in node.Attributes)
+    //{
+    //  if (attr.DynamicContent != null)
+    //  {
+    //    string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
+    //    attr.DynamicFunction = funcName;
 
-    foreach (var child in node.Children)
-    {
-      SetDynamicContent(child);
-    }
+    //    PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
+    //  }
+    //}
+
+    //foreach (var child in node.Children)
+    //{
+    //  SetDynamicContent(child);
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

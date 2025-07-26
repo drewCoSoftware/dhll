@@ -10,11 +10,19 @@
   <ItemGroup>
     <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="drewCo.Tools" Version="1.3.3.6" />
+    <PackageReference Include="drewCo.Tools" Version="1.4.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="dhllTesters" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\code\repos\dhll\dhll\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\code\repos\dhll\dhll\.editorconfig" />
   </ItemGroup>
 
 </Project>

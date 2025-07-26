@@ -69,51 +69,52 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void CreateChildElementsForCsharp(CodeFile cf, Node parent, string parentVarId)
   {
-    foreach (var item in parent.Children)
-    {
-      if (item.IsTextNode)
-      {
+    throw new NotImplementedException();
+    //foreach (var item in parent.Children)
+    //{
+    //  if (item.IsTextNode)
+    //  {
 
-        string? useText = FormatText(item.Value);
-        string? valLine = !string.IsNullOrWhiteSpace(useText) ? $"\"{useText}\"" : null;
+    //    string? useText = FormatText(item.Value);
+    //    string? valLine = !string.IsNullOrWhiteSpace(useText) ? $"\"{useText}\"" : null;
 
 
-        if (item.DynamicContent != null)
-        {
-          string valId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-          // We need to know all of the variable names....
-          // HACK: We are assuming that the dynamic functions are all at class level!
-          string funcName = item.DynamicFunction;
-          valLine = $"var {valId} = this.{funcName}();";
-          cf.WriteLine(valLine);
+    //    if (item.DynamicContent != null)
+    //    {
+    //      string valId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+    //      // We need to know all of the variable names....
+    //      // HACK: We are assuming that the dynamic functions are all at class level!
+    //      string funcName = item.DynamicFunction;
+    //      valLine = $"var {valId} = this.{funcName}();";
+    //      cf.WriteLine(valLine);
 
-          string nodeName = NamingContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
-          cf.WriteLine($"var {nodeName} = HTMLNode.CreateTextNode({valId});");
-          cf.WriteLine($"{parentVarId}.AddChild({nodeName});");
+    //      string nodeName = NamingContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
+    //      cf.WriteLine($"var {nodeName} = HTMLNode.CreateTextNode({valId});");
+    //      cf.WriteLine($"{parentVarId}.AddChild({nodeName});");
 
-          continue;
-        }
+    //      continue;
+    //    }
 
-      }
-      else
-      {
-        cf.NextLine();
+    //  }
+    //  else
+    //  {
+    //    cf.NextLine();
 
-        string nodeId = NamingContext.GetUniqueNameFor("node");
-        cf.WriteLine($"var {nodeId} = new HTMLNode(\"{item.Name}\");");
-        cf.WriteLine($"{parentVarId}.AddChild({nodeId});");
+    //    string nodeId = NamingContext.GetUniqueNameFor("node");
+    //    cf.WriteLine($"var {nodeId} = new HTMLNode(\"{item.Name}\");");
+    //    cf.WriteLine($"{parentVarId}.AddChild({nodeId});");
 
-        // Attributes.
-        AddAttributesForCsharp(cf, item, nodeId);
+    //    // Attributes.
+    //    AddAttributesForCsharp(cf, item, nodeId);
 
-        // Now its child elements too....
-        CreateChildElementsForCsharp(cf, item, nodeId);
+    //    // Now its child elements too....
+    //    CreateChildElementsForCsharp(cf, item, nodeId);
 
-        // Add the child node to the parent....
-        //cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
-      }
+    //    // Add the child node to the parent....
+    //    //cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+    //  }
 
-    }
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -263,25 +264,26 @@ internal class TemplateEmitter
   /// </summary>
   private List<Node> BindNode(Node node, string bindTo, CodeFile cf)
   {
-    var res = new List<Node>();
+    throw new NotImplementedException();
+    //var res = new List<Node>();
 
-    string elementId = QualifyIdentifier(node.Identifier);
-    if (Dynamics.IdentifierIsClassLevel(node.Identifier))
-    {
-      res.Add(node);
-      cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
-    }
+    //string elementId = QualifyIdentifier(node.Identifier);
+    //if (Dynamics.IdentifierIsClassLevel(node.Identifier))
+    //{
+    //  res.Add(node);
+    //  cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
+    //}
 
-    int index = 0;
-    foreach (var c in node.Children)
-    {
-      if (c.Name == "<text>") { continue; }
-      var kids = BindNode(c, bindTo + $".children[{index}]", cf);
-      res.AddRange(kids);
-      ++index;
-    }
+    //int index = 0;
+    //foreach (var c in node.Children)
+    //{
+    //  if (c.Name == "<text>") { continue; }
+    //  var kids = BindNode(c, bindTo + $".children[{index}]", cf);
+    //  res.AddRange(kids);
+    //  ++index;
+    //}
 
-    return res;
+    //return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -364,45 +366,47 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void CreateChildElements(CodeFile cf, Node parent, NamingContext nameContext)
   {
-    foreach (var item in parent.Children)
-    {
-      if (item.Name == "<text>")
-      {
-        string? useText = FormatText(item.Value);
-        string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
+    throw new NotImplementedException();
 
-        if (item.DynamicContent != null)
-        {
-          // We need to know all of the variable names....
-          // HACK: We are assuming that the dynamic functions are all at class level!
-          string funcName = item.DynamicFunction;
-          useValue = $"this.{funcName}()";
-        }
+    //foreach (var item in parent.Children)
+    //{
+    //  if (item.Name == "<text>")
+    //  {
+    //    string? useText = FormatText(item.Value);
+    //    string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
 
-        if (useValue != null)
-        {
-          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
-        }
+    //    if (item.DynamicContent != null)
+    //    {
+    //      // We need to know all of the variable names....
+    //      // HACK: We are assuming that the dynamic functions are all at class level!
+    //      string funcName = item.DynamicFunction;
+    //      useValue = $"this.{funcName}()";
+    //    }
 
-        continue;
-      }
-      else
-      {
-        cf.NextLine(2);
-        string assignTo = GetTypescriptAssignSyntax(item);
-        cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
+    //    if (useValue != null)
+    //    {
+    //      cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
+    //    }
 
-        // Attributes.
-        AddAttributes(cf, item, item.Identifier);
+    //    continue;
+    //  }
+    //  else
+    //  {
+    //    cf.NextLine(2);
+    //    string assignTo = GetTypescriptAssignSyntax(item);
+    //    cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
 
-        // Now its child elements too....
-        CreateChildElements(cf, item, nameContext);
+    //    // Attributes.
+    //    AddAttributes(cf, item, item.Identifier);
 
-        // Add the child node to the parent....
-        cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
-      }
+    //    // Now its child elements too....
+    //    CreateChildElements(cf, item, nameContext);
 
-    }
+    //    // Add the child node to the parent....
+    //    cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+    //  }
+
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
