@@ -1,4 +1,5 @@
 ﻿using dhll.CodeGen;
+using dhll.Expressions;
 using dhll.v1;
 using drewCo.Tools;
 using System.Text;
@@ -28,6 +29,12 @@ namespace dhll.Emitters
         { "double", "double" },
       };
       return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    public override void EmitExpression(Expression expression)
+    {
+      throw new NotImplementedException();
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

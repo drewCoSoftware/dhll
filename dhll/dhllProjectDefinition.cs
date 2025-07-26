@@ -19,7 +19,7 @@ public class dhllProjectDefinition
   [JsonIgnore]
   public string Path { get; private set; } = null!;
 
-  public List<string> InputFiles { get; set; } = new List<string>();
+  public IList<string> InputFiles { get; set; } = new List<string>();
 
   /// <summary>
   /// Global output directory for all OutputTargets that don't specify an OutputDir.

@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using dhll.CodeGen;
+using dhll.Expressions;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
@@ -36,6 +37,12 @@ namespace dhll.Emitters
         { "double", "number" },
       };
       return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    public override void EmitExpression(Expression expression)
+    {
+      throw new NotImplementedException();
     }
 
     // --------------------------------------------------------------------------------------------------------------------------

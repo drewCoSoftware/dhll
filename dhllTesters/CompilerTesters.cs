@@ -13,6 +13,26 @@ namespace dhllTesters
   // ==============================================================================================================================
   public class CompilerTesters : TestBase
   {
+    [Test]
+    public void CanCompileBasicTemplate()
+    {
+      dhllProjectDefinition def = CreateProjectDef(new[] {
+      "./TestInputs/Template1.dhlt",
+      "./TestInputs/BasicTypeDef.dhll"
+      },
+      $"./{nameof(CanCompileBasicTemplate)}{dhllCompiler.DHLPROJ_EXT}");
+
+
+      var compiler = new dhllCompiler(new CompileProjectOptions()
+      {
+        InputFile = def.Path
+      });
+      int compRes = compiler.CompileProject();
+      Assert.That(compRes, Is.EqualTo(0), "Compilation failed!");
+
+    }
+
+
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <summary>
@@ -24,46 +44,50 @@ namespace dhllTesters
     {
       Assert.Inconclusive("I'm not sure what I want to do about this test.... I think the best thing is to advise users to just use &lbrace; &rbrace; stuff in their 'HTML' content?");
 
-      string projPath = CreateDHLLProjectFromFiles(new[] { "EscapedPropString.dhll", "EscapedPropString.dhlt" });
+      var def = CreateProjectDef(new[] {
+        "EscapedPropStringdhll",
+        "EscapedPropString.dhlt"
+      },
+      $"./{nameof(CanCompileBasicTemplate)}{dhllCompiler.DHLPROJ_EXT}");
+
       var ops = new CompileProjectOptions()
       {
-        InputFile = projPath,
+        InputFile = def.Path,
       };
 
       var c = new dhllCompiler(ops);
       int cRes = c.CompileProject();
       Assert.That(0, Is.EqualTo(cRes), "Invalid return code!");
 
-
-
-      //throw new NotSupportedException("we need to update this test to show that any generated template code properly renders the string literals!");
     }
 
+
     // --------------------------------------------------------------------------------------------------------------------------
-    protected string CreateDHLLProjectFromFiles(IList<string> fileNames)
+    /// <summary>
+    /// Create a project def that can target C# and typescript.
+    /// </summary>
+    private dhllProjectDefinition CreateProjectDef(string[] inputFiles, string savetoPath)
     {
-      // We will create + compile a quick project...
-      // TODO: We can probably wrap this up into a single function that will generate a test project file for us.....
-      dhllProjectDefinition pd = new dhllProjectDefinition();
-      foreach (string name in fileNames)
+      var def = new dhllProjectDefinition()
       {
-        pd.InputFiles.Add(name);
-      }
-      pd.OutputTargets.Add("typescript", new OutputTarget()
-      {
-        Name = "typescript",
-        TargetLanguage = "typescript"
-      });
-      pd.OutputTargets.Add("csharp", new OutputTarget()
-      {
-        Name = "csharp",
-        TargetLanguage = "C#"
-      });
-      string projPath = Path.Combine(TestDir, nameof(CanCompileTypeAndTemplateWithEscapePropertyStrings) + dhllCompiler.DHLPROJ_EXT);
-      FileTools.SaveJson(projPath, pd);
+        InputFiles = inputFiles,
+        OutputDir = "./test-output",
+        OutputTargets = new Dictionary<string, OutputTarget>() {
+          {"typescript", new OutputTarget() {
+            Name = "typescript",
+            TargetLanguage = "typescript"
+          }},
+          {"C#", new OutputTarget() {
+            Name = "C#",
+            TargetLanguage = "C#"
+          }}
+        }
+      };
 
-      return projPath;
+      string defPath = savetoPath;
+      FileTools.SaveJson(defPath, def);
 
+      return def;
     }
   }
 }

@@ -1,4 +1,6 @@
 typedef ModalWindow {
     prop bool IsVisible = false;
     string Title = "Modal";
+    prop bool Display = false;
+    prop string TheContent = "";
 }

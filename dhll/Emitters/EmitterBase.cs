@@ -1,4 +1,5 @@
 ﻿using dhll.CodeGen;
+using dhll.Expressions;
 using dhll.v1;
 using drewCo.Tools.Logging;
 
@@ -154,8 +155,8 @@ internal abstract class EmitterBase
     return res;
   }
 
-
-
+  // --------------------------------------------------------------------------------------------------------------------------
+  public abstract void EmitExpression(Expression expression);
 }
 
 

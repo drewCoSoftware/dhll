@@ -2,6 +2,7 @@
 using dhll.Grammars.v1;
 using dhll.Emitters;
 using drewCo.Tools.Logging;
+using System.Xml;
 
 namespace dhll;
 
@@ -32,12 +33,12 @@ internal class TemplateDynamics
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDynamics(TemplateDefinition def_)
+  public TemplateDynamics(TemplateDefinition def_, EmitterBase emitter_)
   {
 
     Def = def_;
     NamingContext = new NamingContext();
-    DynamicFunctions = new DynamicFunctionsGroup(NamingContext);
+    DynamicFunctions = new DynamicFunctionsGroup(NamingContext, emitter_);
     PropTargets = new PropChangeTargets();
 
     Def.DOM.Identifier = NamingContext.GetUniqueNameFor(ROOT_NODE_IDENTIFIER);
@@ -96,45 +97,48 @@ internal class TemplateDynamics
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetDynamicContent(Node node)
   {
-    throw new NotImplementedException();
+    // bool isTextNode = node.Name == "<text>";
 
-    //bool isTextNode = node.Name == "<text>";
+    // throw new NotImplementedException();
+    var dc = node.ChildContent?.DynamicContent;
+    if (node.HasDynamicContent)
+    {
+      //// NOTE: This check should probably happen elsewhere....
+      //if (node.Parent == null)
+      //{
+      //  throw new InvalidOperationException("<text> nodes must have a parent!");
+      //}
 
-    //if (isTextNode && node.DynamicContent != null)
-    //{
-    //  // NOTE: This check should probably happen elsewhere....
-    //  if (node.Parent == null)
-    //  {
-    //    throw new InvalidOperationException("<text> nodes must have a parent!");
-    //  }
+      string funcName = DynamicFunctions.AddDynamicFunction(node.ChildContent!);
+      node.DynamicFunction = funcName;
 
-    //  string funcName = DynamicFunctions.AddDynamicFunction(node.DynamicContent);
-    //  node.DynamicFunction = funcName;
+      // We need to make note that this is a target...
+      // So if every content function is unique, then we can make a 1:1 association with a DOM element....
+      // soo....  --> elem.innerText = contentFunc();
+      // Every time we set a value on the associated list of properties, then we need to call this func....
+      // --> We already have a unique name for the DOM element as it is created....
+      // So then each function is associated with a unique target....
+      //PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
+    }
 
-    //  // We need to make note that this is a target...
-    //  // So if every content function is unique, then we can make a 1:1 association with a DOM element....
-    //  // soo....  --> elem.innerText = contentFunc();
-    //  // Every time we set a value on the associated list of properties, then we need to call this func....
-    //  // --> We already have a unique name for the DOM element as it is created....
-    //  // So then each function is associated with a unique target....
-    //  PropTargets.AddPropChangeTarget(funcName, node.Parent!, node.DynamicContent);
-    //}
+    foreach (var attr in node.Attributes)
+    {
+      if (attr.IsExpression)
+      {
+        //string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
+        //attr.DynamicFunction = funcName;
 
-    //foreach (var attr in node.Attributes)
-    //{
-    //  if (attr.DynamicContent != null)
-    //  {
-    //    string funcName = DynamicFunctions.AddDynamicFunction(attr.DynamicContent);
-    //    attr.DynamicFunction = funcName;
+        //PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
+      }
+    }
 
-    //    PropTargets.AddPropChangeTarget(funcName, node, attr.DynamicContent, attr);
-    //  }
-    //}
-
-    //foreach (var child in node.Children)
-    //{
-    //  SetDynamicContent(child);
-    //}
+    if (node.ChildContent != null)
+    {
+      foreach (var child in node.ChildContent.Nodes)
+      {
+        SetDynamicContent(child);
+      }
+    }
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

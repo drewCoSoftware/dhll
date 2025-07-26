@@ -33,13 +33,13 @@ namespace dhllTesters
 
       // We should have three text, and two expression nodes interleaved:
       // text - exp - text - exp - text
-      Assert.That(dom.Children.Nodes.Count, Is.EqualTo(5));
+      Assert.That(dom.ChildContent.Nodes.Count, Is.EqualTo(5));
 
-      var c1=  dom.Children.Nodes[0];
-      var c2 = dom.Children.Nodes[1];
-      var c3 = dom.Children.Nodes[2];
-      var c4 = dom.Children.Nodes[3];
-      var c5 = dom.Children.Nodes[4];
+      var c1=  dom.ChildContent.Nodes[0];
+      var c2 = dom.ChildContent.Nodes[1];
+      var c3 = dom.ChildContent.Nodes[2];
+      var c4 = dom.ChildContent.Nodes[3];
+      var c5 = dom.ChildContent.Nodes[4];
 
       Assert.IsTrue(c1.Name == HTMLNode.TEXT_NAME);
       Assert.IsTrue(c2.Name == HTMLNode.EXPRESSION_NAME);

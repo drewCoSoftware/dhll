@@ -34,10 +34,14 @@ public class CodeGenAttribute : System.Attribute
 { }
 
 // ==============================================================================================================================
-public class NodeList
+/// <summary>
+/// Represents the child content of a given node.
+/// This includes sub-nodes + any dynamic content information.
+/// </summary>
+public class ChildContent
 {
   // --------------------------------------------------------------------------------------------------------------------------
-  public NodeList(IEnumerable<Node> nodes, DynamicContent? dynamicContent_)
+  public ChildContent(IEnumerable<Node> nodes, DynamicContent? dynamicContent_)
   {
     Nodes.AddRange(nodes);
     DynamicContent = dynamicContent_;
@@ -65,7 +69,7 @@ public partial class Node
   /// </summary>
   public string Name { get; set; } = default!;
   public List<Attribute> Attributes { get; set; } = new List<Attribute>();
-  public NodeList? Children { get; set; } = null;
+  public ChildContent? ChildContent { get; set; } = null;
 
   // public List<Node> Children { get; set; } = new List<Node>();
 
@@ -79,16 +83,12 @@ public partial class Node
   /// </summary>
   public Expression? Expression { get; set; } = null!;
 
-  ///// <summary>
-  ///// If there is any dynamic content / prop expressions in the content, we will use this.
-  ///// </summary>
-  //public DynamicContent? DynamicContent { get; set; } = null;
-
   public bool HasDynamicContent
   {
     get
     {
-      return Children?.DynamicContent != null;
+      return ChildContent?.DynamicContent != null &&
+             ChildContent.DynamicContent.Identifiers.Count > 0;
     }
   }
 
@@ -279,9 +279,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       Attributes = attributes,
     };
 
-    NodeList children = ComputeChildren(elem, res);
+    ChildContent children = ComputeChildren(elem, res);
 
-    res.Children = children;
+    res.ChildContent = children;
 
     return res;
   }
@@ -681,9 +681,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   //}
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private NodeList ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
+  private ChildContent ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
-    NodeList res = default!;
+    ChildContent res = default!;
 
     var elems = elem.children;
     foreach (var child in elems)
@@ -699,7 +699,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private NodeList GetChildNodesFromHTMLContent(templateParser.HtmlContentContext parent, Node parentNode)
+  private ChildContent GetChildNodesFromHTMLContent(templateParser.HtmlContentContext parent, Node parentNode)
   {
     var nodes = new List<Node>();
 
@@ -752,7 +752,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     // NOTE: We could combine contiguous text nodes at this point to simplify the tree a bit.
     var dc = ParseDynamicContent(nodes);
 
-    var res = new NodeList(nodes, dc);
+    var res = new ChildContent(nodes, dc);
     return res;
   }
 

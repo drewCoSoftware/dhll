@@ -42,8 +42,8 @@ public class dhllCompiler
 
   // --------------------------------------------------------------------------------------------------------------------------
   // NOTE: This may need to be internal only?
-  public dhllCompiler()
-  {  }
+  internal dhllCompiler()
+  { }
 
   // --------------------------------------------------------------------------------------------------------------------------
   public dhllCompiler(CompileProjectOptions ops_)
@@ -157,7 +157,7 @@ public class dhllCompiler
 
     CreateTypeIndex(parsed);
 
-    var templateFiles = filesByType[DHLT_EXT];
+    List<string> templateFiles = filesByType[DHLT_EXT];
     ProcessTemplateFiles(templateFiles);
 
 
@@ -253,10 +253,7 @@ public class dhllCompiler
           // to render / bind against the different versions....
           // if (item.Name != null) { useName += ("." + item.Name); }
 
-          // NOTE: I don't think that we actually need the emitter here.....
-          // It proabably doesn't need to be stored in dynamics, rather it is invoked when we 
-          // doing the code emit step....
-          var dynamics = new TemplateDynamics(item);
+          var dynamics = new TemplateDynamics(item, null);
 
           Context.TemplateIndex.Add(useName, dynamics);
         }
@@ -313,7 +310,7 @@ public class dhllCompiler
   /// Partitions the list of values, computed from the inputs, into a dictionary using a function to derive a key from those inputs.
   /// </summary>
   [Obsolete("Use version from drewco.Tools > 1.3.3.6!")]
-  private static Dictionary<TKey, List<TValue>> Partition<TInput, TKey, TValue>(List<TInput> input, Func<TInput, TKey> keyGenerator, Func<TInput, TValue> valGenerator)
+  private static Dictionary<TKey, List<TValue>> Partition<TInput, TKey, TValue>(IList<TInput> input, Func<TInput, TKey> keyGenerator, Func<TInput, TValue> valGenerator)
   {
     var res = new Dictionary<TKey, List<TValue>>();
     foreach (var item in input)
@@ -421,25 +418,25 @@ public class dhllCompiler
 
   }
 
-    // --------------------------------------------------------------------------------------------------------------------------
-    public TemplateDefinition[] ParseTemplates(string input)
-    {
-            AntlrInputStream s = new AntlrInputStream(input);
-        var lexer = new templateLexer(s);
+  // --------------------------------------------------------------------------------------------------------------------------
+  public TemplateDefinition[] ParseTemplates(string input)
+  {
+    AntlrInputStream s = new AntlrInputStream(input);
+    var lexer = new templateLexer(s);
 
-        var ts = new CommonTokenStream(lexer);
-        var parser = new templateParser(ts);
+    var ts = new CommonTokenStream(lexer);
+    var parser = new templateParser(ts);
 
-        TemplatesContext context = parser.templates();
-        var v = new templatesVisitorImpl();
+    TemplatesContext context = parser.templates();
+    var v = new templatesVisitorImpl();
 
-        v.VisitTemplates(context);
+    v.VisitTemplates(context);
 
-        return v.TemplateDefs.ToArray();
-    }
+    return v.TemplateDefs.ToArray();
+  }
 
-    // --------------------------------------------------------------------------------------------------------------------------
-    private EmitterBase CreateEmitter(string targetLang)
+  // --------------------------------------------------------------------------------------------------------------------------
+  private EmitterBase CreateEmitter(string targetLang)
   {
     // NOTE: We will use a registration type approach in the future.
     // That will allow for all kinds of plugins + overrides if we wanted.

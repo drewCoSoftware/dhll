@@ -1,4 +1,5 @@
 ﻿using dhll.CodeGen;
+using dhll.Grammars.v1;
 using drewCo.Tools;
 using System.Text.RegularExpressions;
 
@@ -16,11 +17,13 @@ internal class DynamicFunctionsGroup
   private object DataLock = new object();
 
   private NamingContext NamingContext = null!;
+  private EmitterBase CodeEmitter = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public DynamicFunctionsGroup(NamingContext namingContext_)
+  public DynamicFunctionsGroup(NamingContext namingContext_, EmitterBase codeEmitter_)
   {
     NamingContext = namingContext_;
+    CodeEmitter = codeEmitter_;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -28,10 +31,12 @@ internal class DynamicFunctionsGroup
   /// Create internal internal entries based on the dynamic content....
   /// Returns the name of the generated function!
   /// </summary>
-  public string AddDynamicFunction(DynamicContent dc)
+  public string AddDynamicFunction(ChildContent childContent)
   {
-    //int x = 123 + 346;
-    //int y = -123 + -456;
+    if (childContent.DynamicContent == null)
+    {
+      throw new InvalidOperationException("no dynamic content is listed!");
+    }
 
     lock (DataLock)
     {
@@ -47,11 +52,11 @@ internal class DynamicFunctionsGroup
 
       // NOTE: We should just be composing some dhll constructs here, and emitting them later...
       // For now we will just use a functor....
-      string func = ComputeStringFunction(dc);
+      string func = GenerateComputeStringFunction(childContent);
       funcDef.Body.Add(func);
 
-      // Now we will associate the dynamic function with all of the implicated properties.
-      foreach (var item in dc.Identifiers)
+      // Now we will associate the dynamic function with all of the implicated identifiers(properties).
+      foreach (var item in childContent.DynamicContent.Identifiers)
       {
         if (!PropsToFunctions.TryGetValue(item, out var funcs))
         {
@@ -70,7 +75,12 @@ internal class DynamicFunctionsGroup
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private string ComputeStringFunction(DynamicContent dc)
+  /// <summary>
+  /// Returns a function that will create + return a string from the given dynamic content...
+  /// </summary>
+  /// <param name="dc"></param>
+  /// <returns></returns>
+  private string GenerateComputeStringFunction(ChildContent dc)
   {
     // Maybe a way to do the dynamic strings?
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
@@ -84,43 +94,55 @@ internal class DynamicFunctionsGroup
     const bool REMOVE_EXCESS_WHITESPACE = true;
     const bool REMOVE_NEWLINES = true;
 
-    
+    var useParts = new List<string>();
+    foreach (var x in dc.Nodes)
+    {
+      if (x.IsExpressionNode)
+      {
+        // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
+        string expressionText = RenderExpression(x);
+        useParts.Add($"(this.{x.Expression})");
+      }
+      else
+      {
+        string p = x.Value;
+        if (REMOVE_NEWLINES)
+        {
+          p = StripNewlines(p);
+        }
+        if (REMOVE_EXCESS_WHITESPACE)
+        {
+          p = Regex.Replace(p, "[ ]*", " ");
+          p = StringTools.Quote(p);
+        }
+        if (p != string.Empty)
+        {
+          useParts.Add(p);
+        }
+      }
+    }
+
+    string joined = string.Join(" + ", useParts);
+
+    // HACK: We are assuming that all return types are strings + doing a forced string coersion.
+    string res = $"return ({joined}).toString();";
+
+    // NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
+    // we are just working with raw strings so.......
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private string RenderExpression(Node x)
+  {
+    if (!x.IsExpressionNode) { 
+      throw new InvalidOperationException("This is not an expression node!");
+    }
+
+    this.CodeEmitter.EmitExpression(x.Expression);
+   // this.EmitFunctionDefs
+
     throw new NotImplementedException();
-    //var useParts = new List<string>();
-    //foreach (var x in dc.Parts)
-    //{
-    //  if (x.IsExpession)
-    //  {
-    //    // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
-    //    useParts.Add($"(this.{x.Value})");
-    //  }
-    //  else
-    //  {
-    //    string p = x.Value;
-    //    if (REMOVE_NEWLINES)
-    //    {
-    //      p = StripNewlines(p);
-    //    }
-    //    if (REMOVE_EXCESS_WHITESPACE)
-    //    {
-    //      p = Regex.Replace(p, "[ ]*", " ");
-    //      p = StringTools.Quote(p);
-    //    }
-    //    if (p != string.Empty)
-    //    {
-    //      useParts.Add(p);
-    //    }
-    //  }
-    //}
-
-    //string joined = string.Join(" + ", useParts);
-
-    //// HACK: We are assuming that all return types are strings + doing a forced string coersion.
-    //string res = $"return ({joined}).toString();";
-
-    //// NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
-    //// we are just working with raw strings so.......
-    //return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
