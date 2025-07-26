@@ -51,7 +51,7 @@ internal class DynamicFunctionsGroup
       funcDef.Body.Add(func);
 
       // Now we will associate the dynamic function with all of the implicated properties.
-      foreach (var item in dc.PropertyNames)
+      foreach (var item in dc.Identifiers)
       {
         if (!PropsToFunctions.TryGetValue(item, out var funcs))
         {
@@ -85,41 +85,42 @@ internal class DynamicFunctionsGroup
     const bool REMOVE_NEWLINES = true;
 
     
-    var useParts = new List<string>();
-    foreach (var x in dc.Parts)
-    {
-      if (x.IsExpession)
-      {
-        // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
-        useParts.Add($"(this.{x.Value})");
-      }
-      else
-      {
-        string p = x.Value;
-        if (REMOVE_NEWLINES)
-        {
-          p = StripNewlines(p);
-        }
-        if (REMOVE_EXCESS_WHITESPACE)
-        {
-          p = Regex.Replace(p, "[ ]*", " ");
-          p = StringTools.Quote(p);
-        }
-        if (p != string.Empty)
-        {
-          useParts.Add(p);
-        }
-      }
-    }
+    throw new NotImplementedException();
+    //var useParts = new List<string>();
+    //foreach (var x in dc.Parts)
+    //{
+    //  if (x.IsExpession)
+    //  {
+    //    // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
+    //    useParts.Add($"(this.{x.Value})");
+    //  }
+    //  else
+    //  {
+    //    string p = x.Value;
+    //    if (REMOVE_NEWLINES)
+    //    {
+    //      p = StripNewlines(p);
+    //    }
+    //    if (REMOVE_EXCESS_WHITESPACE)
+    //    {
+    //      p = Regex.Replace(p, "[ ]*", " ");
+    //      p = StringTools.Quote(p);
+    //    }
+    //    if (p != string.Empty)
+    //    {
+    //      useParts.Add(p);
+    //    }
+    //  }
+    //}
 
-    string joined = string.Join(" + ", useParts);
+    //string joined = string.Join(" + ", useParts);
 
-    // HACK: We are assuming that all return types are strings + doing a forced string coersion.
-    string res = $"return ({joined}).toString();";
+    //// HACK: We are assuming that all return types are strings + doing a forced string coersion.
+    //string res = $"return ({joined}).toString();";
 
-    // NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
-    // we are just working with raw strings so.......
-    return res;
+    //// NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
+    //// we are just working with raw strings so.......
+    //return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

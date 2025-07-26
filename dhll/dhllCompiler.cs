@@ -40,8 +40,6 @@ public class dhllCompiler
 
   private CompilerContext Context = null!;
 
-  private ILogger Logger { get { return Context.Logger; } }
-
   // --------------------------------------------------------------------------------------------------------------------------
   // NOTE: This may need to be internal only?
   public dhllCompiler()
@@ -124,7 +122,7 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private void CompileDhllProject(string projectFilePath)
   {
-    Logger.Info("Loading project file...");
+    Log.Info("Loading project file...");
     var projFile = dhllProjectDefinition.Load(projectFilePath);
 
     CompileDhllProject(projFile);
@@ -135,7 +133,7 @@ public class dhllCompiler
   {
     ValidateProjectFile(projFile);
 
-    Logger.Info("Compiling dhll Project.");
+    Log.Info("Compiling dhll Project.");
 
     // TODO: Add + check for a clean-on-build flag.
     CleanPreviousOutput(projFile);
@@ -149,7 +147,7 @@ public class dhllCompiler
       throw new InvalidOperationException(msg);
     }
 
-    Logger.Verbose("Parsing dhll files...");
+    Log.Verbose("Parsing dhll files...");
     // We need a pre-pass on the code files so that we can determine the type information
     // for the properties that may appear in the generated template code.
     //
@@ -180,7 +178,7 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private void CleanPreviousOutput(dhllProjectDefinition proj)
   {
-    Logger.Info("Cleaning previous output.");
+    Log.Info("Cleaning previous output.");
 
     var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -193,7 +191,7 @@ public class dhllCompiler
         continue;
       }
 
-      Logger.Verbose($"Cleaning directory at: {useOutputDir}");
+      Log.Verbose($"Cleaning directory at: {useOutputDir}");
       FileTools.EmptyDirectory(useOutputDir);
     }
   }
@@ -242,7 +240,7 @@ public class dhllCompiler
       // code emitting step of the type definitions into the target language...
       foreach (var path in templateFiles)
       {
-        Logger.Info($"Processing template at path: {path}");
+        Log.Info($"Processing template at path: {path}");
 
         var templateDefs = ParseTemplatesFromFile(path);
 
@@ -360,7 +358,7 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private void CompileDhllFile(string inputFile, EmitterBase emitter, string outputDir)
   {
-    Logger.Info($"Compiling dhll at path: {inputFile} to language: {emitter.TargetLanguage}");
+    Log.Info($"Compiling dhll at path: {inputFile} to language: {emitter.TargetLanguage}");
 
     dhllFile parsed = ParseDhllFile(inputFile);
     CompileAndEmitFiles(parsed, emitter, outputDir);
@@ -405,12 +403,12 @@ public class dhllCompiler
   {
     if (results.OutputFiles.Length == 0)
     {
-      Logger.Warning("There are no output files!");
+      Log.Warning("There are no output files!");
     }
 
     foreach (var item in results.OutputFiles)
     {
-      Logger.Info($"-> File: {item}");
+      Log.Info($"-> File: {item}");
     }
   }
 
@@ -468,7 +466,7 @@ public class dhllCompiler
   // --------------------------------------------------------------------------------------------------------------------------
   private void ValidateProjectFile(dhllProjectDefinition projectDef)
   {
-    Logger.Verbose("Validating project...");
+    Log.Verbose("Validating project...");
 
     if (projectDef.OutputTargets == null || projectDef.OutputTargets.Count == 0)
     {
@@ -476,7 +474,7 @@ public class dhllCompiler
     }
 
     string baseDir = FileTools.GetRootedPath(Path.GetDirectoryName(projectDef.Path));
-    Logger.Verbose($"The base directory is: {baseDir}");
+    Log.Verbose($"The base directory is: {baseDir}");
 
     foreach (var inputPath in projectDef.InputFiles)
     {
@@ -496,7 +494,7 @@ public class dhllCompiler
         throw new InvalidOperationException($"key/name mismatch in output targets: {key}/{t.Name}!  Values must be the same!");
       }
 
-      Logger.Verbose($"Validating output target: {key}");
+      Log.Verbose($"Validating output target: {key}");
       if (!SupportedLanguages.Contains(t.TargetLanguage))
       {
         // TODO: Show valid

@@ -77,7 +77,7 @@ internal class PropChangeTargets
 
     lock (DataLock)
     {
-      foreach (var prop in dynamicContent.PropertyNames)
+      foreach (var prop in dynamicContent.Identifiers)
       {
         if (!PropsToTargets.TryGetValue(prop, out var targets))
         {

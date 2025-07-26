@@ -568,7 +568,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
     var res = new DynamicContent()
     {
-      PropertyNames = allIdentifiers
+      Identifiers = allIdentifiers
       // NOTE: I don't think that 'parts' really matters as this is already covered by the node list....
     };
 
@@ -583,7 +583,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     var ids = GetIdentifiersFromExpresion(epxr);
     return new DynamicContent()
     {
-      PropertyNames = ids.ToList()
+      Identifiers = ids.ToList()
     };
   }
 
