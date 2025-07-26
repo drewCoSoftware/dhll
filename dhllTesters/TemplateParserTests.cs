@@ -50,7 +50,6 @@ namespace dhllTesters
 
       // Also show that we have some dynamic content for the child nodes....
       Assert.IsTrue(dom.HasDynamicContent, "The dynamic content flag should be set!");
-      int x = 10;
     }
 
 
@@ -120,10 +119,11 @@ namespace dhllTesters
     {
       var compiler = new dhllCompiler();
       string inputPath = GetTestInputPath("MultiRootTemplate.dhlt");
+      string input = File.ReadAllText(inputPath);
 
       Assert.Throws<TemplateParseException>(() =>
       {
-        TemplateDefinition[] defs = compiler.ParseTemplatesFromFile(inputPath);
+        TemplateDefinition[] defs = compiler.ParseTemplates(input);
       }, $"A {nameof(TemplateParseException)} should have been thrown!");
     }
 

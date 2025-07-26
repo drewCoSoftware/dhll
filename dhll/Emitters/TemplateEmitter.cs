@@ -303,8 +303,10 @@ internal class TemplateEmitter
     foreach (var item in srcNode.Attributes)
     {
 
-      if (item.DynamicContent != null)
+      if (item.IsExpression != null)
       {
+        throw new NotImplementedException();
+
         string useValId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
         string valLine = $"var {useValId} = \"{item.Value}\";";
 
@@ -341,8 +343,9 @@ internal class TemplateEmitter
     }
     string useValue = $"'{item.Value.StringVal}'";
 
-    if (item.DynamicContent != null)
+    if (item.IsExpression)
     {
+      throw new NotImplementedException();
       // The attribute value is created via expression.
       string funcName = item.DynamicFunction;
       useValue = $"this.{funcName}()";

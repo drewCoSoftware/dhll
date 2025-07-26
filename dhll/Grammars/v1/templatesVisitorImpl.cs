@@ -144,8 +144,13 @@ public class Attribute
 {
   public string Name { get; set; } = default!;
   public AttributeValue Value { get; set; } = default!;
-
-  public DynamicContent? DynamicContent { get; set; } = null;
+  public bool IsExpression
+  {
+    get
+    {
+      return Value?.Expression != null;
+    }
+  }
 
   /// <summary>
   /// Used during codegen.
@@ -308,7 +313,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
       //if (val != null && HasPropString(val))
       //{
-      DynamicContent? dc = ParseDynamicContent(val);
+      //DynamicContent? dc = ParseDynamicContent(val);
 
       //  // Any value, be it class or text must be representable as a string.
       //  // This means that any time an implicated property changes, then we will compute a string (like sprintf) and then slap in into the DOM at the correct place.
@@ -325,7 +330,6 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       {
         Name = name,
         Value = val,
-        DynamicContent = dc
       };
 
       res.Add(toAdd);
@@ -538,10 +542,13 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private DynamicContent ParseDynamicContent(AttributeValue val)
-  {
-    return ParseDynamicContent(val.Expression);
-  }
+  // NOTE: Every attribute that is an expression is dynamic by definition...
+  // I think we can handle this at the codegen level...
+  //private DynamicContent? ParseDynamicContent(AttributeValue val)
+  //{
+
+  //  return ParseDynamicContent(val.Expression);
+  //}
 
   // --------------------------------------------------------------------------------------------------------------------------
   /// <summary>

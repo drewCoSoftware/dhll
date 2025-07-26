@@ -1,5 +1,3 @@
-<!-- Evidence of HTML comment support.... -->
-<!-- This template was provided to show that if there is more than one 'root' element under '<template>' then the parsing will fail! -->
 <template for="MyType">
   <div>{MyText}</div>
   <div>Root Number 2</div>
