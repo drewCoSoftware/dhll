@@ -40,10 +40,35 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public override void EmitExpression(Expression expression)
+    public override string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null)
     {
+      var primary = expression as PrimaryExpression;
+      if (primary != null)
+      {
+        // Context.code
+        string res = primary.Content;
+        if (onIdentifierCallback != null)
+        {
+          res = onIdentifierCallback(res);
+        }
+        return res;
+
+      }
       throw new NotImplementedException();
     }
+
+    //// --------------------------------------------------------------------------------------------------------------------------
+    //public override void EmitExpression(Expression expression, CodeFile cf)
+    //{
+    //  var primary = expression as PrimaryExpression;
+    //  if (primary != null) {
+    //    // Context.code
+    //    cf.WriteLine(primary.Content);
+    //    return;
+    //  }
+
+    //  throw new NotImplementedException();
+    //}
 
     // --------------------------------------------------------------------------------------------------------------------------
     public override EmitterResults Emit(string outputDir, dhllFile file)
@@ -68,17 +93,17 @@ namespace dhll.Emitters
       foreach (var td in file.TypeDefs)
       {
         // Let's check to see if there is an associated template...
-        Logger.Verbose("Resolving template data...");
+        Log.Verbose("Resolving template data...");
         TemplateDynamics? dynamics = GetTemplateDynamics(td);
         TemplateEmitter? templateEmitter = null;
         if (dynamics != null)
         {
-          Logger.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, dynamics, Context);
+          Log.Verbose($"Resolved template for type: {td.Identifier}");
+          templateEmitter = new TemplateEmitter(td.Identifier, dynamics, Context, this);
         }
         else
         {
-          Logger.Verbose($"There is no template for type: {td.Identifier}");
+          Log.Verbose($"There is no template for type: {td.Identifier}");
         }
 
         var preProcResults = PreProcessDeclarations(td);
@@ -292,6 +317,19 @@ namespace dhll.Emitters
     Default = 0,
     Public,
     Private
+  }
+
+  // ==============================================================================================================================
+  internal class FunctionDef
+  {
+    public EScope Scope { get; set; } = EScope.Default;
+    public string Identifier { get; set; }
+    public string ReturnType { get; set; }
+
+    // TODO: Function args...
+
+    // TODO: This will end up being a list of statements at some point, for proper emitting....
+    public List<string> Body = new List<string>();
   }
 
 }

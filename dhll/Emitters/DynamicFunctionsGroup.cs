@@ -31,7 +31,8 @@ internal class DynamicFunctionsGroup
   /// Create internal internal entries based on the dynamic content....
   /// Returns the name of the generated function!
   /// </summary>
-  public string AddDynamicFunction(ChildContent childContent)
+  [Obsolete("This has been moved to the TemplateEmitter.")]
+  public string AddDynamicContentFunction(ChildContent childContent)
   {
     if (childContent.DynamicContent == null)
     {
@@ -80,6 +81,7 @@ internal class DynamicFunctionsGroup
   /// </summary>
   /// <param name="dc"></param>
   /// <returns></returns>
+  [Obsolete("This has been moved to the TemplateEmitter.")]
   private string GenerateComputeStringFunction(ChildContent dc)
   {
     // Maybe a way to do the dynamic strings?
@@ -133,14 +135,15 @@ internal class DynamicFunctionsGroup
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
+  [Obsolete("This has been moved to the TemplateEmitter.")]
   private string RenderExpression(Node x)
   {
-    if (!x.IsExpressionNode) { 
-      throw new InvalidOperationException("This is not an expression node!");
-    }
+   // if (!x.IsExpressionNode) { 
+   //   throw new InvalidOperationException("This is not an expression node!");
+   // }
 
-    this.CodeEmitter.EmitExpression(x.Expression);
-   // this.EmitFunctionDefs
+   // this.CodeEmitter.EmitExpression(x.Expression, cf);
+   //// this.EmitFunctionDefs
 
     throw new NotImplementedException();
   }

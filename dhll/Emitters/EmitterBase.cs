@@ -9,7 +9,6 @@ namespace dhll.Emitters;
 // ==============================================================================================================================
 internal abstract class EmitterBase
 {
-  protected ILogger Logger { get { return Context.Logger; } }
   protected CompilerContext Context { get; set; } = default!;
 
   protected Dictionary<string, string> TypeNameTable = null!;
@@ -26,7 +25,13 @@ internal abstract class EmitterBase
 
   public abstract void EmitFunctionDefs(IEnumerable<FunctionDef> defs, CodeFile cf);
   public abstract EmitterResults Emit(string outputDir, dhllFile file);
+  
+  // public abstract void EmitExpression(Expression expression, CodeFile cf);
 
+  // HACK: The 'onPrimaryCallback' is being used so that we can inject 'this.' into some typescript statements.
+  // In reality the code emitter should have some kind of notion of 'scope' that covers when it is in a 
+  // class and is emitting class members....
+  public abstract string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null);
 
   // --------------------------------------------------------------------------------------------------------------------------
   public EmitterBase(CompilerContext context_)
@@ -155,8 +160,6 @@ internal abstract class EmitterBase
     return res;
   }
 
-  // --------------------------------------------------------------------------------------------------------------------------
-  public abstract void EmitExpression(Expression expression);
 }
 
 

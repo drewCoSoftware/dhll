@@ -17,8 +17,8 @@ namespace dhllTesters
     public void CanCompileBasicTemplate()
     {
       dhllProjectDefinition def = CreateProjectDef(new[] {
-      "./TestInputs/Template1.dhlt",
-      "./TestInputs/BasicTypeDef.dhll"
+        "./TestInputs/Template1.dhlt",
+        "./TestInputs/BasicTypeDef.dhll"
       },
       $"./{nameof(CanCompileBasicTemplate)}{dhllCompiler.DHLPROJ_EXT}");
 

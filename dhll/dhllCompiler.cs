@@ -512,7 +512,6 @@ public class dhllCompiler
 // ==============================================================================================================================
 internal class CompilerContext
 {
-  public ILogger Logger { get; set; } = default!;
   public TemplateIndex TemplateIndex { get; set; } = default!;
   public TypeIndex TypeIndex { get; set; } = default!;
 }

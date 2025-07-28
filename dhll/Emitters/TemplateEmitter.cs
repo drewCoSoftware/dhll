@@ -1,8 +1,12 @@
 ﻿using Antlr4.Runtime.Tree;
 using dhll.CodeGen;
+using dhll.Emitters;
+using dhll.Expressions;
 using dhll.Grammars.v1;
 using drewCo.Tools;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design;
+using System.Text.RegularExpressions;
 
 
 
@@ -17,6 +21,7 @@ internal class TemplateEmitter
   const string DEFAULT_VAL_ID = "val";
   const string DEFAULT_TEXT_NODE_ID = "textNode";
 
+  [Obsolete("This will get removed in a future iteration!")]
   private TemplateDynamics Dynamics = null!;
 
   private NamingContext NamingContext = new NamingContext();
@@ -26,17 +31,29 @@ internal class TemplateEmitter
   /// Name of the type that this template represents.
   /// </summary>
   private string TypeIdentifier = null!;
+  private EmitterBase Emitter = null!;
+
+
+  /// <summary>
+  /// Every dynamic function is associated with one or more identifiers.
+  /// This is how we will keep track of them.
+  /// </summary>
+  private Dictionary<string, List<string>> DynamicFunctionsIdentifiers = new Dictionary<string, List<string>>();
+  private Dictionary<string, FunctionDef> DynamicFunctions = new Dictionary<string, FunctionDef>();
+
+
 
   // --------------------------------------------------------------------------------------------------------------------------
   // This version is mostly meant for test cases....
   internal TemplateEmitter() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_)
+  public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_, EmitterBase emitter_)
   {
     TypeIdentifier = typeIdentifier_;
     Dynamics = dynamics_;
     Context = context_;
+    Emitter = emitter_;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -265,6 +282,7 @@ internal class TemplateEmitter
   private List<Node> BindNode(Node node, string bindTo, CodeFile cf)
   {
     throw new NotImplementedException();
+
     //var res = new List<Node>();
 
     //string elementId = QualifyIdentifier(node.Identifier);
@@ -369,9 +387,44 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void CreateChildElements(CodeFile cf, Node parent, NamingContext nameContext)
   {
-    throw new NotImplementedException();
+    if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
+    {
+      return;
+    }
 
-    //foreach (var item in parent.Children)
+    if (parent.HasDynamicContent)
+    {
+      // We will have a function that creates the content for the node.
+      string funcName = EmitDynamicContentFunction(cf, parent.ChildContent);
+      cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {funcName});");
+
+      // Register the association.
+      var allIds = parent.ChildContent.DynamicContent.Identifiers;
+      if (allIds.Count > 0)
+      {
+        DynamicFunctionsIdentifiers.Add(funcName, allIds);
+      }
+    }
+    else
+    {
+      foreach (var item in parent.ChildContent.Nodes)
+      {
+        cf.NextLine(2);
+        string assignTo = GetTypescriptAssignSyntax(item);
+        cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
+
+        // Attributes.
+        AddAttributes(cf, item, item.Identifier);
+
+        // Now its child elements too....
+        CreateChildElements(cf, item, nameContext);
+
+        // Add the child node to the parent....
+        cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+      }
+    }
+
+    //foreach (var item in parent.ChildContent)
     //{
     //  if (item.Name == "<text>")
     //  {
@@ -409,7 +462,139 @@ internal class TemplateEmitter
     //    cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
     //  }
 
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  /// <summary>
+  /// Create internal internal entries based on the dynamic content....
+  /// Returns the name of the generated function!
+  /// </summary>
+  public string EmitDynamicContentFunction(CodeFile cf, ChildContent childContent)
+  {
+    if (childContent.DynamicContent == null)
+    {
+      throw new InvalidOperationException("no dynamic content is listed!");
+    }
+
+    //lock (DataLock)
+    //{
+    string functionName = NamingContext.GetUniqueNameFor("getValue");
+
+    // We need to create the function definition....
+    // Simple function def, that takes zero arguments...
+    var funcDef = new FunctionDef()
+    {
+      Identifier = functionName,
+      ReturnType = "string"
+    };
+
+    // NOTE: We should just be composing some dhll constructs here, and emitting them later...
+    // For now we will just use a functor....
+    string func = GenerateComputeStringFunction(childContent, cf);
+    funcDef.Body.Add(func);
+
+    // We will emit these all at once, later.
+    DynamicFunctions.Add(functionName, funcDef);
+    int x = 10;
+
+    // 
+
+    //// Now we will associate the dynamic function with all of the implicated identifiers(properties).
+    //// NOTE: This should technically be done when we preprocess the templates.
+    //// I think that making the associations here, for now, is OK as we will be doing a second pass later....
+    //foreach (var item in childContent.DynamicContent.Identifiers)
+    //{
+    //  // NOTE: We should be checking to see if the identifiers are actually on the typedef that we are
+    //  // generating the template for....
+    //  if (!PropsToFunctions.TryGetValue(item, out var funcs))
+    //  {
+    //    funcs = new List<FunctionDef>();
+    //    PropsToFunctions[item] = funcs;
+    //  }
+
+    //  funcs.Add(funcDef);
     //}
+
+    //UniqueFunctions.Add(funcDef);
+
+    return functionName;
+    //  }
+
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private string GenerateComputeStringFunction(ChildContent dc, CodeFile cf)
+  {
+    // Maybe a way to do the dynamic strings?
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+
+
+    // HACK:
+    // We are assuming that all expressions are single, class level variables!
+    // TODO: Some kind of option for how we want to handle leading / trailing whitespace in these
+    // functions.  Since we are just targeting typescript for now, we are going to remove it all.
+
+    const bool REMOVE_EXCESS_WHITESPACE = true;
+    const bool REMOVE_NEWLINES = true;
+
+    var useParts = new List<string>();
+    foreach (var x in dc.Nodes)
+    {
+      if (x.IsExpressionNode)
+      {
+        string expr = RenderExpression(x, cf);
+        // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
+        expr = $"({expr})";
+
+        useParts.Add(expr);
+      }
+      else if (x.IsTextNode)
+      {
+        string p = x.Value;
+        if (REMOVE_NEWLINES)
+        {
+          p = StringTools.StripNewlines(p);
+        }
+        if (REMOVE_EXCESS_WHITESPACE)
+        {
+          p = Regex.Replace(p, "[ ]+", " ");
+          p = StringTools.Quote(p);
+        }
+        if (p != string.Empty)
+        {
+          useParts.Add(p);
+        }
+      }
+      else
+      {
+        // I think that we just render this as normal........
+        // Actually, I don't think that we will actually get here?
+        throw new NotImplementedException();
+      }
+    }
+
+    string joined = string.Join(" + ", useParts);
+
+    // HACK: We are assuming that all return types are strings + doing a forced string coersion.
+    // In the future, we could look at the typedef to decide if this is necessary.
+    // We might even be able to figure out some kind of a way to remove excess parens?
+    string res = $"return ({joined}).toString();";
+
+    // NOTE: We could certainly add some code to clean up the expressions a bit, but for the time being
+    // we are just working with raw strings so.......
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private string RenderExpression(Node node, CodeFile cf)
+  {
+    if (!node.IsExpressionNode)
+    {
+      throw new InvalidOperationException("This is not an expression node!");
+    }
+
+    string res = this.Emitter.RenderExpression(node.Expression!, (id) => QualifyIdentifier(id));
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -439,15 +624,4 @@ internal class TemplateEmitter
 }
 
 
-// ==============================================================================================================================
-internal class FunctionDef
-{
-  public EScope Scope { get; set; } = EScope.Default;
-  public string Identifier { get; set; }
-  public string ReturnType { get; set; }
-
-  // TODO: Function args...
-
-  public List<string> Body = new List<string>();
-}
 

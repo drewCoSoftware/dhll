@@ -51,7 +51,7 @@ internal class TemplateDynamics
   // --------------------------------------------------------------------------------------------------------------------------
   private void PreProcessNodes()
   {
-    SetDynamicContent(Def.DOM);
+    // SetDynamicContent(Def.DOM);
     SetNodeIdentifiers(Def.DOM);
   }
 
@@ -75,8 +75,24 @@ internal class TemplateDynamics
   /// </summary>
   private void SetNodeIdentifiers(Node node)
   {
-    throw new NotImplementedException();
+    // throw new NotImplementedException();
+    if (node.IsExpressionNode)
+    {
+      if (node.Identifier != null) { throw new InvalidOperationException("This node should not have an identifier yet!"); }
+    }
 
+    string baseName = node.IsExpressionNode ? "_Node" : "node";
+    node.Identifier = NamingContext.GetUniqueNameFor(baseName);
+
+    if (node.ChildContent != null)
+    {
+      foreach (var c in node.ChildContent.Nodes)
+      {
+        SetNodeIdentifiers(c);
+      }
+    }
+
+    // OLD:
     //bool isTextNode = node.Name == "<text>";
 
     //if (node.Identifier == null && !isTextNode)
@@ -109,7 +125,7 @@ internal class TemplateDynamics
       //  throw new InvalidOperationException("<text> nodes must have a parent!");
       //}
 
-      string funcName = DynamicFunctions.AddDynamicFunction(node.ChildContent!);
+      string funcName = DynamicFunctions.AddDynamicContentFunction(node.ChildContent!);
       node.DynamicFunction = funcName;
 
       // We need to make note that this is a target...
