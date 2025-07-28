@@ -51,14 +51,21 @@ public class TypeDef : ISourceMetadata
   public SourceMetadata SourceMeta { get; private set; }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  internal Declare? GetMember(string memberId)
+  internal Declare? GetMember(string name)
   {
     var match = (from x in Members
-                 where x.Identifier == memberId
+                 where x.Identifier == name
                  select x).SingleOrDefault();
 
     return match;
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public bool HasMember(string name) {
+    var res = GetMember(name);
+    return res != null;
+  }
+
 }
 
 // ==============================================================================================================================

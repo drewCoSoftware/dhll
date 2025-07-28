@@ -3,6 +3,7 @@ using dhll.CodeGen;
 using dhll.Emitters;
 using dhll.Expressions;
 using dhll.Grammars.v1;
+using dhll.v1;
 using drewCo.Tools;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design;
@@ -30,7 +31,8 @@ internal class TemplateEmitter
   /// <summary>
   /// Name of the type that this template represents.
   /// </summary>
-  private string TypeIdentifier = null!;
+  private string ForType = null!;
+  private TypeDef TemplateType = null!;
   private EmitterBase Emitter = null!;
 
 
@@ -50,9 +52,16 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_, EmitterBase emitter_)
   {
-    TypeIdentifier = typeIdentifier_;
-    Dynamics = dynamics_;
     Context = context_;
+
+    ForType = typeIdentifier_;
+    TemplateType = Context.TypeIndex.GetDataType(this.ForType);
+    if (TemplateType == null)
+    {
+      throw new InvalidOperationException($"There is no typedef for: {this.ForType} in the type index!");
+    }
+
+    Dynamics = dynamics_;
     Emitter = emitter_;
   }
 
@@ -147,7 +156,7 @@ internal class TemplateEmitter
     // Special name.
 
     string assignTo = GetTypescriptAssignSyntax(root);
-    cf.WriteLine($"{QualifyIdentifier(assignTo)} = document.createElement('{root.Name}');");
+    cf.WriteLine($"{assignTo} = document.createElement('{root.Name}');");
 
     AddAttributes(cf, root, root.Identifier!);
 
@@ -230,7 +239,7 @@ internal class TemplateEmitter
                                                                       : $".innerText");
 
         // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
-        string propType = Context.TypeIndex.GetMemberDataType(this.TypeIdentifier, useName);
+        string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
 
         // Some extra coercion so we produce typesafe code....
         // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
@@ -604,11 +613,17 @@ internal class TemplateEmitter
   /// </summary>
   private string QualifyIdentifier(string symbol)
   {
-    if (Dynamics.IdentifierIsClassLevel(symbol))
+    // TODO: Cache this....
+
+    if (TemplateType.HasMember(symbol))
     {
       return $"this.{symbol}";
     }
     return symbol;
+    //if (Dynamics.IdentifierIsClassLevel(symbol))
+    //{
+    //  return $"this.{symbol}";
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

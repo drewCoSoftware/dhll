@@ -114,6 +114,16 @@ internal class TypeIndex
 
     return declare.TypeName;
   }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  public TypeDef? GetDataType(string forType)
+  {
+    if (this.IdsToTypes.TryGetValue(forType, out TypeDef res))
+    {
+      return res;
+    }
+    return null;
+  }
 }
 
 
