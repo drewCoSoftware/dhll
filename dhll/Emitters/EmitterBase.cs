@@ -56,7 +56,7 @@ internal abstract class EmitterBase
   // --------------------------------------------------------------------------------------------------------------------------
   protected virtual TemplateDynamics? GetTemplateDynamics(TypeDef td)
   {
-    Context.TemplateIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
+    Context.TemplateDynamicsIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
     return template;
   }
 

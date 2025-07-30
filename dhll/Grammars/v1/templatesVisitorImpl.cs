@@ -9,10 +9,12 @@ using drewCo.Tools;
 using drewCo.Web;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.WebSockets;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using static dhll.v1.templateParser;
 
 namespace dhll.Grammars.v1;
@@ -105,10 +107,26 @@ public partial class Node
 
   /// <summary>
   /// Used during codegen.
+  /// Name of the dynamic function that is called to create the content.
   /// </summary>
   [CodeGen]
-  internal string DynamicFunction { get; set; } = null!;
+  internal DynamicFunctionInfo DynamicFunction { get; set; } = null!;
 
+}
+
+
+// ==============================================================================================================================
+public class DynamicFunctionInfo
+{
+  /// <summary>
+  /// The name of the dynamic function.
+  /// </summary>
+  public string Name { get; set; } = default!;
+
+  /// <summary>
+  /// Any of the class level identifiers that are used to compute the value of the function.
+  /// </summary>
+  public string[] IdentifiersUsed { get; set; } = default!;
 }
 
 // ==============================================================================================================================
@@ -159,7 +177,7 @@ public class Attribute
   /// Used during codegen.
   /// </summary>
   [CodeGen]
-  internal string DynamicFunction { get; set; }
+  internal DynamicFunctionInfo DynamicFunction { get; set; }
 }
 
 // ==============================================================================================================================
@@ -188,6 +206,12 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
   public List<TemplateDefinition> TemplateDefs = new List<TemplateDefinition>();
 
+  /// <summary>
+  /// Naming context for the current template that we are parsing.
+  /// NOTE: NOT THREAD SAFE!
+  /// </summary>
+  private NamingContext NameContext = null!; //new NamingContext();
+
   // --------------------------------------------------------------------------------------------------------------------------
   public override object VisitTemplates([NotNull] templateParser.TemplatesContext context)
   {
@@ -203,6 +227,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
         throw new Exception($"Top level element must be '{TEMPLATE}'!");
       }
 
+      NameContext = new NamingContext();
       TemplateDefinition def = ParseTemplate(elem);
 
       TemplateDefs.Add(def);
@@ -256,14 +281,18 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     // We also need the DOM without the Prop strings so that we can create them in a DOM via javascript....
 
     // The DOM we can do like any other tree of tags....
-    Node n = ComputeDOM(rootElem);
+    Node domNode = ComputeDOM(rootElem);
+    // domNode.Identifier = TemplateDynamics.ROOT_NODE_IDENTIFIER;
+
+    // Second pass to compute the dynamics for codegen.
+    ComputeDynamicContentInfo(domNode);
 
 
     var def = new TemplateDefinition()
     {
       ForType = forVal,
       Name = nameVal,
-      DOM = n
+      DOM = domNode
     };
 
     return def;
@@ -283,10 +312,80 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     };
 
     ChildContent children = ComputeChildren(elem, res);
-
     res.ChildContent = children;
 
     return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void ComputeDynamicContentInfo(Node node)
+  {
+    bool anyDynamic = false;
+
+    if (node.HasDynamicContent)
+    {
+      anyDynamic = true;
+
+      // If it has dynamic content, then its content is computed from a function.
+      var allExpressions = (from x in node.ChildContent?.Nodes
+                            where x.IsExpressionNode
+                            select x);
+      var ids = allExpressions.SelectMany(x => GetIdentifiersFromExpresion(x.Expression!)).ToArray();
+
+      DynamicFunctionInfo df = CreateDynamicFunctionInfo(ids);
+
+      node.DynamicFunction = df;
+    }
+
+    foreach (var attr in node.Attributes)
+    {
+      anyDynamic = true;
+
+      if (attr.IsExpression)
+      {
+        var ids = GetIdentifiersFromExpresion(attr.Value.Expression!);
+        var df = CreateDynamicFunctionInfo(ids);
+        attr.DynamicFunction = df;
+      }
+    }
+
+    SetIdentifier(node, anyDynamic);
+
+    foreach (var c in node.ChildContent?.Nodes)
+    {
+      ComputeDynamicContentInfo(c);
+    }
+
+  }
+
+  private void SetIdentifier(Node node, bool anyDynamic)
+  {
+    return;
+    if (node.Parent == null)
+    {
+      node.Identifier = TemplateDynamics.ROOT_NODE_IDENTIFIER;
+    }
+    else
+    {
+      if (anyDynamic)
+      {
+        node.Identifier = NameContext.GetUniqueNameFor("_Node");
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private DynamicFunctionInfo CreateDynamicFunctionInfo(string[] ids)
+  {
+    // NOTE: If there are no ids, then 'get value' is a constant.
+    // Something that can be optimized later.....
+    string funcName = ids.Length == 0 ? "constVal" : "getVal";
+    var df = new DynamicFunctionInfo()
+    {
+      Name = NameContext.GetUniqueNameFor("getValue"),
+      IdentifiersUsed = ids
+    };
+    return df;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

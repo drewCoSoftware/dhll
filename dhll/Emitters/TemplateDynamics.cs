@@ -51,7 +51,7 @@ internal class TemplateDynamics
   // --------------------------------------------------------------------------------------------------------------------------
   private void PreProcessNodes()
   {
-    // SetDynamicContent(Def.DOM);
+    SetDynamicContent(Def.DOM);
     SetNodeIdentifiers(Def.DOM);
   }
 
@@ -111,8 +111,10 @@ internal class TemplateDynamics
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
+  [Obsolete]
   private void SetDynamicContent(Node node)
   {
+    return; 
     // bool isTextNode = node.Name == "<text>";
 
     // throw new NotImplementedException();
@@ -126,7 +128,7 @@ internal class TemplateDynamics
       //}
 
       string funcName = DynamicFunctions.AddDynamicContentFunction(node.ChildContent!);
-      node.DynamicFunction = funcName;
+     // node.DynamicFunction = funcName;
 
       // We need to make note that this is a target...
       // So if every content function is unique, then we can make a 1:1 association with a DOM element....

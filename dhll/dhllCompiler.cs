@@ -68,7 +68,7 @@ public class dhllCompiler
     Context = new CompilerContext()
     {
       TypeIndex = new TypeIndex(),
-      TemplateIndex = new TemplateIndex(),
+      TemplateDynamicsIndex = new TemplateIndex(),
     };
   }
 
@@ -242,7 +242,7 @@ public class dhllCompiler
       {
         Log.Info($"Processing template at path: {path}");
 
-        var templateDefs = ParseTemplatesFromFile(path);
+        TemplateDefinition[] templateDefs = ParseTemplatesFromFile(path);
 
         foreach (var item in templateDefs)
         {
@@ -255,7 +255,7 @@ public class dhllCompiler
 
           var dynamics = new TemplateDynamics(item, null);
 
-          Context.TemplateIndex.Add(useName, dynamics);
+          Context.TemplateDynamicsIndex.Add(useName, dynamics);
         }
       }
     }
@@ -512,6 +512,7 @@ public class dhllCompiler
 // ==============================================================================================================================
 internal class CompilerContext
 {
-  public TemplateIndex TemplateIndex { get; set; } = default!;
+  // TODO: We are going to change this so that it is just the template.... 
+  public TemplateIndex TemplateDynamicsIndex { get; set; } = default!;
   public TypeIndex TypeIndex { get; set; } = default!;
 }

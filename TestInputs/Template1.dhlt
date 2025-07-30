@@ -1,4 +1,4 @@
-<template for="BasicTypeDef" name="test-1">
+<template for="BasicType" name="test-1">
   <div class="my-thing">
     <div class={Display}>
       <p>I am a sub-tag</p>

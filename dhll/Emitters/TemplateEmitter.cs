@@ -22,10 +22,10 @@ internal class TemplateEmitter
   const string DEFAULT_VAL_ID = "val";
   const string DEFAULT_TEXT_NODE_ID = "textNode";
 
-  [Obsolete("This will get removed in a future iteration!")]
-  private TemplateDynamics Dynamics = null!;
+  // [Obsolete("This will get removed in a future iteration!")]
+  // private TemplateDynamics Dynamics = null!;
 
-  private NamingContext NamingContext = new NamingContext();
+//  private NamingContext NamingContext = new NamingContext();
   private CompilerContext Context = null!;
 
   /// <summary>
@@ -44,13 +44,14 @@ internal class TemplateEmitter
   private Dictionary<string, FunctionDef> DynamicFunctions = new Dictionary<string, FunctionDef>();
 
 
+  private Node DOM = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
   // This version is mostly meant for test cases....
   internal TemplateEmitter() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateEmitter(string typeIdentifier_, TemplateDynamics dynamics_, CompilerContext context_, EmitterBase emitter_)
+  public TemplateEmitter(string typeIdentifier_, Node dom_, CompilerContext context_, EmitterBase emitter_)
   {
     Context = context_;
 
@@ -61,7 +62,7 @@ internal class TemplateEmitter
       throw new InvalidOperationException($"There is no typedef for: {this.ForType} in the type index!");
     }
 
-    Dynamics = dynamics_;
+    DOM = dom_;
     Emitter = emitter_;
   }
 
@@ -78,7 +79,7 @@ internal class TemplateEmitter
 
     const string ROOT_NAME = "root";
 
-    Node root = Dynamics.DOM;
+    Node root = DOM;
     cf.WriteLine($"var {ROOT_NAME} = new HTMLNode(\"{root.Name}\");");
     AddAttributesForCsharp(cf, root, ROOT_NAME);
 
@@ -148,7 +149,7 @@ internal class TemplateEmitter
   {
 
     // Walk the tree and create elements + children as we go....
-    Node root = Dynamics.DOM;
+    Node root = DOM;
 
     cf.WriteLine($"CreateDOM(): HTMLElement ");
     cf.OpenBlock();
@@ -161,7 +162,7 @@ internal class TemplateEmitter
     AddAttributes(cf, root, root.Identifier!);
 
     // Now we need to populate the child elements....
-    CreateChildElements(cf, root, NamingContext);
+    CreateChildElements(cf, root);
 
     cf.NextLine(2);
     cf.WriteLine($"return {QualifyIdentifier(root.Identifier!)};");
@@ -187,7 +188,7 @@ internal class TemplateEmitter
   /// </summary>
   public void EmitBindFunction(CodeFile cf, TemplateDynamics dynamics)
   {
-    Node root = Dynamics.DOM;
+    Node root = DOM;
 
     const string BIND_ID = "dom";
     cf.Write($"Bind({BIND_ID}:HTMLElement) ");
@@ -317,11 +318,12 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private string GetTypescriptAssignSyntax(Node node)
   {
-    string res = $"let {node.Identifier}";
-    if (Dynamics.IdentifierIsClassLevel(node.Identifier))
-    {
-      res = $"this.{node.Identifier!}";
-    }
+    string res = $"let {QualifyIdentifier(node.Identifier)}";
+
+    //if (Dynamics.IdentifierIsClassLevel(node.Identifier))
+    //{
+    //  res = $"this.{node.Identifier!}";
+    //}
     return res;
   }
 
@@ -335,15 +337,15 @@ internal class TemplateEmitter
       {
         throw new NotImplementedException();
 
-        string useValId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-        string valLine = $"var {useValId} = \"{item.Value}\";";
+        //string useValId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+        //string valLine = $"var {useValId} = \"{item.Value}\";";
 
-        // The attribute value is created via expression.
-        string funcName = item.DynamicFunction;
-        valLine = $"var {useValId} = {funcName}();";
+        //// The attribute value is created via expression.
+        //string funcName = item.DynamicFunction;
+        //valLine = $"var {useValId} = {funcName}();";
 
-        cf.WriteLine(valLine);
-        cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {useValId});");
+        //cf.WriteLine(valLine);
+        //cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {useValId});");
       }
 
     }
@@ -443,7 +445,7 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CreateChildElements(CodeFile cf, Node parent, NamingContext nameContext)
+  private void CreateChildElements(CodeFile cf, Node parent)
   {
     if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
     {
@@ -453,7 +455,7 @@ internal class TemplateEmitter
     if (parent.HasDynamicContent)
     {
       // We will have a function that creates the content for the node.
-      string funcName = EmitDynamicContentFunction(cf, parent.ChildContent);
+      string funcName = EmitDynamicContentFunction(cf, parent);
       cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', this.{funcName}());");
 
       // Register the association.
@@ -498,7 +500,7 @@ internal class TemplateEmitter
           AddAttributes(cf, item, item.Identifier);
 
           // Now its child elements too....
-          CreateChildElements(cf, item, nameContext);
+          CreateChildElements(cf, item);
 
           // Add the child node to the parent....
           cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
@@ -552,16 +554,16 @@ internal class TemplateEmitter
   /// Create internal internal entries based on the dynamic content....
   /// Returns the name of the generated function!
   /// </summary>
-  public string EmitDynamicContentFunction(CodeFile cf, ChildContent childContent)
+  public string EmitDynamicContentFunction(CodeFile cf, Node node) // ChildContent childContent)
   {
-    if (childContent.DynamicContent == null)
+    if (!node.HasDynamicContent)
     {
       throw new InvalidOperationException("no dynamic content is listed!");
     }
 
     //lock (DataLock)
     //{
-    string functionName = NamingContext.GetUniqueNameFor("getValue");
+    string functionName = node.DynamicFunction.Name; // NamingContext.GetUniqueNameFor("getValue");
 
     // We need to create the function definition....
     // Simple function def, that takes zero arguments...
@@ -573,11 +575,13 @@ internal class TemplateEmitter
 
     // NOTE: We should just be composing some dhll constructs here, and emitting them later...
     // For now we will just use a functor....
-    string func = GenerateComputeStringFunction(childContent, cf);
+    string func = GenerateComputeStringFunction(node.ChildContent, cf);
     funcDef.Body.Add(func);
 
     // We will emit these all at once, later.
     DynamicFunctions.Add(functionName, funcDef);
+
+
     int x = 10;
 
     // 

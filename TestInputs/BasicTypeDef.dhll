@@ -1,4 +1,4 @@
-typedef BasicTypeDef {
+typedef BasicType {
     prop bool IsVisible = false;
     string Title = "Modal";
     prop bool Display = false;

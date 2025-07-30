@@ -22,8 +22,8 @@ namespace dhllTesters
       var v = new dhllVisitorImpl();
       var td = (TypeDef)v.Visit(context);
 
-      Assert.That(td.Identifier, Is.EqualTo("ModalWindow"));
-      Assert.That(td.Members.Count, Is.EqualTo(2));
+      Assert.That(td.Identifier, Is.EqualTo("BasicType"));
+      Assert.That(td.Members.Count, Is.EqualTo(5));
       Assert.That(td.Members[0].Identifier, Is.EqualTo("IsVisible"));
       Assert.That(td.Members[0].InitValue, Is.EqualTo("false"));
     }
