@@ -1,6 +1,6 @@
-<template for="ModalWindow" name="test-1">
+<template for="BasicTypeDef" name="test-1">
   <div class="my-thing">
-    <div class="{Display}">
+    <div class={Display}>
       <p>I am a sub-tag</p>
     </div>
     This is just some loose text....

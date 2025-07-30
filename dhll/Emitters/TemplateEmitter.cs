@@ -290,27 +290,28 @@ internal class TemplateEmitter
   /// </summary>
   private List<Node> BindNode(Node node, string bindTo, CodeFile cf)
   {
-    throw new NotImplementedException();
+    // throw new NotImplementedException();
 
-    //var res = new List<Node>();
+    var res = new List<Node>();
 
-    //string elementId = QualifyIdentifier(node.Identifier);
-    //if (Dynamics.IdentifierIsClassLevel(node.Identifier))
-    //{
-    //  res.Add(node);
-    //  cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
-    //}
+    string elementId = QualifyIdentifier(node.Identifier);
+    // if (Dynamics.IdentifierIsClassLevel(node.Identifier))
+    if (this.TemplateType.HasMember(node.Identifier))
+    {
+      res.Add(node);
+      cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
+    }
 
-    //int index = 0;
-    //foreach (var c in node.Children)
-    //{
-    //  if (c.Name == "<text>") { continue; }
-    //  var kids = BindNode(c, bindTo + $".children[{index}]", cf);
-    //  res.AddRange(kids);
-    //  ++index;
-    //}
+    int index = 0;
+    foreach (var c in node.ChildContent.Nodes)
+    {
+      if (c.Name == "<text>") { continue; }
+      var kids = BindNode(c, bindTo + $".children[{index}]", cf);
+      res.AddRange(kids);
+      ++index;
+    }
 
-    //return res;
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -355,34 +356,82 @@ internal class TemplateEmitter
     {
 
       string useValue = FormatValue(item);
-
-
       cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute('{item.Name}', {useValue});");
+
+      //if (exp is PrimaryExpression) { 
+
+      //}
+
+      //  if (item.Value.Expression.Children.External.count
     }
+    // string useValue = FormatValue(item);
+
+
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
   internal string FormatValue(Grammars.v1.Attribute item)
   {
-    if (item.Value.Type != EAttrValType.String)
+    string res = null!;
+
+    if (item.Value.Type == EAttrValType.String)
     {
-      throw new InvalidOperationException("Can't format a non-string attribute value!");
+      res = item.Value.StringVal!;
+      return res;
     }
-    string useValue = $"'{item.Value.StringVal}'";
 
     if (item.IsExpression)
     {
-      throw new NotImplementedException();
-      // The attribute value is created via expression.
-      string funcName = item.DynamicFunction;
-      useValue = $"this.{funcName}()";
-    }
-    else
-    {
-      useValue = UnescapeBackslash(useValue);
+      var exp = item.Value.Expression;
+      var primary = exp as PrimaryExpression;
+      if (primary != null)
+      {
+        switch (primary.Type)
+
+        {
+          case EPrimaryType.Identifier:
+            res = QualifyIdentifier(primary.Content);
+            break;
+
+          case EPrimaryType.Number:
+          case EPrimaryType.String:
+            res = primary.Content;
+            break;
+
+          default:
+            throw new NotImplementedException();
+        }
+      }
+
+      // NOTE: In the absence of data type, we will just convert everything to a string:
+      // This can be improved upon later.
+      res = $"({res}).toString()";
+
+      return res;
+
+
+      //if (item.Value.Type != EAttrValType.String)
+      //{
+      //  throw new InvalidOperationException("Can't format a non-string attribute value!");
+      //}
+      //string useValue = $"'{item.Value.StringVal}'";
+
+      //if (item.IsExpression)
+      //{
+      //  throw new NotImplementedException();
+      //  // The attribute value is created via expression.
+      //  string funcName = item.DynamicFunction;
+      //  useValue = $"this.{funcName}()";
+      //}
+      //else
+      //{
+      //  useValue = UnescapeBackslash(useValue);
+      //}
+
+      //return useValue;
     }
 
-    return useValue;
+    throw new InvalidOperationException();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -405,7 +454,7 @@ internal class TemplateEmitter
     {
       // We will have a function that creates the content for the node.
       string funcName = EmitDynamicContentFunction(cf, parent.ChildContent);
-      cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {funcName});");
+      cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', this.{funcName}());");
 
       // Register the association.
       var allIds = parent.ChildContent.DynamicContent.Identifiers;
@@ -418,18 +467,43 @@ internal class TemplateEmitter
     {
       foreach (var item in parent.ChildContent.Nodes)
       {
-        cf.NextLine(2);
-        string assignTo = GetTypescriptAssignSyntax(item);
-        cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
+        if (item.IsTextNode)
+        {
+          string? useText = FormatText(item.Value);
+          string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
 
-        // Attributes.
-        AddAttributes(cf, item, item.Identifier);
+          // NOTE: Dynamic content would have been detected at the parent level.....
+          //if (item.DynamicContent != null)
+          //{
+          //  // We need to know all of the variable names....
+          //  // HACK: We are assuming that the dynamic functions are all at class level!
+          //  string funcName = item.DynamicFunction;
+          //  useValue = $"this.{funcName}()";
+          //}
 
-        // Now its child elements too....
-        CreateChildElements(cf, item, nameContext);
+          if (useValue != null)
+          {
+            cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
+          }
 
-        // Add the child node to the parent....
-        cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+          continue;
+        }
+        else
+        {
+          cf.NextLine(2);
+          string assignTo = GetTypescriptAssignSyntax(item);
+          cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
+
+          // Attributes.
+          AddAttributes(cf, item, item.Identifier);
+
+          // Now its child elements too....
+          CreateChildElements(cf, item, nameContext);
+
+          // Add the child node to the parent....
+          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+        }
+
       }
     }
 
@@ -633,8 +707,21 @@ internal class TemplateEmitter
 
     string res = value.Replace("\r", " ");
     res = res.Replace("\n", " ");
+    res = res.Trim();
 
     return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal void EmitDynamicFunctions(CodeFile cf)
+  {
+    this.Emitter.EmitFunctionDefs(this.DynamicFunctions.Values, cf);
+
+    //foreach (var item in this.DynamicFunctions.Values)
+    //{
+    //}
+
+    //throw new NotImplementedException();
   }
 }
 

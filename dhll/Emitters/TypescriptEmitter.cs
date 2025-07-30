@@ -122,7 +122,10 @@ namespace dhll.Emitters
         if (dynamics != null)
         {
           dynamics.EmitDOMDeclarations(cf);
+          
           templateEmitter.EmitCreateDOMFunctionForTypescript(cf);
+
+          templateEmitter.EmitDynamicFunctions(cf);
 
           templateEmitter.EmitBindFunction(cf, dynamics);
 

@@ -41,6 +41,9 @@ public class CodeGenAttribute : System.Attribute
 public class ChildContent
 {
   // --------------------------------------------------------------------------------------------------------------------------
+  internal ChildContent() { }
+
+  // --------------------------------------------------------------------------------------------------------------------------
   public ChildContent(IEnumerable<Node> nodes, DynamicContent? dynamicContent_)
   {
     Nodes.AddRange(nodes);
@@ -69,7 +72,7 @@ public partial class Node
   /// </summary>
   public string Name { get; set; } = default!;
   public List<Attribute> Attributes { get; set; } = new List<Attribute>();
-  public ChildContent? ChildContent { get; set; } = null;
+  public ChildContent? ChildContent { get; set; } = new ChildContent();
 
   // public List<Node> Children { get; set; } = new List<Node>();
 
