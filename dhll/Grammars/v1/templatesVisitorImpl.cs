@@ -59,6 +59,11 @@ public class ChildContent
 // ==============================================================================================================================
 public partial class Node
 {
+  // --------------------------------------------------------------------------------------------------------------------------
+  public Node(Node? parent_)
+  {
+    Parent = parent_;
+  }
 
   public bool IsTextNode { get { return Name == HTMLNode.TEXT_NAME; } }
   public bool IsExpressionNode { get { return Name == HTMLNode.EXPRESSION_NAME; } }
@@ -66,7 +71,7 @@ public partial class Node
   /// <summary>
   /// The parent node, or null if this is the root node.
   /// </summary>
-  public Node? Parent { get; set; } = null;
+  public Node? Parent { get; private set; } = null;
 
   /// <summary>
   /// Name of the tag, i.e. 'p', 'img', etc.
@@ -185,8 +190,10 @@ public class Attribute
 /// Some languages (like typescript) are allowed to have HTML type templates, and this
 /// type captures their data.
 /// </summary>
-public class TemplateDefinition
+public class TemplateInfo
 {
+  public const string ROOT_NODE_IDENTIFIER = "_Root";
+
   public string ForType { get; set; } = default!;
   public string? Name { get; set; } = default!;
 
@@ -194,6 +201,8 @@ public class TemplateDefinition
   /// Node-Tree representation of the DOM.
   /// </summary>
   public Node DOM { get; set; } = default!;
+
+  public DynamicContentIndex DynamicContentIndex { get; set; } = default!;
 }
 
 
@@ -204,7 +213,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 {
   private const string TEMPLATE = "template";
 
-  public List<TemplateDefinition> TemplateDefs = new List<TemplateDefinition>();
+  public List<TemplateInfo> TemplateInfos = new List<TemplateInfo>();
 
   /// <summary>
   /// Naming context for the current template that we are parsing.
@@ -228,9 +237,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       }
 
       NameContext = new NamingContext();
-      TemplateDefinition def = ParseTemplate(elem);
+      TemplateInfo def = ParseTemplate(elem);
 
-      TemplateDefs.Add(def);
+      TemplateInfos.Add(def);
     }
 
     // NOTE: No clue what to return here....  Null is the default return value FWIW.
@@ -238,7 +247,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private TemplateDefinition ParseTemplate(templateParser.HtmlElementContext elem)
+  private TemplateInfo ParseTemplate(templateParser.HtmlElementContext elem)
   {
     // Each template element MUST have a single child element!
     var content = elem.htmlContent();
@@ -281,32 +290,33 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     // We also need the DOM without the Prop strings so that we can create them in a DOM via javascript....
 
     // The DOM we can do like any other tree of tags....
-    Node domNode = ComputeDOM(rootElem);
+    Node domNode = ComputeDOM(rootElem, null!);
     // domNode.Identifier = TemplateDynamics.ROOT_NODE_IDENTIFIER;
 
     // Second pass to compute the dynamics for codegen.
-    ComputeDynamicContentInfo(domNode);
+    var dci = new DynamicContentIndex(domNode);
+    ComputeDynamicContentInfo(domNode, dci);
 
 
-    var def = new TemplateDefinition()
+    var def = new TemplateInfo()
     {
       ForType = forVal,
       Name = nameVal,
-      DOM = domNode
+      DOM = domNode,
+      DynamicContentIndex = dci
     };
 
     return def;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private Node ComputeDOM(templateParser.HtmlElementContext elem)
+  private Node ComputeDOM(templateParser.HtmlElementContext elem, Node parentNode)
   {
     string tagName = elem.entityName().GetText();
     var attributes = ComputeAttributes(elem);
 
-    var res = new Node()
+    var res = new Node(parentNode)
     {
-      Parent = null,
       Name = tagName,
       Attributes = attributes,
     };
@@ -318,7 +328,10 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void ComputeDynamicContentInfo(Node node)
+  /// <summary>
+  /// Computes, sets, and updates the dynamic content index for all nodes in the tree.
+  /// </summary>
+  private void ComputeDynamicContentInfo(Node node, DynamicContentIndex index)
   {
     bool anyDynamic = false;
 
@@ -349,28 +362,29 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       }
     }
 
-    SetIdentifier(node, anyDynamic);
+    if (anyDynamic)
+    {
+      SetIdentifier(node);
+      index.IdentifiersToNodes.Add(node.Identifier, node);
+    }
 
     foreach (var c in node.ChildContent?.Nodes)
     {
-      ComputeDynamicContentInfo(c);
+      ComputeDynamicContentInfo(c, index);
     }
 
   }
 
-  private void SetIdentifier(Node node, bool anyDynamic)
+  // --------------------------------------------------------------------------------------------------------------------------
+  private void SetIdentifier(Node node)
   {
-    return;
     if (node.Parent == null)
     {
-      node.Identifier = TemplateDynamics.ROOT_NODE_IDENTIFIER;
+      node.Identifier = TemplateInfo.ROOT_NODE_IDENTIFIER;
     }
     else
     {
-      if (anyDynamic)
-      {
-        node.Identifier = NameContext.GetUniqueNameFor("_Node");
-      }
+      node.Identifier = NameContext.GetUniqueNameFor("_Node");
     }
   }
 
@@ -785,6 +799,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   // --------------------------------------------------------------------------------------------------------------------------
   private ChildContent ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
+    if (parentNode == null) { throw new ArgumentNullException() ; }
+    
     ChildContent res = default!;
 
     var elems = elem.children;
@@ -803,6 +819,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   // --------------------------------------------------------------------------------------------------------------------------
   private ChildContent GetChildNodesFromHTMLContent(templateParser.HtmlContentContext parent, Node parentNode)
   {
+    if (parentNode == null) { throw new ArgumentNullException(); }
+
     var nodes = new List<Node>();
 
     var kids = parent.children;
@@ -812,7 +830,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       {
         if (kid is templateParser.HtmlElementContext)
         {
-          var n = ComputeDOM((kid as templateParser.HtmlElementContext)!);
+          var n = ComputeDOM((kid as templateParser.HtmlElementContext)!, parentNode);
           nodes.Add(n);
         }
         else if (kid is templateParser.HtmlChardataContext)
@@ -821,9 +839,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
           string text = charData.GetText();
 
-          var n = new Node()
+          var n = new Node(parentNode)
           {
-            Parent = parentNode,
             Name = HTMLNode.TEXT_NAME,
             Value = text,
           };
@@ -834,9 +851,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
           var context = kid as templateParser.ExpressionContext;
           Expression expr = ParseExpresion(context.expr());
 
-          var n = new Node()
+          var n = new Node(parentNode)
           {
-            Parent = parentNode,
             Name = HTMLNode.EXPRESSION_NAME,
             Value = null,
             Expression = expr,
@@ -918,3 +934,23 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 }
 
+
+/// <summary>
+/// Describes the dynamic content in a DOM, and makes the relationships clear.
+/// NOTE: This is basically V2 of 'template dynamics' but a bit cleaner.
+/// </summary>
+public class DynamicContentIndex
+{
+  // --------------------------------------------------------------------------------------------------------------------------
+  public DynamicContentIndex(Node dom_)
+  {
+    DOM = dom_;
+  }
+
+  public Node DOM { get; private set; }
+
+  /// <summary>
+  /// All identifiers, and the nodes they are attached to.
+  /// </summary>
+  public Dictionary<string, Node> IdentifiersToNodes { get; set; } = new Dictionary<string, Node>();
+}

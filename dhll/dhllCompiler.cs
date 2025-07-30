@@ -68,7 +68,7 @@ public class dhllCompiler
     Context = new CompilerContext()
     {
       TypeIndex = new TypeIndex(),
-      TemplateDynamicsIndex = new TemplateIndex(),
+      TemplateInfoIndex = new TemplateInfoIndex(),
     };
   }
 
@@ -242,7 +242,7 @@ public class dhllCompiler
       {
         Log.Info($"Processing template at path: {path}");
 
-        TemplateDefinition[] templateDefs = ParseTemplatesFromFile(path);
+        TemplateInfo[] templateDefs = ParseTemplatesFromFile(path);
 
         foreach (var item in templateDefs)
         {
@@ -253,9 +253,9 @@ public class dhllCompiler
           // to render / bind against the different versions....
           // if (item.Name != null) { useName += ("." + item.Name); }
 
-          var dynamics = new TemplateDynamics(item, null);
+         // var dynamics = new TemplateDynamics(item, null);
 
-          Context.TemplateDynamicsIndex.Add(useName, dynamics);
+          Context.TemplateInfoIndex.Add(useName, item);
         }
       }
     }
@@ -411,7 +411,7 @@ public class dhllCompiler
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDefinition[] ParseTemplatesFromFile(string inputFilePath)
+  public TemplateInfo[] ParseTemplatesFromFile(string inputFilePath)
   {
     string input = File.ReadAllText(inputFilePath);
     return ParseTemplates(input);
@@ -419,7 +419,7 @@ public class dhllCompiler
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDefinition[] ParseTemplates(string input)
+  public TemplateInfo[] ParseTemplates(string input)
   {
     AntlrInputStream s = new AntlrInputStream(input);
     var lexer = new templateLexer(s);
@@ -432,7 +432,7 @@ public class dhllCompiler
 
     v.VisitTemplates(context);
 
-    return v.TemplateDefs.ToArray();
+    return v.TemplateInfos.ToArray();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -513,6 +513,6 @@ public class dhllCompiler
 internal class CompilerContext
 {
   // TODO: We are going to change this so that it is just the template.... 
-  public TemplateIndex TemplateDynamicsIndex { get; set; } = default!;
+  public TemplateInfoIndex TemplateInfoIndex { get; set; } = default!;
   public TypeIndex TypeIndex { get; set; } = default!;
 }

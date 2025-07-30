@@ -144,6 +144,7 @@ internal class TemplateEmitter
     //}
   }
 
+
   // --------------------------------------------------------------------------------------------------------------------------
   public void EmitCreateDOMFunctionForTypescript(CodeFile cf)
   {
@@ -186,7 +187,7 @@ internal class TemplateEmitter
   /// 
   /// NOTE: Do we need to generate another function to find all instances to bind to?  Might be nice...
   /// </summary>
-  public void EmitBindFunction(CodeFile cf, TemplateDynamics dynamics)
+  public void EmitBindFunction(CodeFile cf, TemplateInfo templateInfo)
   {
     Node root = DOM;
 
@@ -201,7 +202,7 @@ internal class TemplateEmitter
     cf.NextLine(1);
 
     // Set values for all nodes:
-    SetPropertyValues(boundNodes, cf, dynamics);
+    SetPropertyValues(boundNodes, cf, templateInfo);
 
     cf.CloseBlock(1);
 
@@ -209,71 +210,73 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateDynamics dynamics)
+  private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
   {
-
-    // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
-    // walk the tree looking for dynamics.
-    string[] propNames = dynamics.PropTargets.GetNames();
-    var targetNodes = dynamics.PropTargets.GetAllTargetNodes();
-    foreach (var p in propNames)
-    {
-      // Get the name plus any options!
-      string[] pParts = p.Split(':');
-      string useName = pParts[0];
-
-      if (pParts.Length > 1)
-      {
-        throw new NotSupportedException("Property options in templates are not yet supported!");
-      }
-
-      var targets = dynamics.PropTargets.GetTargetsForProperty(p);
-      foreach (var t in targets)
-      {
+    throw new NotSupportedException();
 
 
+    //// NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
+    //// walk the tree looking for dynamics.
+    //string[] propNames = templateInfo.PropTargets.GetNames();
+    //var targetNodes = templateInfo.PropTargets.GetAllTargetNodes();
+    //foreach (var p in propNames)
+    //{
+    //  // Get the name plus any options!
+    //  string[] pParts = p.Split(':');
+    //  string useName = pParts[0];
 
-        // HACK: This is typescript specific!  We will have to come up with a better way later.
-        // Best way is to probably ask the current emitter directly.
-        string useId = QualifyIdentifier(t.TargetNode.Identifier);
-        string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
-                                                                      : $".innerText");
+    //  if (pParts.Length > 1)
+    //  {
+    //    throw new NotSupportedException("Property options in templates are not yet supported!");
+    //  }
 
-        // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
-        string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
+    //  var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
+    //  foreach (var t in targets)
+    //  {
 
-        // Some extra coercion so we produce typesafe code....
-        // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
-        // HACK: This is typescript specific!  We will have to come up with a better way later.
-        // Best way is to probably ask the current emitter directly.
-        if (t.Attr != null)
-        {
-          if (IsNumberType(propType))
-          {
-            getBy += " ?? \"0\"";
-          }
-          else if (propType == "string")
-          {
-            getBy += " ?? \"\"";
-          }
-        }
 
-        if (propType != "string")
-        {
-          if (IsNumberType(propType))
-          {
-            // Cast to number type!
-            getBy = $"Number({getBy})";
-          }
-          else
-          {
-            throw new NotSupportedException($"There is no supported cast for type: {propType}!");
-          }
-        }
 
-        cf.WriteLine($"this._{p} = {getBy};");
-      }
-    }
+    //    // HACK: This is typescript specific!  We will have to come up with a better way later.
+    //    // Best way is to probably ask the current emitter directly.
+    //    string useId = QualifyIdentifier(t.TargetNode.Identifier);
+    //    string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
+    //                                                                  : $".innerText");
+
+    //    // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
+    //    string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
+
+    //    // Some extra coercion so we produce typesafe code....
+    //    // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
+    //    // HACK: This is typescript specific!  We will have to come up with a better way later.
+    //    // Best way is to probably ask the current emitter directly.
+    //    if (t.Attr != null)
+    //    {
+    //      if (IsNumberType(propType))
+    //      {
+    //        getBy += " ?? \"0\"";
+    //      }
+    //      else if (propType == "string")
+    //      {
+    //        getBy += " ?? \"\"";
+    //      }
+    //    }
+
+    //    if (propType != "string")
+    //    {
+    //      if (IsNumberType(propType))
+    //      {
+    //        // Cast to number type!
+    //        getBy = $"Number({getBy})";
+    //      }
+    //      else
+    //      {
+    //        throw new NotSupportedException($"There is no supported cast for type: {propType}!");
+    //      }
+    //    }
+
+    //    cf.WriteLine($"this._{p} = {getBy};");
+    //  }
+    //}
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

@@ -121,10 +121,10 @@ namespace dhllTesters
       string inputPath = GetTestInputPath("MultiRootTemplate.dhlt");
       string input = File.ReadAllText(inputPath);
 
-      Assert.Throws<TemplateParseException>(() =>
+      Assert.Throws<TemplateParseException>((TestDelegate)(() =>
       {
-        TemplateDefinition[] defs = compiler.ParseTemplates(input);
-      }, $"A {nameof(TemplateParseException)} should have been thrown!");
+        dhll.Grammars.v1.TemplateInfo[] defs = compiler.ParseTemplates(input);
+      }), $"A {nameof(TemplateParseException)} should have been thrown!");
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -138,7 +138,7 @@ namespace dhllTesters
       var compiler = new dhllCompiler();
       string inputPath = GetTestInputPath("Template1.dhlt");
 
-      TemplateDefinition[] defs = compiler.ParseTemplatesFromFile(inputPath);
+      dhll.Grammars.v1.TemplateInfo[] defs = compiler.ParseTemplatesFromFile(inputPath);
       Assert.That(defs.Length, Is.EqualTo(1), "There should be one template def!");
 
       // TODO: We can expand upon this test by adding more checks for DOM structure, attributes, etc.

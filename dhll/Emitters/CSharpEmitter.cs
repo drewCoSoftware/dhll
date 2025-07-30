@@ -1,5 +1,6 @@
 ﻿using dhll.CodeGen;
 using dhll.Expressions;
+using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
@@ -60,12 +61,12 @@ namespace dhll.Emitters
       {
         // Let's check to see if there is an associated template...
         Log.Verbose("Resolving template data...");
-        TemplateDynamics? dynamics = GetTemplateDynamics(td);
+        TemplateInfo? templateInfo = GetTemplateInfoForType(td);
         TemplateEmitter? templateEmitter = null;
-        if (dynamics != null)
+        if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, dynamics.DOM, Context, this);
+          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo.DOM, Context, this);
         }
         else
         {
@@ -83,7 +84,7 @@ namespace dhll.Emitters
         cf.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
-        if (dynamics != null)
+        if (templateInfo != null)
         {
           // NOTE: Currently for C# we don't bind to any kind of template, so I am just going
           // to skip this step.  Future versions of the code will of course have to care (say we
@@ -92,7 +93,9 @@ namespace dhll.Emitters
           //dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunctionForCSharp(cf);
           //templateEmitter.EmitBindFunction(CF, dynamics);
-          dynamics.EmitDynamicFunctionDefs(cf, this);
+
+          throw new NotImplementedException("Figure this nedt line out...");
+          // templateInfo.EmitDynamicFunctionDefs(cf, this);
         }
 
 
@@ -121,7 +124,7 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    protected override void EmitGetterSetter(GetterSetter item, TemplateDynamics dynamics, CodeFile cf)
+    protected override void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf)
     {
       string scope = GetScopeWord(item.Scope);
       if (scope != string.Empty) { scope += " "; }

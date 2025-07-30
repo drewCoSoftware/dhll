@@ -1,1 +1,1 @@
-﻿global using TemplateIndex = System.Collections.Generic.Dictionary<string, dhll.TemplateDynamics>;
+﻿global using TemplateInfoIndex = System.Collections.Generic.Dictionary<string, dhll.Grammars.v1.TemplateInfo>;

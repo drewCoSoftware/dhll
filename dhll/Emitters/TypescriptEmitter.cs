@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using dhll.CodeGen;
 using dhll.Expressions;
+using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools;
 using drewCo.Tools.Logging;
@@ -94,12 +95,12 @@ namespace dhll.Emitters
       {
         // Let's check to see if there is an associated template...
         Log.Verbose("Resolving template data...");
-        TemplateDynamics? dynamics = GetTemplateDynamics(td);
+        Grammars.v1.TemplateInfo? templateInfo = base.GetTemplateInfoForType(td);
         TemplateEmitter? templateEmitter = null;
-        if (dynamics != null)
+        if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, dynamics.DOM, Context, this);
+          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo.DOM, Context, this);
         }
         else
         {
@@ -119,23 +120,24 @@ namespace dhll.Emitters
         cf.NextLine();
 
         // Emit template elements that we will want to bind to during calls to setters....
-        if (dynamics != null)
+        if (templateInfo != null)
         {
-          dynamics.EmitDOMDeclarations(cf);
+          EmitDOMDeclarations(templateInfo, cf);
+          // templateDef.EmitDOMDeclarations(cf);
           
           templateEmitter.EmitCreateDOMFunctionForTypescript(cf);
 
           templateEmitter.EmitDynamicFunctions(cf);
 
-          templateEmitter.EmitBindFunction(cf, dynamics);
+          templateEmitter.EmitBindFunction(cf, templateInfo);
 
-          dynamics.EmitDynamicFunctionDefs(cf, this);
+        //  templateDef.EmitDynamicFunctionDefs(cf, this);
         }
 
         // Now emit all of the getters / setters.
         foreach (var item in preProcResults.GetterSetters)
         {
-          EmitGetterSetter(item, dynamics, cf);
+          EmitGetterSetter(item, templateInfo, cf);
         }
 
         cf.CloseBlock();
@@ -151,51 +153,69 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    protected override void EmitGetterSetter(GetterSetter item, TemplateDynamics dynamics, CodeFile cf)
+    private void EmitDOMDeclarations(Grammars.v1.TemplateInfo templateInfo, CodeFile cf)
     {
+      // HACK: We are assuming that we are outputting to typescript syntax!
+      cf.NextLine();
+      cf.WriteLine("// ---- DOM Elements ------");
 
-      if (item.UseGetter)
+      foreach (var s in templateInfo.DynamicContentIndex.IdentifiersToNodes.Keys)
       {
-        cf.Write($"public get {item.Identifier}() ");
-        cf.OpenBlock();
-        cf.WriteLine($"return this.{item.BackingMember.Identifier};");
-        cf.CloseBlock(2);
+        cf.WriteLine($"{s}: HTMLElement;");
       }
 
-      if (item.UseSetter)
-      {
-        string typeName = TranslateTypeName(item.BackingMember.TypeName);
-        string bid = ConvertToArgumentName(item.Identifier) + "_";
+      cf.NextLine(1);
+    }
 
-        cf.Write($"public set {item.Identifier}({bid}: {typeName}) ");
-        cf.OpenBlock();
-        cf.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
 
-        // This is where we do property target stuff...
-        var propTargets = dynamics.PropTargets.GetTargetsForProperty(item.Identifier);
-        if (propTargets != null)
-        {
-          int attrIndex = 0;
-          foreach (var t in propTargets)
-          {
-            if (t.Attr != null)
-            {
-              string valId = $"val{attrIndex}";
-              cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
-              cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
 
-              ++attrIndex;
-            }
-            else
-            {
-              // We are setting content for this item.
-              cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
-            }
-          }
-        }
+    // --------------------------------------------------------------------------------------------------------------------------
+    protected override void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf)
+    {
+      throw new NotSupportedException();
 
-        cf.CloseBlock(2);
-      }
+      //if (item.UseGetter)
+      //{
+      //  cf.Write($"public get {item.Identifier}() ");
+      //  cf.OpenBlock();
+      //  cf.WriteLine($"return this.{item.BackingMember.Identifier};");
+      //  cf.CloseBlock(2);
+      //}
+
+      //if (item.UseSetter)
+      //{
+      //  string typeName = TranslateTypeName(item.BackingMember.TypeName);
+      //  string bid = ConvertToArgumentName(item.Identifier) + "_";
+
+      //  cf.Write($"public set {item.Identifier}({bid}: {typeName}) ");
+      //  cf.OpenBlock();
+      //  cf.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
+
+      //  // This is where we do property target stuff...
+      //  var propTargets = dynamics.PropTargets.GetTargetsForProperty(item.Identifier);
+      //  if (propTargets != null)
+      //  {
+      //    int attrIndex = 0;
+      //    foreach (var t in propTargets)
+      //    {
+      //      if (t.Attr != null)
+      //      {
+      //        string valId = $"val{attrIndex}";
+      //        cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
+      //        cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
+
+      //        ++attrIndex;
+      //      }
+      //      else
+      //      {
+      //        // We are setting content for this item.
+      //        cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
+      //      }
+      //    }
+      //  }
+
+      //  cf.CloseBlock(2);
+      //}
 
     }
 

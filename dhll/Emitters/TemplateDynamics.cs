@@ -13,13 +13,12 @@ namespace dhll;
 /// </summary>
 internal class TemplateDynamics
 {
-  public const string ROOT_NODE_IDENTIFIER = "_Root";
 
   private NamingContext NamingContext = null!;
   private DynamicFunctionsGroup DynamicFunctions = null!;
   public PropChangeTargets PropTargets { get; private set; } = null!;
 
-  private TemplateDefinition Def = null!;
+  private TemplateInfo Def = null!;
 
   // NOTE: We are assuming that our template is represented as an HTML/browser type DOM!
   public Node DOM { get { return Def.DOM; } }
@@ -33,7 +32,7 @@ internal class TemplateDynamics
 
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateDynamics(TemplateDefinition def_, EmitterBase emitter_)
+  public TemplateDynamics(TemplateInfo def_, EmitterBase emitter_)
   {
 
     Def = def_;
@@ -41,11 +40,11 @@ internal class TemplateDynamics
     DynamicFunctions = new DynamicFunctionsGroup(NamingContext, emitter_);
     PropTargets = new PropChangeTargets();
 
-    Def.DOM.Identifier = NamingContext.GetUniqueNameFor(ROOT_NODE_IDENTIFIER);
+    Def.DOM.Identifier = NamingContext.GetUniqueNameFor(TemplateInfo.ROOT_NODE_IDENTIFIER);
 
     PreProcessNodes();
 
-    ClassLevelNodeIdentifiers = PropTargets.GetAllTargetNodeIdentifiers(new[] { ROOT_NODE_IDENTIFIER }).ToHashSet();
+    ClassLevelNodeIdentifiers = PropTargets.GetAllTargetNodeIdentifiers(new[] { TemplateInfo.ROOT_NODE_IDENTIFIER}).ToHashSet();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

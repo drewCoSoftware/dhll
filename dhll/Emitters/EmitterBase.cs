@@ -1,5 +1,6 @@
 ﻿using dhll.CodeGen;
 using dhll.Expressions;
+using dhll.Grammars.v1;
 using dhll.v1;
 using drewCo.Tools.Logging;
 
@@ -20,7 +21,7 @@ internal abstract class EmitterBase
   public abstract string TargetLanguage { get; }
 
   protected abstract Dictionary<string, string> LoadTypeNameTable();
-  protected abstract void EmitGetterSetter(GetterSetter item, TemplateDynamics dynamics, CodeFile cf);
+  protected abstract void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf);
   protected abstract void EmitDeclaration(Declare dec, CodeFile cf);
 
   public abstract void EmitFunctionDefs(IEnumerable<FunctionDef> defs, CodeFile cf);
@@ -54,10 +55,10 @@ internal abstract class EmitterBase
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  protected virtual TemplateDynamics? GetTemplateDynamics(TypeDef td)
+  protected virtual Grammars.v1.TemplateInfo? GetTemplateInfoForType(TypeDef td)
   {
-    Context.TemplateDynamicsIndex.TryGetValue(td.Identifier, out TemplateDynamics? template);
-    return template;
+    Context.TemplateInfoIndex.TryGetValue(td.Identifier, out Grammars.v1.TemplateInfo? def);
+    return def;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
