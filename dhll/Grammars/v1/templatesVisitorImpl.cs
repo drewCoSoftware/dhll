@@ -204,6 +204,8 @@ public class Attribute
 public class TemplateInfo
 {
   public const string ROOT_NODE_IDENTIFIER = "_Root";
+  public const string DEFAULT_DYNAMIC_NODE = "_Node";
+  public const string DEFAULT_NODE_NAME = "node";
 
   public string ForType { get; set; } = default!;
   public string? Name { get; set; } = default!;
@@ -361,7 +363,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       node.DynamicFunction = df;
       df.Node = node;
 
-      index.AddDynamicFuncitonData(df);
+      index.AddDynamicFunctionData(df);
     }
 
     foreach (var attr in node.Attributes)
@@ -376,14 +378,17 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
         attr.DynamicFunction = df;
         df.Attribute = attr;
 
-        index.AddDynamicFuncitonData(df);
+        index.AddDynamicFunctionData(df);
       }
     }
 
     if (anyDynamic)
     {
-      SetIdentifier(node);
+      SetIdentifier(node, TemplateInfo.DEFAULT_DYNAMIC_NODE);
       index.AddNodeData(node.Identifier, node);
+    }
+    else { 
+      SetIdentifier(node, TemplateInfo.DEFAULT_NODE_NAME);
     }
 
     foreach (var c in node.ChildContent?.Nodes)
@@ -394,7 +399,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void SetIdentifier(Node node)
+  private void SetIdentifier(Node node, string baseName)
   {
     if (node.Parent == null)
     {
@@ -402,7 +407,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     }
     else
     {
-      node.Identifier = NameContext.GetUniqueNameFor("_Node");
+      node.Identifier = NameContext.GetUniqueNameFor(baseName);
     }
   }
 
@@ -949,57 +954,5 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
     }
 
     return input;
-  }
-}
-
-
-/// <summary>
-/// Describes the dynamic content in a DOM, and makes the relationships clear.
-/// NOTE: This is basically V2 of 'template dynamics' but a bit cleaner.
-/// </summary>
-public class DynamicContentIndex
-{
-  // --------------------------------------------------------------------------------------------------------------------------
-  public DynamicContentIndex(Node dom_)
-  {
-    DOM = dom_;
-  }
-
-  public Node DOM { get; private set; }
-
-  /// <summary>
-  /// All identifiers, and the nodes they are attached to.
-  /// </summary>
-  public Dictionary<string, List<Node>> IdentifiersToNodes { get; set; } = new Dictionary<string, List<Node>>();
-
-  /// <summary>
-  /// All identifiers, and each of the functions that they are associated with.
-  /// </summary>
-  public Dictionary<string, List<DynamicFunctionInfo>> IdentifiersToDynamicFunctions { get; set; } = new Dictionary<string, List<DynamicFunctionInfo>>();
-
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  internal void AddDynamicFuncitonData(DynamicFunctionInfo df)
-  {
-    foreach (var identifier in df.IdentifiersUsed)
-    {
-      if (!IdentifiersToDynamicFunctions.TryGetValue(identifier, out List<DynamicFunctionInfo>? funcs))
-      {
-        funcs = new List<DynamicFunctionInfo>();
-        IdentifiersToDynamicFunctions.Add(identifier, funcs);
-      }
-      funcs.Add(df);
-    }
-  }
-
-  // --------------------------------------------------------------------------------------------------------------------------
-  internal void AddNodeData(string identifier, Node node)
-  {
-    if (!IdentifiersToNodes.TryGetValue(identifier, out List<Node>? nodes))
-    {
-      nodes = new List<Node>();
-      IdentifiersToNodes.Add(identifier, nodes);
-    }
-    nodes.Add(node);
   }
 }

@@ -50,7 +50,7 @@ internal class TemplateDynamics
   // --------------------------------------------------------------------------------------------------------------------------
   private void PreProcessNodes()
   {
-    SetDynamicContent(Def.DOM);
+    // SetDynamicContent(Def.DOM);
     SetNodeIdentifiers(Def.DOM);
   }
 
@@ -72,6 +72,7 @@ internal class TemplateDynamics
   /// These identifiers are used to indicate which nodes are 'class-level' in which case we will keep a
   /// persistent reference to them.
   /// </summary>
+  [Obsolete]
   private void SetNodeIdentifiers(Node node)
   {
     // throw new NotImplementedException();

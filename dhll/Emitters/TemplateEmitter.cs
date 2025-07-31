@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime.Tree;
+using CommandLine;
 using dhll.CodeGen;
 using dhll.Emitters;
 using dhll.Expressions;
@@ -7,6 +8,7 @@ using dhll.v1;
 using drewCo.Tools;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design;
+using System.Diagnostics.SymbolStore;
 using System.Text.RegularExpressions;
 
 
@@ -45,24 +47,28 @@ internal class TemplateEmitter
 
 
   private Node DOM = null!;
+  private TemplateInfo TemplateInfo = null!;
 
   // --------------------------------------------------------------------------------------------------------------------------
   // This version is mostly meant for test cases....
   internal TemplateEmitter() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateEmitter(string typeIdentifier_, Node dom_, CompilerContext context_, EmitterBase emitter_)
+  public TemplateEmitter(string forType_, TemplateInfo templateInfo_, CompilerContext context_, EmitterBase emitter_)
   {
+    ForType = forType_;
+
+    TemplateInfo = templateInfo_;
+    DOM = TemplateInfo.DOM;
+
     Context = context_;
 
-    ForType = typeIdentifier_;
     TemplateType = Context.TypeIndex.GetDataType(this.ForType);
     if (TemplateType == null)
     {
       throw new InvalidOperationException($"There is no typedef for: {this.ForType} in the type index!");
     }
 
-    DOM = dom_;
     Emitter = emitter_;
   }
 
@@ -327,12 +333,14 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private string GetTypescriptAssignSyntax(Node node)
   {
-    string res = $"let {QualifyIdentifier(node.Identifier)}";
+    if (string.IsNullOrWhiteSpace(node.Identifier)) { 
+      throw new InvalidOperationException("This node is missing an identifier!");
+    }
 
-    //if (Dynamics.IdentifierIsClassLevel(node.Identifier))
-    //{
-    //  res = $"this.{node.Identifier!}";
-    //}
+    string res = $"{QualifyIdentifier(node.Identifier)}";
+    if (!res.StartsWith("this")) {
+      res = "let " + res;
+    }
     return res;
   }
 
@@ -367,6 +375,11 @@ internal class TemplateEmitter
     {
 
       string useValue = FormatValue(item);
+
+
+      // throw new NotImplementedException("todo: make sure that we are picking a backing name!  If it belongs to the class!  Might need another map....");
+
+
       cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute('{item.Name}', {useValue});");
 
       //if (exp is PrimaryExpression) { 
@@ -401,6 +414,7 @@ internal class TemplateEmitter
 
         {
           case EPrimaryType.Identifier:
+            string useName = primary.Content;
             res = QualifyIdentifier(primary.Content);
             break;
 
@@ -482,6 +496,7 @@ internal class TemplateEmitter
         {
           string? useText = FormatText(item.Value);
           string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
+          if (useValue == null) { continue; }
 
           // NOTE: Dynamic content would have been detected at the parent level.....
           //if (item.DynamicContent != null)
@@ -492,12 +507,7 @@ internal class TemplateEmitter
           //  useValue = $"this.{funcName}()";
           //}
 
-          if (useValue != null)
-          {
-            cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
-          }
-
-          continue;
+          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
         }
         else
         {
@@ -700,17 +710,26 @@ internal class TemplateEmitter
   /// </summary>
   private string QualifyIdentifier(string symbol)
   {
-    // TODO: Cache this....
-
-    if (TemplateType.HasMember(symbol))
+    if (IsClassMember(symbol))
     {
       return $"this.{symbol}";
     }
     return symbol;
-    //if (Dynamics.IdentifierIsClassLevel(symbol))
-    //{
-    //  return $"this.{symbol}";
-    //}
+
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private bool IsClassMember(string symbol)
+  {
+    bool res = TemplateType.HasMember(symbol) || IsDOMVariable(symbol);
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  private bool IsDOMVariable(string symbol)
+  {
+    bool res = TemplateInfo.DynamicContentIndex.IsDOMIdentifier(symbol);
+    return res;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

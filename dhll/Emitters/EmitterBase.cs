@@ -104,7 +104,7 @@ internal abstract class EmitterBase
   /// <summary>
   /// Compute the identifier that is used for backing members of properties.
   /// </summary>
-  public virtual string ComputeBackingIdentifier(string identifier)
+  public virtual string GetBackingName(string identifier)
   {
     string res = "_" + identifier;
     return res;
@@ -127,7 +127,7 @@ internal abstract class EmitterBase
       if (dec.IsProperty)
       {
         // Create a new backing member for this declaration.
-        string useId = ComputeBackingIdentifier(dec.Identifier);
+        string useId = GetBackingName(dec.Identifier);
         var useDec = new Declare()
         {
           TypeName = dec.TypeName,

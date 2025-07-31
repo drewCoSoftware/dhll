@@ -100,7 +100,7 @@ namespace dhll.Emitters
         if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo.DOM, Context, this);
+          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo, Context, this);
         }
         else
         {
@@ -170,11 +170,21 @@ namespace dhll.Emitters
 
 
     // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Emits all of the get/set code for all of the properties in the class.
+    /// Getters area  no brainer, but setters may be part of some dynamic function + target that needs to be
+    /// updated.
+    /// </summary>
     protected override void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf)
     {
       return;
 
       throw new NotSupportedException();
+
+
+      // NOTE: When we set a property, we need to update the targets (dom content / attribute values)
+      // of any related function.
+
 
       //if (item.UseGetter)
       //{

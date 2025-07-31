@@ -66,7 +66,7 @@ namespace dhll.Emitters
         if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo.DOM, Context, this);
+          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo, Context, this);
         }
         else
         {
