@@ -209,20 +209,20 @@ namespace dhll.Emitters
         if (dynamicFunctions != null)
         {
           int attrIndex = 0;
-          foreach (var t in dynamicFunctions)
+          foreach (var df in dynamicFunctions)
           {
-            if (t.Attribute != null)
+            if (df.Attribute != null)
             {
               string valId = $"val{attrIndex}";
-              cf.WriteLine($"const {valId} = this.{t.Name}();");
-              cf.WriteLine($"this.{t.Node.Identifier}.setAttribute('{t.Attribute.Name}', {valId});");
+              cf.WriteLine($"const {valId} = this.{df.Name}();");
+              cf.WriteLine($"this.{df.Node.Identifier}.setAttribute('{df.Attribute.Name}', {valId});");
 
               ++attrIndex;
             }
             else
             {
               // We are setting content for this item.
-              cf.WriteLine($"this.{t.Node.Identifier}.innerText = this.{t.Name}();");
+              cf.WriteLine($"this.{df.Node.Identifier}.innerText = this.{df.Name}();");
             }
           }
         }

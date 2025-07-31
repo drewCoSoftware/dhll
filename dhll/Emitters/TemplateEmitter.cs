@@ -39,10 +39,9 @@ internal class TemplateEmitter
 
 
   /// <summary>
-  /// Every dynamic function is associated with one or more identifiers.
-  /// This is how we will keep track of them.
+  /// All of the dynamic functions + their defs that we have found.
+  /// We keep a list of them so we can emit them to the file later.
   /// </summary>
-  private Dictionary<string, List<string>> DynamicFunctionsIdentifiers = new Dictionary<string, List<string>>();
   private Dictionary<string, FunctionDef> DynamicFunctions = new Dictionary<string, FunctionDef>();
 
 
@@ -330,12 +329,14 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private string GetTypescriptAssignSyntax(Node node)
   {
-    if (string.IsNullOrWhiteSpace(node.Identifier)) { 
+    if (string.IsNullOrWhiteSpace(node.Identifier))
+    {
       throw new InvalidOperationException("This node is missing an identifier!");
     }
 
     string res = $"{QualifyIdentifier(node.Identifier)}";
-    if (!res.StartsWith("this")) {
+    if (!res.StartsWith("this"))
+    {
       res = "let " + res;
     }
     return res;
@@ -472,18 +473,20 @@ internal class TemplateEmitter
       return;
     }
 
+    // Attributes:
+    foreach (var attr in parent.Attributes)
+    {
+      if (attr.IsExpression)
+      {
+        string funcName = CreateDynamicContentFunction(attr);
+      }
+    }
+
     if (parent.HasDynamicContent)
     {
       // We will have a function that creates the content for the node.
-      string funcName = EmitDynamicContentFunction(cf, parent);
+      string funcName = CreateDynamicContentFunction(parent);
       cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', this.{funcName}());");
-
-      // Register the association.
-      var allIds = parent.ChildContent.DynamicContent.Identifiers;
-      if (allIds.Count > 0)
-      {
-        DynamicFunctionsIdentifiers.Add(funcName, allIds);
-      }
     }
     else
     {
@@ -566,11 +569,36 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  /// <summary>
-  /// Create internal entries based on the dynamic content....
-  /// Returns the name of the generated function!
-  /// </summary>
-  public string EmitDynamicContentFunction(CodeFile cf, Node node) // ChildContent childContent)
+  public string CreateDynamicContentFunction(dhll.Grammars.v1.Attribute attr)
+  {
+    if (!attr.IsExpression)
+    {
+      throw new InvalidOperationException("attribute is not an expression!");
+    }
+
+    string res = attr.DynamicFunction.Name;
+    var funcDef = new FunctionDef() {
+      Identifier = res,
+      ReturnType = "string"
+    };
+
+    string func = RenderExpression(attr.Value.Expression!);
+    
+    // HACK: Extra parens + string coersion to get us over the hump.  we can care about optimizing this later....
+    func = "return (" + func + ").toString();";
+
+    funcDef.Body.Add(func);
+
+    DynamicFunctions.Add(res, funcDef);
+    return res;
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Create internal entries based on the dynamic content....
+    /// Returns the name of the generated function!
+    /// </summary>
+  public string CreateDynamicContentFunction(Node node) // ChildContent childContent)
   {
     if (!node.HasDynamicContent)
     {
@@ -591,7 +619,7 @@ internal class TemplateEmitter
 
     // NOTE: We should just be composing some dhll constructs here, and emitting them later...
     // For now we will just use a functor....
-    string func = GenerateComputeStringFunction(node.ChildContent, cf);
+    string func = GenerateComputeStringFunction(node.ChildContent);
     funcDef.Body.Add(func);
 
     // We will emit these all at once, later.
@@ -626,7 +654,7 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private string GenerateComputeStringFunction(ChildContent dc, CodeFile cf)
+  private string GenerateComputeStringFunction(ChildContent dc)
   {
     // Maybe a way to do the dynamic strings?
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
@@ -645,7 +673,7 @@ internal class TemplateEmitter
     {
       if (x.IsExpressionNode)
       {
-        string expr = RenderExpression(x, cf);
+        string expr = RenderExpression(x);
         // HACK: We are shoving it in parens assuming that more complex expressions will be supported later.
         expr = $"({expr})";
 
@@ -689,14 +717,19 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private string RenderExpression(Node node, CodeFile cf)
+  private string RenderExpression(Node node)
   {
     if (!node.IsExpressionNode)
     {
       throw new InvalidOperationException("This is not an expression node!");
     }
+    return RenderExpression(node.Expression!);
+  }
 
-    string res = this.Emitter.RenderExpression(node.Expression!, (id) => QualifyIdentifier(id));
+  // --------------------------------------------------------------------------------------------------------------------------
+  private string RenderExpression(Expression expr)
+  {
+    string res = this.Emitter.RenderExpression(expr!, (id) => QualifyIdentifier(id));
     return res;
   }
 
