@@ -1,4 +1,5 @@
-﻿namespace dhll.Grammars.v1;
+﻿
+namespace dhll.Grammars.v1;
 
 // ==============================================================================================================================
 /// <summary>
@@ -54,7 +55,7 @@ public class DynamicContentIndex
   // --------------------------------------------------------------------------------------------------------------------------
   public bool HasIdentifier(string name)
   {
-    return IdentifiersToDynamicFunctions.ContainsKey(name);  
+    return IdentifiersToDynamicFunctions.ContainsKey(name);
   }
 
 
@@ -69,4 +70,13 @@ public class DynamicContentIndex
     return IdentifiersToNodes.ContainsKey(name);
   }
 
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal DynamicFunctionInfo[]? GetDynamicFunctions(string identifier)
+  {
+    if (IdentifiersToDynamicFunctions.TryGetValue(identifier, out var res))
+    {
+      return res.ToArray();
+    }
+    return null;
+  }
 }

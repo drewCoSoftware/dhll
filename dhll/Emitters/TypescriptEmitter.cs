@@ -124,14 +124,14 @@ namespace dhll.Emitters
         {
           EmitDOMDeclarations(templateInfo, cf);
           // templateDef.EmitDOMDeclarations(cf);
-          
+
           templateEmitter.EmitCreateDOMFunctionForTypescript(cf);
 
           templateEmitter.EmitDynamicFunctions(cf);
 
           templateEmitter.EmitBindFunction(cf, templateInfo);
 
-        //  templateDef.EmitDynamicFunctionDefs(cf, this);
+          //  templateDef.EmitDynamicFunctionDefs(cf, this);
         }
 
         // Now emit all of the getters / setters.
@@ -175,59 +175,81 @@ namespace dhll.Emitters
     /// Getters area  no brainer, but setters may be part of some dynamic function + target that needs to be
     /// updated.
     /// </summary>
-    protected override void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf)
+    protected override void EmitGetterSetter(GetterSetter item, TemplateInfo templateInfo, CodeFile cf)
     {
-      return;
-
-      throw new NotSupportedException();
-
+      // return;
+      // throw new NotSupportedException();
 
       // NOTE: When we set a property, we need to update the targets (dom content / attribute values)
       // of any related function.
 
 
-      //if (item.UseGetter)
-      //{
-      //  cf.Write($"public get {item.Identifier}() ");
-      //  cf.OpenBlock();
-      //  cf.WriteLine($"return this.{item.BackingMember.Identifier};");
-      //  cf.CloseBlock(2);
-      //}
+      if (item.UseGetter)
+      {
+        cf.Write($"public get {item.Identifier}() ");
+        cf.OpenBlock();
+        cf.WriteLine($"return this.{item.BackingMember.Identifier};");
+        cf.CloseBlock(2);
+      }
 
-      //if (item.UseSetter)
-      //{
-      //  string typeName = TranslateTypeName(item.BackingMember.TypeName);
-      //  string bid = ConvertToArgumentName(item.Identifier) + "_";
+      if (item.UseSetter)
+      {
+        string typeName = TranslateTypeName(item.BackingMember.TypeName);
+        string bid = ConvertToArgumentName(item.Identifier) + "_";
 
-      //  cf.Write($"public set {item.Identifier}({bid}: {typeName}) ");
-      //  cf.OpenBlock();
-      //  cf.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
+        cf.Write($"public set {item.Identifier}({bid}: {typeName}) ");
+        cf.OpenBlock();
+        cf.WriteLine($"this.{item.BackingMember.Identifier} = {bid};");
 
-      //  // This is where we do property target stuff...
-      //  var propTargets = dynamics.PropTargets.GetTargetsForProperty(item.Identifier);
-      //  if (propTargets != null)
-      //  {
-      //    int attrIndex = 0;
-      //    foreach (var t in propTargets)
-      //    {
-      //      if (t.Attr != null)
-      //      {
-      //        string valId = $"val{attrIndex}";
-      //        cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
-      //        cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
+        // This is where we do property target stuff...
+        // var propTargets = templateInfo.PropTargets.GetTargetsForProperty(item.Identifier);
+        var dci = templateInfo.DynamicContentIndex;
+        var dynamicFunctions = dci.GetDynamicFunctions(item.Identifier);
 
-      //        ++attrIndex;
-      //      }
-      //      else
-      //      {
-      //        // We are setting content for this item.
-      //        cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
-      //      }
-      //    }
-      //  }
+        if (dynamicFunctions != null)
+        {
+          int attrIndex = 0;
+          foreach (var t in dynamicFunctions)
+          {
+            if (t.Attribute != null)
+            {
+              string valId = $"val{attrIndex}";
+              cf.WriteLine($"const {valId} = this.{t.Name}();");
+              cf.WriteLine($"this.{t.Node.Identifier}.setAttribute('{t.Attribute.Name}', {valId});");
 
-      //  cf.CloseBlock(2);
-      //}
+              ++attrIndex;
+            }
+            else
+            {
+              // We are setting content for this item.
+              cf.WriteLine($"this.{t.Node.Identifier}.innerText = this.{t.Name}();");
+            }
+          }
+        }
+
+        //if (propTargets != null)
+        //{
+        //  int attrIndex = 0;
+        //  foreach (var t in propTargets)
+        //  {
+        //    if (t.Attr != null)
+        //    {
+        //      string valId = $"val{attrIndex}";
+        //      cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
+        //      cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
+
+        //      ++attrIndex;
+        //    }
+        //    else
+        //    {
+        //      // We are setting content for this item.
+        //      cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
+        //    }
+        //  }
+        //}
+
+        cf.CloseBlock(2);
+      }
 
     }
 

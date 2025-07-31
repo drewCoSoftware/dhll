@@ -218,9 +218,6 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
   {
-
-
-
     // throw new NotSupportedException();
 
 

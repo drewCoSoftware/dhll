@@ -140,9 +140,9 @@ public class DynamicFunctionInfo
   public Attribute? Attribute { get; set; } = null;
 
   /// <summary>
-  /// The node, if any, that this function is associated with.
+  /// The node, that this function is associated with.
   /// </summary>
-  public Node? Node { get; set; } = null;
+  public Node Node { get; set; } = null!;
 }
 
 // ==============================================================================================================================
@@ -377,6 +377,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
 
         attr.DynamicFunction = df;
         df.Attribute = attr;
+        df.Node = node;
 
         index.AddDynamicFunctionData(df);
       }
