@@ -25,7 +25,7 @@ internal class TemplateEmitter
   // [Obsolete("This will get removed in a future iteration!")]
   // private TemplateDynamics Dynamics = null!;
 
-//  private NamingContext NamingContext = new NamingContext();
+  //  private NamingContext NamingContext = new NamingContext();
   private CompilerContext Context = null!;
 
   /// <summary>
@@ -212,13 +212,18 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
   {
-    throw new NotSupportedException();
+
+
+
+    // throw new NotSupportedException();
 
 
     //// NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     //// walk the tree looking for dynamics.
-    //string[] propNames = templateInfo.PropTargets.GetNames();
-    //var targetNodes = templateInfo.PropTargets.GetAllTargetNodes();
+    //var dci = templateInfo.DynamicContentIndex;
+    //string[] propNames = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
+    //// Node[] targetNodes = dci.IdentifiersToNodes.Values.ToArray(); //   templateInfo.PropTargets.GetAllTargetNodes();
+
     //foreach (var p in propNames)
     //{
     //  // Get the name plus any options!
@@ -230,11 +235,14 @@ internal class TemplateEmitter
     //    throw new NotSupportedException("Property options in templates are not yet supported!");
     //  }
 
-    //  var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
+    //  // For a given identifer in the class, we want to find all of the dynamic functions
+    //  // that contain it.
+    //  var targets = dci.IdentifiersToDynamicFunctions[p];
+
+    //  // var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
     //  foreach (var t in targets)
     //  {
-
-
+    //    var id = QualifyIdentifier(t.Node.Identifier);
 
     //    // HACK: This is typescript specific!  We will have to come up with a better way later.
     //    // Best way is to probably ask the current emitter directly.
@@ -276,7 +284,7 @@ internal class TemplateEmitter
 
     //    cf.WriteLine($"this._{p} = {getBy};");
     //  }
-    //}
+    //  }
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -294,8 +302,6 @@ internal class TemplateEmitter
   /// </summary>
   private List<Node> BindNode(Node node, string bindTo, CodeFile cf)
   {
-    // throw new NotImplementedException();
-
     var res = new List<Node>();
 
     string elementId = QualifyIdentifier(node.Identifier);
@@ -554,7 +560,7 @@ internal class TemplateEmitter
 
   // --------------------------------------------------------------------------------------------------------------------------
   /// <summary>
-  /// Create internal internal entries based on the dynamic content....
+  /// Create internal entries based on the dynamic content....
   /// Returns the name of the generated function!
   /// </summary>
   public string EmitDynamicContentFunction(CodeFile cf, Node node) // ChildContent childContent)

@@ -172,6 +172,8 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     protected override void EmitGetterSetter(GetterSetter item, TemplateInfo dynamics, CodeFile cf)
     {
+      return;
+
       throw new NotSupportedException();
 
       //if (item.UseGetter)

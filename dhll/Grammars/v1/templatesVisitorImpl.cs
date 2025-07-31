@@ -5,6 +5,7 @@ using Antlr4.Runtime.Tree;
 using dhll.Emitters;
 using dhll.Expressions;
 using dhll.v1;
+using drewCo.Curations;
 using drewCo.Tools;
 using drewCo.Web;
 using System.Collections.Specialized;
@@ -132,6 +133,16 @@ public class DynamicFunctionInfo
   /// Any of the class level identifiers that are used to compute the value of the function.
   /// </summary>
   public string[] IdentifiersUsed { get; set; } = default!;
+
+  /// <summary>
+  /// The attribute, if any, that this function is associated with.
+  /// </summary>
+  public Attribute? Attribute { get; set; } = null;
+
+  /// <summary>
+  /// The node, if any, that this function is associated with.
+  /// </summary>
+  public Node? Node { get; set; } = null;
 }
 
 // ==============================================================================================================================
@@ -348,6 +359,9 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       DynamicFunctionInfo df = CreateDynamicFunctionInfo(ids);
 
       node.DynamicFunction = df;
+      df.Node = node;
+
+      index.AddDynamicFuncitonData(df);
     }
 
     foreach (var attr in node.Attributes)
@@ -358,14 +372,18 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       {
         var ids = GetIdentifiersFromExpresion(attr.Value.Expression!);
         var df = CreateDynamicFunctionInfo(ids);
+
         attr.DynamicFunction = df;
+        df.Attribute = attr;
+
+        index.AddDynamicFuncitonData(df);
       }
     }
 
     if (anyDynamic)
     {
       SetIdentifier(node);
-      index.IdentifiersToNodes.Add(node.Identifier, node);
+      index.AddNodeData(node.Identifier, node);
     }
 
     foreach (var c in node.ChildContent?.Nodes)
@@ -799,8 +817,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   // --------------------------------------------------------------------------------------------------------------------------
   private ChildContent ComputeChildren(templateParser.HtmlElementContext elem, Node parentNode)
   {
-    if (parentNode == null) { throw new ArgumentNullException() ; }
-    
+    if (parentNode == null) { throw new ArgumentNullException(); }
+
     ChildContent res = default!;
 
     var elems = elem.children;
@@ -952,5 +970,36 @@ public class DynamicContentIndex
   /// <summary>
   /// All identifiers, and the nodes they are attached to.
   /// </summary>
-  public Dictionary<string, Node> IdentifiersToNodes { get; set; } = new Dictionary<string, Node>();
+  public Dictionary<string, List<Node>> IdentifiersToNodes { get; set; } = new Dictionary<string, List<Node>>();
+
+  /// <summary>
+  /// All identifiers, and each of the functions that they are associated with.
+  /// </summary>
+  public Dictionary<string, List<DynamicFunctionInfo>> IdentifiersToDynamicFunctions { get; set; } = new Dictionary<string, List<DynamicFunctionInfo>>();
+
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal void AddDynamicFuncitonData(DynamicFunctionInfo df)
+  {
+    foreach (var identifier in df.IdentifiersUsed)
+    {
+      if (!IdentifiersToDynamicFunctions.TryGetValue(identifier, out List<DynamicFunctionInfo>? funcs))
+      {
+        funcs = new List<DynamicFunctionInfo>();
+        IdentifiersToDynamicFunctions.Add(identifier, funcs);
+      }
+      funcs.Add(df);
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------
+  internal void AddNodeData(string identifier, Node node)
+  {
+    if (!IdentifiersToNodes.TryGetValue(identifier, out List<Node>? nodes))
+    {
+      nodes = new List<Node>();
+      IdentifiersToNodes.Add(identifier, nodes);
+    }
+    nodes.Add(node);
+  }
 }
