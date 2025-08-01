@@ -34,7 +34,7 @@ namespace dhll.Emitters
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
-    public override string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null)
+    public override string RenderExpression(Expression expression)
     {
       var primary = expression as PrimaryExpression;
       if (primary != null)
@@ -42,9 +42,9 @@ namespace dhll.Emitters
         // Context.code
         string res = primary.Content;
         if (primary.Type == EPrimaryType.Identifier) {
-          if (onIdentifierCallback != null)
+          if (OnRenderExpressionIdentifierCallback != null)
           {
-            res = onIdentifierCallback(res);
+            res = OnRenderExpressionIdentifierCallback(res);
           }
         }
         //switch (primary.Type)
@@ -63,8 +63,8 @@ namespace dhll.Emitters
       var binary = expression as BinaryExpression;
       if (binary != null)
       {
-        string l = RenderExpression(binary.Left, onIdentifierCallback);
-        string r = RenderExpression(binary.Right, onIdentifierCallback);
+        string l = RenderExpression(binary.Left);
+        string r = RenderExpression(binary.Right);
 
         string op = RenderOperator(binary.OperatorType);
 
@@ -124,7 +124,7 @@ namespace dhll.Emitters
         if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo, Context, this);
+          templateEmitter = new TemplateEmitter(td, templateInfo, Context, this);
         }
         else
         {

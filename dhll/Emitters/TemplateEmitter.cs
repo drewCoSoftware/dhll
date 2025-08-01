@@ -53,16 +53,16 @@ internal class TemplateEmitter
   internal TemplateEmitter() { }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  public TemplateEmitter(string forType_, TemplateInfo templateInfo_, CompilerContext context_, EmitterBase emitter_)
+  public TemplateEmitter(TypeDef templateType_, TemplateInfo templateInfo_, CompilerContext context_, EmitterBase emitter_)
   {
-    ForType = forType_;
+    TemplateType = templateType_;
+    ForType = TemplateType.Identifier;
 
     TemplateInfo = templateInfo_;
     DOM = TemplateInfo.DOM;
 
     Context = context_;
 
-    TemplateType = Context.TypeIndex.GetDataType(this.ForType);
     if (TemplateType == null)
     {
       throw new InvalidOperationException($"There is no typedef for: {this.ForType} in the type index!");

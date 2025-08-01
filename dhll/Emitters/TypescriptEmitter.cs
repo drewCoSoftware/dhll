@@ -42,7 +42,7 @@ namespace dhll.Emitters
 
     // --------------------------------------------------------------------------------------------------------------------------
     // NOTE: This implementation is the same as the C# version....
-    public override string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null)
+    public override string RenderExpression(Expression expression)
     {
       var primary = expression as PrimaryExpression;
       if (primary != null)
@@ -51,9 +51,9 @@ namespace dhll.Emitters
         string res = primary.Content;
         if (primary.Type == EPrimaryType.Identifier)
         {
-          if (onIdentifierCallback != null)
+          if (this.OnRenderExpressionIdentifierCallback != null)
           {
-            res = onIdentifierCallback(res);
+            res = OnRenderExpressionIdentifierCallback(res);
           }
         }
         //switch (primary.Type)
@@ -72,8 +72,8 @@ namespace dhll.Emitters
       var binary = expression as BinaryExpression;
       if (binary != null)
       {
-        string l = RenderExpression(binary.Left, onIdentifierCallback);
-        string r = RenderExpression(binary.Right, onIdentifierCallback);
+        string l = RenderExpression(binary.Left);
+        string r = RenderExpression(binary.Right);
 
         string op = RenderOperator(binary.OperatorType);
 
@@ -146,7 +146,18 @@ namespace dhll.Emitters
         if (templateInfo != null)
         {
           Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td.Identifier, templateInfo, Context, this);
+
+
+
+          // We need some 'RenderExpression' callbacks for the TS emitter....
+          this.OnRenderExpressionIdentifierCallback = (id) =>
+          {
+            string res = QualifyIdentifier(id, td, templateInfo);
+            return res;
+          };
+
+
+          templateEmitter = new TemplateEmitter(td, templateInfo, Context, this);
         }
         else
         {
@@ -195,6 +206,36 @@ namespace dhll.Emitters
 
       return res;
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Determines which identifiers belong to the class and should be accessed as 'this.xxx'
+    /// We use a simple hueristic at this time....
+    /// </summary>
+    private string QualifyIdentifier(string symbol, TypeDef templateType, TemplateInfo templateInfo)
+    {
+      if (IsClassMember(symbol, templateType, templateInfo))
+      {
+        return $"this.{symbol}";
+      }
+      return symbol;
+
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private bool IsClassMember(string symbol, TypeDef templateType, TemplateInfo templateInfo)
+    {
+      bool res = templateType.HasMember(symbol) || IsDOMVariable(symbol, templateInfo);
+      return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private bool IsDOMVariable(string symbol, TemplateInfo templateInfo)
+    {
+      bool res = templateInfo.DynamicContentIndex.IsDOMIdentifier(symbol);
+      return res;
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------
     private void EmitDOMDeclarations(Grammars.v1.TemplateInfo templateInfo, CodeFile cf)

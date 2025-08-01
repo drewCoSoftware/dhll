@@ -32,7 +32,17 @@ internal abstract class EmitterBase
   // HACK: The 'onPrimaryCallback' is being used so that we can inject 'this.' into some typescript statements.
   // In reality the code emitter should have some kind of notion of 'scope' that covers when it is in a 
   // class and is emitting class members....
-  public abstract string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null);
+  public abstract string RenderExpression(Expression expression);
+
+  /// <summary>
+  /// When rendering expressions, this callback is used when an identifer is encountered.
+  /// Some things, like typescript, need extra qualification of the identifiers so they
+  /// can be resolved correctly.
+  /// </summary>
+  /// <remarks>
+  /// Make sure that all imprementors of this ABC actually do something with this!
+  /// </remarks>
+  public Func<string, string>? OnRenderExpressionIdentifierCallback = null;
 
   // --------------------------------------------------------------------------------------------------------------------------
   public EmitterBase(CompilerContext context_)
