@@ -41,16 +41,58 @@ namespace dhll.Emitters
       {
         // Context.code
         string res = primary.Content;
-        if (onIdentifierCallback != null)
-        {
-          res = onIdentifierCallback(res);
+        if (primary.Type == EPrimaryType.Identifier) {
+          if (onIdentifierCallback != null)
+          {
+            res = onIdentifierCallback(res);
+          }
         }
-        return res;
+        //switch (primary.Type)
+        //{
+        //  case EPrimaryType.Identifier:
+        //  case EPrimaryType.String:
+        //    return res;
+        //  default:
+        //    throw new ArgumentException($"{primary.Type} is not a supported primary expression type!");
+        //}
 
+        return res;
+      }
+
+
+      var binary = expression as BinaryExpression;
+      if (binary != null)
+      {
+        string l = RenderExpression(binary.Left, onIdentifierCallback);
+        string r = RenderExpression(binary.Right, onIdentifierCallback);
+
+        string op = RenderOperator(binary.OperatorType);
+
+        string res = $"{l} {op} {r}";
+        return res;
       }
 
       throw new NotImplementedException("expression not supported!");
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    private string RenderOperator(EOperator operatorType)
+    {
+      switch (operatorType)
+      {
+        case EOperator.Add:
+          return "+";
+        case EOperator.Subtract:
+          return "-";
+        case EOperator.Multiply:
+          return "*";
+        case EOperator.Divide:
+          return "/";
+        default:
+          throw new ArgumentException($"The operator type: {operatorType} is not supported.");
+      }
+    }
+
 
     // --------------------------------------------------------------------------------------------------------------------------
     public override EmitterResults Emit(string outputDir, dhllFile file)

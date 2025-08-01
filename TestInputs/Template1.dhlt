@@ -1,6 +1,6 @@
 <template for="BasicType" name="test-1">
   <div class="my-thing">
-    <div class={Display}>
+    <div class={Display + 123}>
       <p>I am a sub-tag</p>
     </div>
     This is just some loose text....
