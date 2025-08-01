@@ -76,77 +76,90 @@ internal class TemplateEmitter
   public void EmitCreateDOMFunctionForCSharp(CodeFile cf)
   {
 
+    var nameContext = new NamingContext();
+
     const string TEMPLATE_TYPE = "string";
     cf.WriteLine($"public {TEMPLATE_TYPE} CreateDOM()");
     cf.OpenBlock(true);
 
     // We are going to use the 'HTMLNode' syntax since I know that code already works.
-
     const string ROOT_NAME = "root";
 
     Node root = DOM;
     cf.WriteLine($"var {ROOT_NAME} = new HTMLNode(\"{root.Name}\");");
-    AddAttributesForCsharp(cf, root, ROOT_NAME);
+    AddAttributesForCsharp(cf, root, ROOT_NAME, nameContext);
 
-    CreateChildElementsForCsharp(cf, root, ROOT_NAME);
+    CreateChildElementsForCsharp(cf, root, ROOT_NAME, nameContext);
 
+    cf.NextLine();
     cf.WriteLine($"{TEMPLATE_TYPE} res = {ROOT_NAME}.ToHTMLString();");
-
-
     cf.WriteLine("return res;");
 
     cf.CloseBlock();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CreateChildElementsForCsharp(CodeFile cf, Node parent, string parentVarId)
+  private void CreateChildElementsForCsharp(CodeFile cf, Node parent, string parentNodeName, NamingContext nameContext)
   {
-    throw new NotImplementedException();
-    //foreach (var item in parent.Children)
-    //{
-    //  if (item.IsTextNode)
-    //  {
+    if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
+    {
+      return;
+    }
 
-    //    string? useText = FormatText(item.Value);
-    //    string? valLine = !string.IsNullOrWhiteSpace(useText) ? $"\"{useText}\"" : null;
+    // Attributes:
+    // NOTE: Should we be calling 'AddAttributesForCSharp**' here?
+    // NOTE: Should  the code in 'AddAttributesForCSharp' be responsible for this step?
+    foreach (var attr in parent.Attributes)
+    {
+      if (attr.IsExpression)
+      {
+        string funcName = CreateDynamicContentFunction(attr);
+      }
+    }
 
+    if (parent.HasDynamicContent)
+    {
+      // We will have a function that creates the content for the node.
+      string funcName = CreateDynamicContentFunction(parent);
 
-    //    if (item.DynamicContent != null)
-    //    {
-    //      string valId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-    //      // We need to know all of the variable names....
-    //      // HACK: We are assuming that the dynamic functions are all at class level!
-    //      string funcName = item.DynamicFunction;
-    //      valLine = $"var {valId} = this.{funcName}();";
-    //      cf.WriteLine(valLine);
+      var nodeId = nameContext.GetUniqueNameFor("textNode");
+      string valName = nameContext.GetUniqueNameFor("val");
 
-    //      string nodeName = NamingContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
-    //      cf.WriteLine($"var {nodeName} = HTMLNode.CreateTextNode({valId});");
-    //      cf.WriteLine($"{parentVarId}.AddChild({nodeName});");
+      cf.WriteLine($"string {valName} = {funcName}();");
+      cf.WriteLine($"var {nodeId} = HTMLNode.CreateTextNode({valName});");
+      cf.WriteLine($"{parentNodeName}.AddChild({nodeId});");
+    }
+    else
+    {
+      foreach (var item in parent.ChildContent.Nodes)
+      {
+        if (item.IsTextNode)
+        {
+          string? useText = FormatText(item.Value);
+          string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
+          if (useValue == null) { continue; }
 
-    //      continue;
-    //    }
+          var nodeId = nameContext.GetUniqueNameFor("textNode");
+          cf.WriteLine($"var {nodeId} = HTMLNode.CreateTextNode(\"{useText}\");");
+        }
+        else
+        {
+          cf.NextLine(2);
+          string nodeId = nameContext.GetUniqueNameFor("node");
+          cf.WriteLine($"var {nodeId} = new HTMLNode(\"{item.Name}\");");
 
-    //  }
-    //  else
-    //  {
-    //    cf.NextLine();
+          // Attributes.
+          AddAttributesForCsharp(cf, item, nodeId, nameContext);
 
-    //    string nodeId = NamingContext.GetUniqueNameFor("node");
-    //    cf.WriteLine($"var {nodeId} = new HTMLNode(\"{item.Name}\");");
-    //    cf.WriteLine($"{parentVarId}.AddChild({nodeId});");
+          // Now its child elements too....
+          CreateChildElementsForCsharp(cf, item, nodeId, nameContext);
 
-    //    // Attributes.
-    //    AddAttributesForCsharp(cf, item, nodeId);
+          // Add the child node to the parent....
+          cf.WriteLine($"{parentNodeName}.AddChild({nodeId});");
+        }
 
-    //    // Now its child elements too....
-    //    CreateChildElementsForCsharp(cf, item, nodeId);
-
-    //    // Add the child node to the parent....
-    //    //cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
-    //  }
-
-    //}
+      }
+    }
   }
 
 
@@ -308,7 +321,7 @@ internal class TemplateEmitter
 
     string elementId = QualifyIdentifier(node.Identifier);
     // if (Dynamics.IdentifierIsClassLevel(node.Identifier))
-    if (this.TemplateType.HasMember(node.Identifier))
+    if (IsClassMember(node.Identifier))
     {
       res.Add(node);
       cf.WriteLine($"{elementId} = <HTMLElement>{bindTo};");
@@ -343,24 +356,26 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void AddAttributesForCsharp(CodeFile cf, Node srcNode, string parentSymbol)
+  private void AddAttributesForCsharp(CodeFile cf, Node srcNode, string parentSymbol, NamingContext nameContext)
   {
     foreach (var item in srcNode.Attributes)
     {
-
-      if (item.IsExpression != null)
+      if (item.IsExpression)
       {
-        throw new NotImplementedException();
+        string useValId = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+        string valLine = $"var {useValId} = \"{item.Value}\";";
 
-        //string useValId = NamingContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-        //string valLine = $"var {useValId} = \"{item.Value}\";";
+        // The attribute value is created via expression.
+        string funcName = item.DynamicFunction.Name;
+        valLine = $"var {useValId} = {funcName}();";
 
-        //// The attribute value is created via expression.
-        //string funcName = item.DynamicFunction;
-        //valLine = $"var {useValId} = {funcName}();";
-
-        //cf.WriteLine(valLine);
-        //cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {useValId});");
+        cf.WriteLine(valLine);
+        cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {useValId});");
+      }
+      else
+      {
+        // Const, string value.
+        cf.WriteLine($"{parentSymbol}.SetAttribute(\"{item.Name}\", {item.Value.StringVal});");
       }
 
     }
@@ -498,15 +513,6 @@ internal class TemplateEmitter
           string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
           if (useValue == null) { continue; }
 
-          // NOTE: Dynamic content would have been detected at the parent level.....
-          //if (item.DynamicContent != null)
-          //{
-          //  // We need to know all of the variable names....
-          //  // HACK: We are assuming that the dynamic functions are all at class level!
-          //  string funcName = item.DynamicFunction;
-          //  useValue = $"this.{funcName}()";
-          //}
-
           cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
         }
         else
@@ -528,44 +534,6 @@ internal class TemplateEmitter
       }
     }
 
-    //foreach (var item in parent.ChildContent)
-    //{
-    //  if (item.Name == "<text>")
-    //  {
-    //    string? useText = FormatText(item.Value);
-    //    string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
-
-    //    if (item.DynamicContent != null)
-    //    {
-    //      // We need to know all of the variable names....
-    //      // HACK: We are assuming that the dynamic functions are all at class level!
-    //      string funcName = item.DynamicFunction;
-    //      useValue = $"this.{funcName}()";
-    //    }
-
-    //    if (useValue != null)
-    //    {
-    //      cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
-    //    }
-
-    //    continue;
-    //  }
-    //  else
-    //  {
-    //    cf.NextLine(2);
-    //    string assignTo = GetTypescriptAssignSyntax(item);
-    //    cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
-
-    //    // Attributes.
-    //    AddAttributes(cf, item, item.Identifier);
-
-    //    // Now its child elements too....
-    //    CreateChildElements(cf, item, nameContext);
-
-    //    // Add the child node to the parent....
-    //    cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
-    //  }
-
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
@@ -577,13 +545,14 @@ internal class TemplateEmitter
     }
 
     string res = attr.DynamicFunction.Name;
-    var funcDef = new FunctionDef() {
+    var funcDef = new FunctionDef()
+    {
       Identifier = res,
       ReturnType = "string"
     };
 
     string func = RenderExpression(attr.Value.Expression!);
-    
+
     // HACK: Extra parens + string coersion to get us over the hump.  we can care about optimizing this later....
     func = "return (" + func + ").toString();";
 
@@ -594,10 +563,10 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Create internal entries based on the dynamic content....
-    /// Returns the name of the generated function!
-    /// </summary>
+  /// <summary>
+  /// Create internal entries based on the dynamic content....
+  /// Returns the name of the generated function!
+  /// </summary>
   public string CreateDynamicContentFunction(Node node) // ChildContent childContent)
   {
     if (!node.HasDynamicContent)
@@ -729,7 +698,7 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private string RenderExpression(Expression expr)
   {
-    string res = this.Emitter.RenderExpression(expr!, (id) => QualifyIdentifier(id));
+    string res = this.Emitter.RenderExpression(expr!);
     return res;
   }
 

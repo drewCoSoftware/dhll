@@ -130,8 +130,6 @@ namespace dhll.Emitters
           templateEmitter.EmitDynamicFunctions(cf);
 
           templateEmitter.EmitBindFunction(cf, templateInfo);
-
-          //  templateDef.EmitDynamicFunctionDefs(cf, this);
         }
 
         // Now emit all of the getters / setters.

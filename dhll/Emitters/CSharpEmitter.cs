@@ -36,7 +36,20 @@ namespace dhll.Emitters
     // --------------------------------------------------------------------------------------------------------------------------
     public override string RenderExpression(Expression expression, Func<string, string>? onIdentifierCallback = null)
     {
-      throw new NotImplementedException();
+      var primary = expression as PrimaryExpression;
+      if (primary != null)
+      {
+        // Context.code
+        string res = primary.Content;
+        if (onIdentifierCallback != null)
+        {
+          res = onIdentifierCallback(res);
+        }
+        return res;
+
+      }
+
+      throw new NotImplementedException("expression not supported!");
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -56,6 +69,9 @@ namespace dhll.Emitters
       string outputPath = Path.Combine(Directory.GetCurrentDirectory(), outputDir, fName + ".cs");
 
       WriteCodeGenHeader(cf);
+
+      cf.NextLine();
+      cf.WriteLine("using drewCo.Web;", 2);
 
       foreach (var td in file.TypeDefs)
       {
@@ -92,10 +108,16 @@ namespace dhll.Emitters
 
           //dynamics.EmitDOMDeclarations(CF);
           templateEmitter.EmitCreateDOMFunctionForCSharp(cf);
-          //templateEmitter.EmitBindFunction(CF, dynamics);
 
-          throw new NotImplementedException("Figure this nedt line out...");
-          // templateInfo.EmitDynamicFunctionDefs(cf, this);
+          templateEmitter.EmitDynamicFunctions(cf);
+
+          // NOTE: C# Doesn't have a bind function.  It doesn't operate in the DOM, so that doesn't
+          // make any sense.
+          // templateEmitter.EmitBindFunction(cf, templateInfo);
+
+
+          ////throw new NotImplementedException("Figure this nedt line out...");
+          //templateInfo.EmitDynamicFunctionDefs(cf, this);
         }
 
 
@@ -167,10 +189,12 @@ namespace dhll.Emitters
         getset = " { get; set; }";
         lineEnder = string.Empty;
       }
+
       string line = $"{scope}{useType} {dec.Identifier}{getset}";
       if (dec.InitValue != null)
       {
         line += $" = {dec.InitValue}";
+        lineEnder = ";";
       }
       line += lineEnder;
 
