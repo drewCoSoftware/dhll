@@ -226,75 +226,94 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
   {
-    throw new NotSupportedException();
+    // throw new NotSupportedException();
 
-    //// NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
-    //// walk the tree looking for dynamics.
-    //var dci = templateInfo.DynamicContentIndex;
-    //string[] propNames = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
-    //// Node[] targetNodes = dci.IdentifiersToNodes.Values.ToArray(); //   templateInfo.PropTargets.GetAllTargetNodes();
+    // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
+    // walk the tree looking for dynamics.
+    DynamicContentIndex dci = templateInfo.DynamicContentIndex;
+    string[] propNames = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
+    // Node[] targetNodes = dci.IdentifiersToNodes.Values.ToArray(); //   templateInfo.PropTargets.GetAllTargetNodes();
 
-    //foreach (var p in propNames)
-    //{
-    //  // Get the name plus any options!
-    //  string[] pParts = p.Split(':');
-    //  string useName = pParts[0];
+    foreach (var p in propNames)
+    {
 
-    //  if (pParts.Length > 1)
-    //  {
-    //    throw new NotSupportedException("Property options in templates are not yet supported!");
-    //  }
+      // For a given identifer in the class, we want to find all of the dynamic functions
+      // that contain it.
+      var nodes = dci.IdentifiersToNodes[p];
 
-    //  // For a given identifer in the class, we want to find all of the dynamic functions
-    //  // that contain it.
-    //  var targets = dci.IdentifiersToDynamicFunctions[p];
+      // var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
+      foreach (var node in nodes)
+      {
+        // Every node will either have content or attributes that are created from functions.
+        // For non-trivial expressions, we may need to come up with some kind of data-* attributes
+        // to supoport proper binding...
 
-    //  // var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
-    //  foreach (var t in targets)
-    //  {
-    //    var id = QualifyIdentifier(t.Node.Identifier);
+        var id = QualifyIdentifier(node.Identifier);
 
-    //    // HACK: This is typescript specific!  We will have to come up with a better way later.
-    //    // Best way is to probably ask the current emitter directly.
-    //    string useId = QualifyIdentifier(t.TargetNode.Identifier);
-    //    string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
-    //                                                                  : $".innerText");
+        foreach (var attr in node.Attributes)
+        {
+          if (attr.IsExpression)
+          {
+            var primary = attr.Value.Expression as PrimaryExpression;
+            if (primary == null)
+            {
+              throw new InvalidOperationException("only primary expressions are supported in binding functions at this time!");
+            }
+          }
+          if (attr.DynamicFunction != null)
+          {
 
-    //    // NOTE: This data should probably be available in 'dynamics.PropTargets'!"
-    //    string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
+            var funcids = attr.DynamicFunction.IdentifiersUsed;
+            if (funcids
 
-    //    // Some extra coercion so we produce typesafe code....
-    //    // 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
-    //    // HACK: This is typescript specific!  We will have to come up with a better way later.
-    //    // Best way is to probably ask the current emitter directly.
-    //    if (t.Attr != null)
-    //    {
-    //      if (IsNumberType(propType))
-    //      {
-    //        getBy += " ?? \"0\"";
-    //      }
-    //      else if (propType == "string")
-    //      {
-    //        getBy += " ?? \"\"";
-    //      }
-    //    }
+            int xxxx = 10;
+          }
+        }
 
-    //    if (propType != "string")
-    //    {
-    //      if (IsNumberType(propType))
-    //      {
-    //        // Cast to number type!
-    //        getBy = $"Number({getBy})";
-    //      }
-    //      else
-    //      {
-    //        throw new NotSupportedException($"There is no supported cast for type: {propType}!");
-    //      }
-    //    }
 
-    //    cf.WriteLine($"this._{p} = {getBy};");
-    //  }
-    //  }
+
+        int x = 10;
+        //// HACK: This is typescript specific!  We will have to come up with a better way later.
+        //// Best way is to probably ask the current emitter directly.
+        //string useId = QualifyIdentifier(t.TargetNode.Identifier);
+        //string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
+        //                                                              : $".innerText");
+
+        //// NOTE: This data should probably be available in 'dynamics.PropTargets'!"
+        //string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
+
+        //// Some extra coercion so we produce typesafe code....
+        //// 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
+        //// HACK: This is typescript specific!  We will have to come up with a better way later.
+        //// Best way is to probably ask the current emitter directly.
+        //if (t.Attr != null)
+        //{
+        //  if (IsNumberType(propType))
+        //  {
+        //    getBy += " ?? \"0\"";
+        //  }
+        //  else if (propType == "string")
+        //  {
+        //    getBy += " ?? \"\"";
+        //  }
+        //}
+
+        //if (propType != "string")
+        //{
+        //  if (IsNumberType(propType))
+        //  {
+        //    // Cast to number type!
+        //    getBy = $"Number({getBy})";
+        //  }
+        //  else
+        //  {
+        //    throw new NotSupportedException($"There is no supported cast for type: {propType}!");
+        //  }
+        //}
+
+        //cf.WriteLine($"this._{p} = {getBy};");
+      }
+    }
   }
 
   // --------------------------------------------------------------------------------------------------------------------------

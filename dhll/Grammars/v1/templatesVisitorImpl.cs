@@ -731,7 +731,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   private string[] GetIdentifiersFromExpresion(Expression val)
   {
     var primary = val as PrimaryExpression;
-    if (primary != null)
+    if (primary != null && primary.Type == EPrimaryType.Identifier)
     {
       return new[] { primary.Content };
     }
