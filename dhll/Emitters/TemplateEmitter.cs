@@ -75,7 +75,6 @@ internal class TemplateEmitter
   // HACK: I don't really have a way to emit templates to different language targets at this time, so this will have to do.
   public void EmitCreateDOMFunctionForCSharp(CodeFile cf)
   {
-
     var nameContext = new NamingContext();
 
     const string TEMPLATE_TYPE = "string";
@@ -166,6 +165,7 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   public void EmitCreateDOMFunctionForTypescript(CodeFile cf)
   {
+    var nameContext = new NamingContext();
 
     // Walk the tree and create elements + children as we go....
     Node root = DOM;
@@ -178,10 +178,10 @@ internal class TemplateEmitter
     string assignTo = GetTypescriptAssignSyntax(root);
     cf.WriteLine($"{assignTo} = document.createElement('{root.Name}');");
 
-    AddAttributes(cf, root, root.Identifier!);
+    AddAttributes(cf, root, root.Identifier!, nameContext);
 
     // Now we need to populate the child elements....
-    CreateChildElements(cf, root);
+    CreateChildElements(cf, root, nameContext);
 
     cf.NextLine(2);
     cf.WriteLine($"return {QualifyIdentifier(root.Identifier!)};");
@@ -320,7 +320,6 @@ internal class TemplateEmitter
     var res = new List<Node>();
 
     string elementId = QualifyIdentifier(node.Identifier);
-    // if (Dynamics.IdentifierIsClassLevel(node.Identifier))
     if (IsClassMember(node.Identifier))
     {
       res.Add(node);
@@ -382,27 +381,33 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void AddAttributes(CodeFile cf, Node toNode, string parentSymbol)
+  private void AddAttributes(CodeFile cf, Node toNode, string parentSymbol, NamingContext nameContext)
   {
+
     foreach (var item in toNode.Attributes)
     {
+      if (item.IsExpression)
+      {
+        string useValId = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+        //string valLine = $"var {useValId} = \"{item.Value}\";";
 
-      string useValue = FormatValue(item);
+        // The attribute value is created via expression.
+        // NOTE: We are assuming the qualification of the function:
+        // --> In the real world we would have a way to do so.
+        string funcName = item.DynamicFunction.Name;
+        funcName = "this." + funcName;
 
+        string valLine = $"var {useValId} = {funcName}();";
 
-      // throw new NotImplementedException("todo: make sure that we are picking a backing name!  If it belongs to the class!  Might need another map....");
+        cf.WriteLine(valLine);
+        cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute(\"{item.Name}\", {useValId});");
+      }
+      else
+      {
+        cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute(\"{item.Name}\", {item.Value.StringVal});");
+      }
 
-
-      cf.WriteLine($"{QualifyIdentifier(parentSymbol)}.setAttribute('{item.Name}', {useValue});");
-
-      //if (exp is PrimaryExpression) { 
-
-      //}
-
-      //  if (item.Value.Expression.Children.External.count
     }
-    // string useValue = FormatValue(item);
-
 
   }
 
@@ -419,27 +424,28 @@ internal class TemplateEmitter
 
     if (item.IsExpression)
     {
-      var exp = item.Value.Expression;
-      var primary = exp as PrimaryExpression;
-      if (primary != null)
-      {
-        switch (primary.Type)
+      res = RenderExpression(item.Value.Expression);
+      //var exp = item.Value.Expression;
+      //var primary = exp as PrimaryExpression;
+      //if (primary != null)
+      //{
+      //  switch (primary.Type)
 
-        {
-          case EPrimaryType.Identifier:
-            string useName = primary.Content;
-            res = QualifyIdentifier(primary.Content);
-            break;
+      //  {
+      //    case EPrimaryType.Identifier:
+      //      string useName = primary.Content;
+      //      res = QualifyIdentifier(primary.Content);
+      //      break;
 
-          case EPrimaryType.Number:
-          case EPrimaryType.String:
-            res = primary.Content;
-            break;
+      //    case EPrimaryType.Number:
+      //    case EPrimaryType.String:
+      //      res = primary.Content;
+      //      break;
 
-          default:
-            throw new NotImplementedException();
-        }
-      }
+      //    default:
+      //      throw new NotImplementedException();
+      //  }
+      //}
 
       // NOTE: In the absence of data type, we will just convert everything to a string:
       // This can be improved upon later.
@@ -447,26 +453,6 @@ internal class TemplateEmitter
 
       return res;
 
-
-      //if (item.Value.Type != EAttrValType.String)
-      //{
-      //  throw new InvalidOperationException("Can't format a non-string attribute value!");
-      //}
-      //string useValue = $"'{item.Value.StringVal}'";
-
-      //if (item.IsExpression)
-      //{
-      //  throw new NotImplementedException();
-      //  // The attribute value is created via expression.
-      //  string funcName = item.DynamicFunction;
-      //  useValue = $"this.{funcName}()";
-      //}
-      //else
-      //{
-      //  useValue = UnescapeBackslash(useValue);
-      //}
-
-      //return useValue;
     }
 
     throw new InvalidOperationException();
@@ -481,7 +467,7 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void CreateChildElements(CodeFile cf, Node parent)
+  private void CreateChildElements(CodeFile cf, Node parent, NamingContext nameContext)
   {
     if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
     {
@@ -522,10 +508,10 @@ internal class TemplateEmitter
           cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
 
           // Attributes.
-          AddAttributes(cf, item, item.Identifier);
+          AddAttributes(cf, item, item.Identifier, nameContext);
 
           // Now its child elements too....
-          CreateChildElements(cf, item);
+          CreateChildElements(cf, item, nameContext);
 
           // Add the child node to the parent....
           cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
@@ -574,8 +560,6 @@ internal class TemplateEmitter
       throw new InvalidOperationException("no dynamic content is listed!");
     }
 
-    //lock (DataLock)
-    //{
     string functionName = node.DynamicFunction.Name; // NamingContext.GetUniqueNameFor("getValue");
 
     // We need to create the function definition....
@@ -594,31 +578,7 @@ internal class TemplateEmitter
     // We will emit these all at once, later.
     DynamicFunctions.Add(functionName, funcDef);
 
-
-    int x = 10;
-
-    // 
-
-    //// Now we will associate the dynamic function with all of the implicated identifiers(properties).
-    //// NOTE: This should technically be done when we preprocess the templates.
-    //// I think that making the associations here, for now, is OK as we will be doing a second pass later....
-    //foreach (var item in childContent.DynamicContent.Identifiers)
-    //{
-    //  // NOTE: We should be checking to see if the identifiers are actually on the typedef that we are
-    //  // generating the template for....
-    //  if (!PropsToFunctions.TryGetValue(item, out var funcs))
-    //  {
-    //    funcs = new List<FunctionDef>();
-    //    PropsToFunctions[item] = funcs;
-    //  }
-
-    //  funcs.Add(funcDef);
-    //}
-
-    //UniqueFunctions.Add(funcDef);
-
     return functionName;
-    //  }
 
   }
 
