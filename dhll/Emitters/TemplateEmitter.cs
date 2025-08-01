@@ -24,10 +24,6 @@ internal class TemplateEmitter
   const string DEFAULT_VAL_ID = "val";
   const string DEFAULT_TEXT_NODE_ID = "textNode";
 
-  // [Obsolete("This will get removed in a future iteration!")]
-  // private TemplateDynamics Dynamics = null!;
-
-  //  private NamingContext NamingContext = new NamingContext();
   private CompilerContext Context = null!;
 
   /// <summary>
@@ -121,8 +117,8 @@ internal class TemplateEmitter
       // We will have a function that creates the content for the node.
       string funcName = CreateDynamicContentFunction(parent);
 
-      var nodeId = nameContext.GetUniqueNameFor("textNode");
-      string valName = nameContext.GetUniqueNameFor("val");
+      var nodeId = nameContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
+      string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
 
       cf.WriteLine($"string {valName} = {funcName}();");
       cf.WriteLine($"var {nodeId} = HTMLNode.CreateTextNode({valName});");
@@ -138,7 +134,7 @@ internal class TemplateEmitter
           string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
           if (useValue == null) { continue; }
 
-          var nodeId = nameContext.GetUniqueNameFor("textNode");
+          var nodeId = nameContext.GetUniqueNameFor(DEFAULT_TEXT_NODE_ID);
           cf.WriteLine($"var {nodeId} = HTMLNode.CreateTextNode(\"{useText}\");");
         }
         else
@@ -230,8 +226,7 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
   {
-    // throw new NotSupportedException();
-
+    throw new NotSupportedException();
 
     //// NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     //// walk the tree looking for dynamics.
