@@ -26,6 +26,9 @@ public class DynamicContentIndex
   /// </summary>
   public Dictionary<string, List<DynamicFunctionInfo>> IdentifiersToDynamicFunctions { get; set; } = new Dictionary<string, List<DynamicFunctionInfo>>();
 
+  //public string[] Identifiers { get { 
+  //  var res = IdentifiersToDynamicFunctions
+  //}}
 
   // --------------------------------------------------------------------------------------------------------------------------
   internal void AddDynamicFunctionData(DynamicFunctionInfo df)

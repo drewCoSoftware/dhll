@@ -216,134 +216,57 @@ internal class TemplateEmitter
     var boundNodes = BindNode(root, BIND_ID, cf);
     cf.NextLine(1);
 
-    // Set values for all nodes:
+
+    // We will pull the property values directly from the root node, and then remove them so that
+    // the DOM is a bit cleaner than when we started.
+    // The reason why we read the property values directly vs. trying to parse them out is because
+    // once you get an expression that has more than one part, it is basically impossible to parse
+    // values back out of it.  For example, if we have : my-attr={Prop1 + Prop2}, it is not possible
+    // to compute the values Prop1/Prop2 when: my-attr="abcdef"; they could be any combination.
+
+    cf.WriteLine("// All property values must be included on the root node.");
     var nameContext = new NamingContext();
-    BindPropertyValues(boundNodes, cf, templateInfo, nameContext);
+    var members = TemplateType.Members;
+    foreach (var m in members)
+    {
+      string attrName = $"data-id-{m.Identifier}";
+      string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+      string getCall = $"const {valName} = this.{root.Identifier}.getAttribute('{attrName}');";
+      cf.WriteLine(getCall);
+      cf.WriteLine($"if ({valName} != undefined)");
+      cf.OpenBlock(false);
+
+      string assignTo = QualifyIdentifier(m.Identifier);
+      string useVal = CoerceValue(valName, m.TypeName);
+      cf.WriteLine($"{assignTo} = {useVal};");
+      cf.CloseBlock(1);
+    }
+
+    //// Set values for all nodes:
+    //var nameContext = new NamingContext();
+    //BindPropertyValues(boundNodes, cf, templateInfo, nameContext);
 
     cf.CloseBlock(1);
-
 
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void BindPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo, NamingContext nameContext)
+  /// <summary>
+  /// Emits proper type coersion syntax so that strings can be converted to other types, as needed.
+  /// </summary>
+  /// HACK: This is typescript specific... It should go in typescript emitter or similar.
+  private string CoerceValue(string value, string dataType)
   {
-    // throw new NotSupportedException();
-
-    // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
-    // walk the tree looking for dynamics.
-    DynamicContentIndex dci = templateInfo.DynamicContentIndex;
-    string[] nodeIds = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
-    // Node[] targetNodes = dci.IdentifiersToNodes.Values.ToArray(); //   templateInfo.PropTargets.GetAllTargetNodes();
-
-    foreach (var p in nodeIds)
+    if (dataType == "bool")
     {
-
-      // For a given identifer in the class, we want to find all of the dynamic functions
-      // that contain it.
-      var nodes = dci.IdentifiersToNodes[p];
-
-      // var targets = templateInfo.PropTargets.GetTargetsForProperty(p);
-      foreach (var node in nodes)
-      {
-        // Every node will either have content or attributes that are created from functions.
-        // For non-trivial expressions, we may need to come up with some kind of data-* attributes
-        // to supoport proper binding...
-
-        var id = QualifyIdentifier(node.Identifier);
-
-        BindAttributes(cf, nameContext, node, id);
-
-
-        // Now we have to bind the rest of the node value....
-
-        //// HACK: This is typescript specific!  We will have to come up with a better way later.
-        //// Best way is to probably ask the current emitter directly.
-        //string useId = QualifyIdentifier(t.TargetNode.Identifier);
-        //string getBy = $"{useId}" + (t.Attr != null ? $".getAttribute('{t.Attr.Name}')"
-        //                                                              : $".innerText");
-
-        //// NOTE: This data should probably be available in 'dynamics.PropTargets'!"
-        //string propType = Context.TypeIndex.GetMemberDataType(this.ForType, useName);
-
-        //// Some extra coercion so we produce typesafe code....
-        //// 'getAttribute' returns (string | null) in typescript scenarios, which can cause errors.
-        //// HACK: This is typescript specific!  We will have to come up with a better way later.
-        //// Best way is to probably ask the current emitter directly.
-        //if (t.Attr != null)
-        //{
-        //  if (IsNumberType(propType))
-        //  {
-        //    getBy += " ?? \"0\"";
-        //  }
-        //  else if (propType == "string")
-        //  {
-        //    getBy += " ?? \"\"";
-        //  }
-        //}
-
-        //if (propType != "string")
-        //{
-        //  if (IsNumberType(propType))
-        //  {
-        //    // Cast to number type!
-        //    getBy = $"Number({getBy})";
-        //  }
-        //  else
-        //  {
-        //    throw new NotSupportedException($"There is no supported cast for type: {propType}!");
-        //  }
-        //}
-
-        //cf.WriteLine($"this._{p} = {getBy};");
-      }
+      value = $"{value} == 'true'";
     }
-  }
-
-  private void BindAttributes(CodeFile cf, NamingContext nameContext, Node node, string id)
-  {
-    foreach (var attr in node.Attributes)
+    else if (IsNumberType(dataType))
     {
-      if (attr.IsExpression)
-      {
-        var primary = attr.Value.Expression as PrimaryExpression;
-        if (primary == null)
-        {
-          throw new InvalidOperationException("only primary expressions are supported in binding functions at this time!");
-        }
-
-        if (primary.Type == EPrimaryType.Identifier)
-        {
-
-          // The value of attribute is assigned to the given identifier.
-          string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-          cf.WriteLine($"const {valName} = {id}.getAttribute('{attr.Name}');");
-
-
-          string useVal = valName;
-          var pType = TemplateType.GetMember(primary.Content)!.TypeName;
-          if (pType == "bool")
-          {
-            useVal = $"{useVal} == 'true'";
-          }
-          else if (IsNumberType(pType))
-          {
-            useVal = $"Number({useVal})";
-          }
-
-          // NOTE: We should be able to qualify the backing memebers!
-          // When we emit the vars in the class definition, they should be added in such a way that
-          // they can be properly qualified!
-          string toClassId = Emitter.GetBackingName(primary.Content);
-          if (TemplateType.HasMember(primary.Content))
-          {
-            toClassId = $"this.{toClassId}";
-          }
-          cf.WriteLine($"{toClassId} = {useVal};");
-        }
-      }
-
+      value = $"Number({value})";
     }
+
+    return value;
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
