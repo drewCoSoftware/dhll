@@ -250,7 +250,7 @@ internal class TemplateEmitter
     var members = TemplateType.Members;
     foreach (var m in members)
     {
-      if (!m.IsProperty) { return; }
+      if (!m.IsProperty) { continue; }
 
       string attrName = GetBindAttributeName(m);
       string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
@@ -262,11 +262,10 @@ internal class TemplateEmitter
       string assignTo = QualifyIdentifier(m.Identifier);
       string useVal = CoerceValue(valName, m.TypeName);
       cf.WriteLine($"{assignTo} = {useVal};");
-      cf.CloseBlock(1);
+      cf.CloseBlock(2);
 
       // Remove the attribute for clean DOM after bind.
-      cf.WriteLine($"this.{root.Identifier}.removeAttribute('{attrName}')");
-
+      cf.WriteLine($"this.{root.Identifier}.removeAttribute('{attrName}');");
     }
 
     //// Set values for all nodes:

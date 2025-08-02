@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using System.Data;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace dhll.CodeGen
@@ -99,8 +100,17 @@ namespace dhll.CodeGen
     {
       if (breakBeforeBrace)
       {
-        NextLine();
+        if (!IsOnNewline())
+        {
+          NextLine();
+        }
+        SB.Append(TabFill);
       }
+      else
+      {
+        RemoveNewline();
+      }
+
       SB.Append("{");
 
       TabDepth += 1;
@@ -109,6 +119,7 @@ namespace dhll.CodeGen
 
       return this;
     }
+
 
     // --------------------------------------------------------------------------------------------------------------------------
     /// <param name="endline">Should a line ending character be included ?</param>
@@ -119,10 +130,47 @@ namespace dhll.CodeGen
       SB.Append(TabFill);
       SB.Append("}");
 
-
       NextLine(breakCount);
 
       return this;
+    }
+
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tells us if the last character(s) in the string builder represent a newline.
+    /// </summary>
+    /// <returns></returns>
+    private bool IsOnNewline()
+    {
+      bool res = SB[SB.Length - 1] == '\n';
+      return res;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+    /// <summary>
+    /// If the current buffer ends with a newline, this code will remove it.
+    /// Remove multiple newlines by calling this function again.
+    /// Returns a boolean value indicating how many newlines were removed.
+    /// </summary>
+    private bool RemoveNewline()
+    {
+      int toRemove = 0;
+      if (SB[SB.Length - 1] == '\n')
+      {
+        ++toRemove;
+        if (SB[SB.Length - 2] == '\r')
+        {
+          ++toRemove;
+        }
+      }
+
+      if (toRemove > 0)
+      {
+        SB.Remove(SB.Length - toRemove, toRemove);
+        return true;
+      }
+      return false;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
