@@ -115,27 +115,27 @@ namespace dhll.Emitters
       cf.NextLine();
       cf.WriteLine("using drewCo.Web;", 2);
 
-      foreach (var td in file.TypeDefs)
+      foreach (var typeDef in file.TypeDefs)
       {
         // Let's check to see if there is an associated template...
         Log.Verbose("Resolving template data...");
-        TemplateInfo? templateInfo = GetTemplateInfoForType(td);
+        TemplateInfo? templateInfo = GetTemplateInfoForType(typeDef);
         TemplateEmitter? templateEmitter = null;
         if (templateInfo != null)
         {
-          Log.Verbose($"Resolved template for type: {td.Identifier}");
-          templateEmitter = new TemplateEmitter(td, templateInfo, Context, this);
+          Log.Verbose($"Resolved template for type: {typeDef.Identifier}");
+          templateEmitter = new TemplateEmitter(typeDef, templateInfo, Context, this);
         }
         else
         {
-          Log.Verbose($"There is no template for type: {td.Identifier}");
+          Log.Verbose($"There is no template for type: {typeDef.Identifier}");
         }
 
-        cf.Write($"class {td.Identifier} ");
+        cf.Write($"class {typeDef.Identifier} ");
         cf.OpenBlock(true);
         cf.NextLine();
 
-        foreach (var dec in td.Members)
+        foreach (var dec in typeDef.Members)
         {
           EmitDeclaration(dec, cf);
         }
@@ -149,7 +149,7 @@ namespace dhll.Emitters
           // want to bind to WPF or something...)
 
           //dynamics.EmitDOMDeclarations(CF);
-          templateEmitter.EmitCreateDOMFunctionForCSharp(cf);
+          templateEmitter.EmitCreateDOMFunctionForCSharp(cf, typeDef);
 
           templateEmitter.EmitDynamicFunctions(cf);
 

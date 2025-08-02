@@ -70,7 +70,7 @@ internal class TemplateEmitter
 
   // --------------------------------------------------------------------------------------------------------------------------
   // HACK: I don't really have a way to emit templates to different language targets at this time, so this will have to do.
-  public void EmitCreateDOMFunctionForCSharp(CodeFile cf)
+  public void EmitCreateDOMFunctionForCSharp(CodeFile cf, TypeDef typeDef)
   {
     var nameContext = new NamingContext();
 
@@ -86,6 +86,25 @@ internal class TemplateEmitter
     AddAttributesForCsharp(cf, root, ROOT_NAME, nameContext);
 
     CreateChildElementsForCsharp(cf, root, ROOT_NAME, nameContext);
+
+
+    // Now set all of the property values on the root.  This is needed to be able for the compimentary typescript
+    // code to be able to Bind().
+    cf.NextLine();
+    cf.WriteLine("// Set property values on attributes so that 'Bind' calls will work.");
+    foreach (var dec in typeDef.Members)
+    {
+      if (!dec.IsProperty) { continue; }
+
+      string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+      cf.WriteLine($"var {valName} = this.{dec.Identifier}?.ToString() ?? string.Empty;");
+      cf.WriteLine($"if (var != string.Empty)");
+      cf.OpenBlock(true);
+
+      string attrName = GetBindAttributeName(dec);
+      cf.WriteLine($"root.SetAttribute(\"{attrName}\", {valName});");
+      cf.CloseBlock(1);
+    }
 
     cf.NextLine();
     cf.WriteLine($"{TEMPLATE_TYPE} res = {ROOT_NAME}.ToHTMLString();");
@@ -213,6 +232,8 @@ internal class TemplateEmitter
     cf.WriteLine("// NOTE: A correctly formed DOM for this type is assumed!");
 
     // Bind all of the nodes with dynamic content.
+    // NOTE: Maybe we need a try/catch around this that sends a console warning?  Or just let it crash?
+    // Maybe that is a compiler option?
     var boundNodes = BindNode(root, BIND_ID, cf);
     cf.NextLine(1);
 
@@ -224,12 +245,14 @@ internal class TemplateEmitter
     // values back out of it.  For example, if we have : my-attr={Prop1 + Prop2}, it is not possible
     // to compute the values Prop1/Prop2 when: my-attr="abcdef"; they could be any combination.
 
-    cf.WriteLine("// All property values must be included on the root node.");
+    cf.WriteLine("// All property values must be included on the root node if you want to bind them.");
     var nameContext = new NamingContext();
     var members = TemplateType.Members;
     foreach (var m in members)
     {
-      string attrName = $"data-id-{m.Identifier}";
+      if (!m.IsProperty) { return; }
+
+      string attrName = GetBindAttributeName(m);
       string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
       string getCall = $"const {valName} = this.{root.Identifier}.getAttribute('{attrName}');";
       cf.WriteLine(getCall);
@@ -240,6 +263,10 @@ internal class TemplateEmitter
       string useVal = CoerceValue(valName, m.TypeName);
       cf.WriteLine($"{assignTo} = {useVal};");
       cf.CloseBlock(1);
+
+      // Remove the attribute for clean DOM after bind.
+      cf.WriteLine($"this.{root.Identifier}.removeAttribute('{attrName}')");
+
     }
 
     //// Set values for all nodes:
@@ -248,6 +275,11 @@ internal class TemplateEmitter
 
     cf.CloseBlock(1);
 
+  }
+
+  private static string GetBindAttributeName(Declare m)
+  {
+    return $"data-id-{m.Identifier}";
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
