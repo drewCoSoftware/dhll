@@ -9,6 +9,7 @@ using drewCo.Tools;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design;
 using System.Diagnostics.SymbolStore;
+using System.Net.WebSockets;
 using System.Text.RegularExpressions;
 
 
@@ -216,7 +217,8 @@ internal class TemplateEmitter
     cf.NextLine(1);
 
     // Set values for all nodes:
-    SetPropertyValues(boundNodes, cf, templateInfo);
+    var nameContext = new NamingContext();
+    BindPropertyValues(boundNodes, cf, templateInfo, nameContext);
 
     cf.CloseBlock(1);
 
@@ -224,17 +226,17 @@ internal class TemplateEmitter
   }
 
   // --------------------------------------------------------------------------------------------------------------------------
-  private void SetPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo)
+  private void BindPropertyValues(List<Node> boundNodes, CodeFile cf, TemplateInfo templateInfo, NamingContext nameContext)
   {
     // throw new NotSupportedException();
 
     // NOTE: TemplateDynamics could probably compute the selectors / paths for binding when we first
     // walk the tree looking for dynamics.
     DynamicContentIndex dci = templateInfo.DynamicContentIndex;
-    string[] propNames = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
+    string[] nodeIds = dci.IdentifiersToNodes.Keys.ToArray(); //; // PropTargets.GetNames();
     // Node[] targetNodes = dci.IdentifiersToNodes.Values.ToArray(); //   templateInfo.PropTargets.GetAllTargetNodes();
 
-    foreach (var p in propNames)
+    foreach (var p in nodeIds)
     {
 
       // For a given identifer in the class, we want to find all of the dynamic functions
@@ -250,29 +252,11 @@ internal class TemplateEmitter
 
         var id = QualifyIdentifier(node.Identifier);
 
-        foreach (var attr in node.Attributes)
-        {
-          if (attr.IsExpression)
-          {
-            var primary = attr.Value.Expression as PrimaryExpression;
-            if (primary == null)
-            {
-              throw new InvalidOperationException("only primary expressions are supported in binding functions at this time!");
-            }
-          }
-          if (attr.DynamicFunction != null)
-          {
-
-            var funcids = attr.DynamicFunction.IdentifiersUsed;
-            if (funcids
-
-            int xxxx = 10;
-          }
-        }
+        BindAttributes(cf, nameContext, node, id);
 
 
+        // Now we have to bind the rest of the node value....
 
-        int x = 10;
         //// HACK: This is typescript specific!  We will have to come up with a better way later.
         //// Best way is to probably ask the current emitter directly.
         //string useId = QualifyIdentifier(t.TargetNode.Identifier);
@@ -313,6 +297,52 @@ internal class TemplateEmitter
 
         //cf.WriteLine($"this._{p} = {getBy};");
       }
+    }
+  }
+
+  private void BindAttributes(CodeFile cf, NamingContext nameContext, Node node, string id)
+  {
+    foreach (var attr in node.Attributes)
+    {
+      if (attr.IsExpression)
+      {
+        var primary = attr.Value.Expression as PrimaryExpression;
+        if (primary == null)
+        {
+          throw new InvalidOperationException("only primary expressions are supported in binding functions at this time!");
+        }
+
+        if (primary.Type == EPrimaryType.Identifier)
+        {
+
+          // The value of attribute is assigned to the given identifier.
+          string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
+          cf.WriteLine($"const {valName} = {id}.getAttribute('{attr.Name}');");
+
+
+          string useVal = valName;
+          var pType = TemplateType.GetMember(primary.Content)!.TypeName;
+          if (pType == "bool")
+          {
+            useVal = $"{useVal} == 'true'";
+          }
+          else if (IsNumberType(pType))
+          {
+            useVal = $"Number({useVal})";
+          }
+
+          // NOTE: We should be able to qualify the backing memebers!
+          // When we emit the vars in the class definition, they should be added in such a way that
+          // they can be properly qualified!
+          string toClassId = Emitter.GetBackingName(primary.Content);
+          if (TemplateType.HasMember(primary.Content))
+          {
+            toClassId = $"this.{toClassId}";
+          }
+          cf.WriteLine($"{toClassId} = {useVal};");
+        }
+      }
+
     }
   }
 
