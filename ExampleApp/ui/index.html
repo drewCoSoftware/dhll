@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>DHLL Example App</title>
+
+    <script type="text/javascript" src="src/generated/typescript/LoginForm.js"></script>
+</head>
+<body>
+
+</body>
+</html>
+
+
+<script type="text/javascript">
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // alert('loaded!');
+        var form = new LoginForm();
+        document.body.appendChild(form.CreateDOM());
+    });
+
+</script>

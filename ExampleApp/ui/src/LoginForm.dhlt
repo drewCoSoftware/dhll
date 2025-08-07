@@ -1,0 +1,11 @@
+<template for="LoginForm">
+    <div class={"login-form" + IsWorking}>
+        <div class="inputs">
+            <label for="username">Username</label>
+            <input type="text" name="username" />
+        </div>
+        <div class="actions">
+            <button class="btn btn-login">Log In</button>
+        </div>
+    </div>
+</template>
