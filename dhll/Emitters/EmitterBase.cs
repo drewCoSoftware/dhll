@@ -26,7 +26,7 @@ internal abstract class EmitterBase
 
   public abstract void EmitFunctionDefs(IEnumerable<FunctionDef> defs, CodeFile cf);
   public abstract EmitterResults Emit(string outputDir, dhllFile file);
-  
+
   // public abstract void EmitExpression(Expression expression, CodeFile cf);
 
   // HACK: The 'onPrimaryCallback' is being used so that we can inject 'this.' into some typescript statements.
@@ -168,6 +168,26 @@ internal abstract class EmitterBase
       GetterSetters = getterSetters,
     };
 
+    return res;
+  }
+
+  // ------------------------------------------------------------------------------------------  
+  // TODO: Move to the correct emitter.
+  private static HashSet<string> csharpPrims = new[] {
+      "bool",
+      "int",
+      "float",
+      "double",
+    }.ToHashSet();
+
+  internal bool IsEmittedTypeNullable(Declare dec)
+  {
+    // NOTE: We will have to have a version of this for all emitted languanges....
+    string typeName = dec.TypeName;
+
+    // NOTE: C# and DHLL primitive type names are all the same!
+    // And if it isn't a primitive / struct in C#, then it can be null!
+    bool res = !csharpPrims.Contains(typeName);
     return res;
   }
 

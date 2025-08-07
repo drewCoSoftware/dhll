@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dhllTesters", "dhllTesters\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dhll", "dhll\dhll.csproj", "{0FC6FD0C-C8C7-4DDB-B9E5-26E93652429B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleProject", "ExampleProject\ExampleProject.csproj", "{4876AE60-27C6-4037-AAC9-5B2017E6F24E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{0FC6FD0C-C8C7-4DDB-B9E5-26E93652429B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FC6FD0C-C8C7-4DDB-B9E5-26E93652429B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FC6FD0C-C8C7-4DDB-B9E5-26E93652429B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4876AE60-27C6-4037-AAC9-5B2017E6F24E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4876AE60-27C6-4037-AAC9-5B2017E6F24E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4876AE60-27C6-4037-AAC9-5B2017E6F24E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4876AE60-27C6-4037-AAC9-5B2017E6F24E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

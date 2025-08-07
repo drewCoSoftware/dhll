@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design;
 using System.Diagnostics.SymbolStore;
 using System.Net.WebSockets;
+using System.Security.AccessControl;
 using System.Text.RegularExpressions;
 
 
@@ -97,8 +98,22 @@ internal class TemplateEmitter
       if (!dec.IsProperty) { continue; }
 
       string valName = nameContext.GetUniqueNameFor(DEFAULT_VAL_ID);
-      cf.WriteLine($"var {valName} = this.{dec.Identifier}?.ToString() ?? string.Empty;");
-      cf.WriteLine($"if (var != string.Empty)");
+
+      // We are converting the class value to a string.  This isn't
+      // the most sophisticated code, but it does do what it needs to do...
+      bool isString = dec.TypeName == "string";
+      bool emitNullCheck = Emitter.IsEmittedTypeNullable(dec) && !isString;
+
+      string fullId = dec.Identifier;
+      if (emitNullCheck) { fullId += "?"; }
+      if (!isString) { 
+        fullId += ".ToString()";
+      }
+      fullId += " ?? string.Empty";
+
+
+      cf.WriteLine($"var {valName} = this.{fullId};");
+      cf.WriteLine($"if ({valName} != string.Empty)");
       cf.OpenBlock(true);
 
       string attrName = GetBindAttributeName(dec);
@@ -325,12 +340,16 @@ internal class TemplateEmitter
     }
 
     int index = 0;
-    foreach (var c in node.ChildContent.Nodes)
+    var cNodes = node.ChildContent?.Nodes;
+    if (cNodes != null)
     {
-      if (c.Name == "<text>") { continue; }
-      var kids = BindNode(c, bindTo + $".children[{index}]", cf);
-      res.AddRange(kids);
-      ++index;
+      foreach (var c in cNodes)
+      {
+        if (c.Name == "<text>") { continue; }
+        var kids = BindNode(c, bindTo + $".children[{index}]", cf);
+        res.AddRange(kids);
+        ++index;
+      }
     }
 
     return res;
