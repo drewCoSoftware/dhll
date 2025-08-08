@@ -1,5 +1,5 @@
 <template for="LoginForm">
-    <div class={"login-form" + IsWorking}>
+    <div class="login-form" data-state={State}>
         <div class="inputs">
             <label for="username">Username</label>
             <input type="text" name="username" />

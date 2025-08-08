@@ -5,6 +5,7 @@
     <title>DHLL Example App</title>
 
     <script type="text/javascript" src="src/generated/typescript/LoginForm.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/main.css" />
 </head>
 <body>
 
@@ -19,6 +20,8 @@
         // alert('loaded!');
         var form = new LoginForm();
         document.body.appendChild(form.CreateDOM());
+
+        //form.State = "loading";
     });
 
 </script>

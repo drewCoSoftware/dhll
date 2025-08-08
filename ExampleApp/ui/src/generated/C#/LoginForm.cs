@@ -13,13 +13,14 @@ class LoginForm
 
   public string Username { get; set; } = "Dave";
   public string Password { get; set; } = "*";
-  public bool IsWorking { get; set; } = false;
+  public string State { get; set; } = "";
 
   public string CreateDOM()
   {
     var root = new HTMLNode("div");
+    root.SetAttribute("class", "login-form");
     var val = getValue();
-    root.SetAttribute("class", val);
+    root.SetAttribute("data-state", val);
 
 
     var node = new HTMLNode("div");
@@ -60,10 +61,10 @@ class LoginForm
     {
       root.SetAttribute("data-id-Password", val2);
     }
-    var val3 = this.IsWorking.ToString() ?? string.Empty;
+    var val3 = this.State ?? string.Empty;
     if (val3 != string.Empty)
     {
-      root.SetAttribute("data-id-IsWorking", val3);
+      root.SetAttribute("data-id-State", val3);
     }
 
     string res = root.ToHTMLString();
@@ -72,7 +73,7 @@ class LoginForm
 
   string getValue()
   {
-    return ("login-form" + IsWorking).ToString();
+    return (State).ToString();
   }
 
 }

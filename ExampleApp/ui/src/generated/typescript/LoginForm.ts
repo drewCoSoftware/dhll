@@ -9,7 +9,7 @@ class LoginForm {
 
   _Username: string = "Dave";
   _Password: string = "*";
-  _IsWorking: boolean = false;
+  _State: string = "";
 
 
   // ---- DOM Elements ------
@@ -22,8 +22,9 @@ class LoginForm {
 
   CreateDOM(): HTMLElement {
     this._Root = document.createElement('div');
+    this._Root.setAttribute("class", "login-form");
     var val = this.getValue();
-    this._Root.setAttribute("class", val);
+    this._Root.setAttribute("data-state", val);
 
 
     this._Node = document.createElement('div');
@@ -60,7 +61,7 @@ class LoginForm {
 
 
   getValue(): string{
-    return ("login-form" + this.IsWorking).toString();
+    return (this.State).toString();
   }
 
   Bind(dom:HTMLElement) {
@@ -85,12 +86,12 @@ class LoginForm {
     }
 
     this._Root.removeAttribute('data-id-Password');
-    const val2 = this._Root.getAttribute('data-id-IsWorking');
+    const val2 = this._Root.getAttribute('data-id-State');
     if (val2 != undefined){
-      this.IsWorking = val2 == 'true';
+      this.State = val2;
     }
 
-    this._Root.removeAttribute('data-id-IsWorking');
+    this._Root.removeAttribute('data-id-State');
   }
   public get Username() {
     return this._Username;
@@ -108,14 +109,14 @@ class LoginForm {
     this._Password = password_;
   }
 
-  public get IsWorking() {
-    return this._IsWorking;
+  public get State() {
+    return this._State;
   }
 
-  public set IsWorking(isWorking_: boolean) {
-    this._IsWorking = isWorking_;
+  public set State(state_: string) {
+    this._State = state_;
     const val0 = this.getValue();
-    this._Root.setAttribute('class', val0);
+    this._Root.setAttribute('data-state', val0);
   }
 
 }

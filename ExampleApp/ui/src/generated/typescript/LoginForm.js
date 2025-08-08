@@ -8,12 +8,13 @@ var LoginForm = /** @class */ (function () {
     function LoginForm() {
         this._Username = "Dave";
         this._Password = "*";
-        this._IsWorking = false;
+        this._State = "";
     }
     LoginForm.prototype.CreateDOM = function () {
         this._Root = document.createElement('div');
+        this._Root.setAttribute("class", "login-form");
         var val = this.getValue();
-        this._Root.setAttribute("class", val);
+        this._Root.setAttribute("data-state", val);
         this._Node = document.createElement('div');
         this._Node.setAttribute("class", "inputs");
         this._Node1 = document.createElement('label');
@@ -35,7 +36,7 @@ var LoginForm = /** @class */ (function () {
         return this._Root;
     };
     LoginForm.prototype.getValue = function () {
-        return ("login-form" + this.IsWorking).toString();
+        return (this.State).toString();
     };
     LoginForm.prototype.Bind = function (dom) {
         // NOTE: A correctly formed DOM for this type is assumed!
@@ -56,11 +57,11 @@ var LoginForm = /** @class */ (function () {
             this.Password = val1;
         }
         this._Root.removeAttribute('data-id-Password');
-        var val2 = this._Root.getAttribute('data-id-IsWorking');
+        var val2 = this._Root.getAttribute('data-id-State');
         if (val2 != undefined) {
-            this.IsWorking = val2 == 'true';
+            this.State = val2;
         }
-        this._Root.removeAttribute('data-id-IsWorking');
+        this._Root.removeAttribute('data-id-State');
     };
     Object.defineProperty(LoginForm.prototype, "Username", {
         get: function () {
@@ -82,14 +83,14 @@ var LoginForm = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(LoginForm.prototype, "IsWorking", {
+    Object.defineProperty(LoginForm.prototype, "State", {
         get: function () {
-            return this._IsWorking;
+            return this._State;
         },
-        set: function (isWorking_) {
-            this._IsWorking = isWorking_;
+        set: function (state_) {
+            this._State = state_;
             var val0 = this.getValue();
-            this._Root.setAttribute('class', val0);
+            this._Root.setAttribute('data-state', val0);
         },
         enumerable: false,
         configurable: true
