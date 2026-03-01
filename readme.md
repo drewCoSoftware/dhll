@@ -35,3 +35,8 @@ To test some rules:
 // Make sure to point to the correct file version.
 antlr4-parse ./v1/dhll.g4 file -gui test-input.txt
 ```
+
+If you want to test both lexer + parser, specify them both in the command line:
+```
+antlr4-parse ./v1/templateLexer.g4  ./v1/templateParser.g4 templates -gui test-templates-2.txt
+```

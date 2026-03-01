@@ -381,9 +381,13 @@ public class dhllCompiler
 
     AntlrInputStream s = new AntlrInputStream(inputText);
     var lexer = new dhllLexer(s);
+    lexer.RemoveErrorListeners();
+    lexer.AddErrorListener(ThrowingErrorListener_Lexer.Instance);
 
     var ts = new CommonTokenStream(lexer);
     var parser = new dhllParser(ts);
+    parser.RemoveErrorListeners();
+    parser.AddErrorListener(ThrowingErrorListener_Parser.Instance);
 
     FileContext context = parser.file();
     var v = new dhllVisitorImpl();
