@@ -8,7 +8,11 @@ SEA_WS: (' ' | '\t' | '\r'? '\n')+;
 
 TAG_OPEN: '<' ->pushMode(TAG);
 
-HTML_TEXT: ~('<' | '{')+;
+fragment ESCAPED_CHARS
+    : '\\' ('{' | '}' | '"')
+    ;
+
+HTML_TEXT: (ESCAPED_CHARS  | ~('<' | '{'))+;
 
 EXP_OPEN: '{' -> pushMode(EXPRESSION);
 

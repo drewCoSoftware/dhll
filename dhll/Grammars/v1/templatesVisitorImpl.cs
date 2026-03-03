@@ -264,7 +264,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   {
     // Each template element MUST have a single child element!
     var content = elem.htmlContent();
-    int childElemCount = content.htmlElement().Count();
+    int childElemCount = content == null ? 0 : content.htmlElement().Count();
 
     if (childElemCount != 1)
     {
@@ -388,7 +388,8 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       SetIdentifier(node, TemplateInfo.DEFAULT_DYNAMIC_NODE);
       index.AddNodeData(node.Identifier, node);
     }
-    else { 
+    else
+    {
       SetIdentifier(node, TemplateInfo.DEFAULT_NODE_NAME);
     }
 

@@ -1,4 +1,4 @@
 
 typedef MyType { 
-  prop string Name = "TheName"
-} 
+  prop string Name = "TheName";
+}
