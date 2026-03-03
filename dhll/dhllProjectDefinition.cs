@@ -14,6 +14,11 @@ public class dhllProjectDefinition
   public const string DEFAULT_OUTPUT_DIR = "build";
 
   /// <summary>
+  /// What version of project file is this?  '1.0' is the only supported one at this time.
+  /// </summary>
+  public string Version { get; set; } = "1.0";
+
+  /// <summary>
   /// The path of this file.
   /// </summary>
   [JsonIgnore]
@@ -30,6 +35,7 @@ public class dhllProjectDefinition
   /// We need a way to target multiple output targets...
   /// </summary>
   public Dictionary<string, OutputTarget> OutputTargets { get; set; } = new Dictionary<string, OutputTarget>();
+
 
 
   // --------------------------------------------------------------------------------------------------------------------------

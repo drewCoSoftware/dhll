@@ -1,0 +1,18 @@
+{
+    "Version": "1.0",
+    "OutputDir": "./generated",
+    "InputFiles": [
+        "LoginForm.dhll",
+        "LoginForm.dhlt"
+    ],
+    "OutputTargets": {
+        "C#": { 
+            "Name":"C#",
+            "TargetLanguage": "C#"
+        },
+        "typescript": { 
+            "Name":"typescript",
+            "TargetLanguage": "typescript"
+        }
+    }
+}

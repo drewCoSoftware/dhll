@@ -1,0 +1,5 @@
+typedef LoginForm {
+    prop string Username = "Dave";
+    prop string Password = "*";
+    prop bool IsWorking = false;
+}

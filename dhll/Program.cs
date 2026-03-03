@@ -1,6 +1,7 @@
 ﻿using Antlr4.Runtime;
 using CommandLine;
 using dhll.v1;
+using drewCo.Tools;
 using drewCo.Tools.Logging;
 using System.Runtime.CompilerServices;
 using CmdParser = CommandLine.Parser;
@@ -68,8 +69,15 @@ namespace dhll
       var consoleLogger = new ConsoleLogger();
       Log.AddLogger(consoleLogger);
 
+   
+      var logsDir =  Path.Combine(FileTools.GetAppDir(), "logs");
+      string exDir = Path.Combine(logsDir, "exceptions");
+      FileTools.CreateDirectory(logsDir);
+      FileTools.CreateDirectory(exDir);
+
+      // TODO: Swap back to 'overwrite' when drewco.tools > 1.4.0.6
       var levels = new[] { ELogLevel.EXCEPTION.ToString() };
-      var ops = new FileLoggerOptions(levels, "./logs", "runlog", "./logs/exceptions", EFileLoggerMode.Overwrite);
+      var ops = new FileLoggerOptions(levels, logsDir, "runlog", exDir, EFileLoggerMode.Sequential);
       Log.AddLogger(new FileLogger(ops));
     }
 

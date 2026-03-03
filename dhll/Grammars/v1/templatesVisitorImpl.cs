@@ -393,9 +393,13 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
       SetIdentifier(node, TemplateInfo.DEFAULT_NODE_NAME);
     }
 
-    foreach (var c in node.ChildContent?.Nodes)
+    var cNodes = node.ChildContent?.Nodes;
+    if (cNodes != null)
     {
-      ComputeDynamicContentInfo(c, index);
+      foreach (var c in cNodes)
+      {
+        ComputeDynamicContentInfo(c, index);
+      }
     }
 
   }
