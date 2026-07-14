@@ -22,8 +22,8 @@ namespace dhllTesters
       {
         InputFile = def.Path
       });
-      int compRes = compiler.CompileProject();
-      Assert.That(compRes, Is.EqualTo(0), "Compilation failed!");
+      int resultCode = compiler.CompileProject();
+      Assert.That(resultCode, Is.EqualTo(0), "Compilation failed!");
 
     }
 
@@ -51,8 +51,8 @@ namespace dhllTesters
       };
 
       var c = new dhllCompiler(ops);
-      int cRes = c.CompileProject();
-      Assert.That(0, Is.EqualTo(cRes), "Invalid return code!");
+      int resultCode = c.CompileProject();
+      Assert.That(0, Is.EqualTo(resultCode), "Invalid return code!");
 
     }
 

@@ -39,6 +39,8 @@ class LoginForm {
     this._Node2 = document.createElement('input');
     this._Node2.setAttribute("type", "text");
     this._Node2.setAttribute("name", "username");
+    var val1 = this.getValue1();
+    this._Node2.setAttribute("value", val1);
     this._Node.append(this._Node2);
     this._Root.append(this._Node);
 
@@ -61,6 +63,10 @@ class LoginForm {
 
   getValue(): string{
     return ("login-form" + this.IsWorking).toString();
+  }
+
+  getValue1(): string{
+    return (this.Username).toString();
   }
 
   Bind(dom:HTMLElement) {
@@ -98,6 +104,8 @@ class LoginForm {
 
   public set Username(username_: string) {
     this._Username = username_;
+    const val0 = this.getValue1();
+    this._Node2.setAttribute('value', val0);
   }
 
   public get Password() {

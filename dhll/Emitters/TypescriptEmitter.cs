@@ -312,27 +312,6 @@ namespace dhll.Emitters
           }
         }
 
-        //if (propTargets != null)
-        //{
-        //  int attrIndex = 0;
-        //  foreach (var t in propTargets)
-        //  {
-        //    if (t.Attr != null)
-        //    {
-        //      string valId = $"val{attrIndex}";
-        //      cf.WriteLine($"const {valId} = this.{t.FunctionName}();");
-        //      cf.WriteLine($"this.{t.TargetNode.Identifier}.setAttribute('{t.Attr.Name}', {valId});");
-
-        //      ++attrIndex;
-        //    }
-        //    else
-        //    {
-        //      // We are setting content for this item.
-        //      cf.WriteLine($"this.{t.TargetNode.Identifier}.innerText = this.{t.FunctionName}();");
-        //    }
-        //  }
-        //}
-
         cf.CloseBlock(2);
       }
 
