@@ -435,7 +435,7 @@ internal class TemplateEmitter
 
     if (item.Value.Type == EAttrValType.String)
     {
-      res = item.Value.StringVal!;
+      res = UnescapeBackslash(item.Value.StringVal!);
       return res;
     }
 

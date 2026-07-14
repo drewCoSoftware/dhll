@@ -264,7 +264,7 @@ internal class templatesVisitorImpl : templateParserBaseVisitor<object>
   {
     // Each template element MUST have a single child element!
     var content = elem.htmlContent();
-    int childElemCount = content.htmlElement().Count();
+    int childElemCount = content == null ? 0 : content.htmlElement().Count();
 
     if (childElemCount != 1)
     {

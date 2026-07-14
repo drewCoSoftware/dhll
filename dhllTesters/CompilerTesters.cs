@@ -1,18 +1,13 @@
 ﻿using dhll;
-using dhll.Emitters;
-using dhll.Grammars.v1;
 using drewCo.Tools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace dhllTesters
 {
   // ==============================================================================================================================
   public class CompilerTesters : TestBase
   {
+
+    // --------------------------------------------------------------------------------------------------------------------------
     [Test]
     public void CanCompileBasicTemplate()
     {
@@ -40,13 +35,13 @@ namespace dhllTesters
     /// i.e. {MyProp} as a literal would be: \{MyProp\}
     /// </summary>
     [Test]
-    public void CanCompileTypeAndTemplateWithEscapePropertyStrings()
+    public void CanCompileTypeAndTemplateWithEscapedPropertyStrings()
     {
-      Assert.Inconclusive("I'm not sure what I want to do about this test.... I think the best thing is to advise users to just use &lbrace; &rbrace; stuff in their 'HTML' content?");
+     // Assert.Inconclusive("I'm not sure what I want to do about this test.... I think the best thing is to advise users to just use &lbrace; &rbrace; stuff in their 'HTML' content?");
 
       var def = CreateProjectDef(new[] {
-        "EscapedPropStringdhll",
-        "EscapedPropString.dhlt"
+        "TestInputs\\EscapedPropString.dhll",
+        "TestInputs\\EscapedPropString.dhlt"
       },
       $"./{nameof(CanCompileBasicTemplate)}{dhllCompiler.DHLPROJ_EXT}");
 

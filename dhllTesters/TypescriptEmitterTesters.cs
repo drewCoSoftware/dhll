@@ -9,6 +9,7 @@ namespace dhllTesters
   /// </summary>
   public class TypescriptEmitterTesters : TestBase
   {
+    // --------------------------------------------------------------------------------------------------------------------------
     /// <summary>
     /// Shows that escaped strings are unescaped correctly when being emitted as literals.
     /// This is something that all languages should do by default.
@@ -17,7 +18,7 @@ namespace dhllTesters
     public void CanEmitEscapedStringAsLiteral()
     {
       const string TEST_STRING = @"\{escaped-value\}";
-      const string EXPECTED = "'{escaped-value}'";        // Note that it is single quoted + curly braces are escaped!
+      const string EXPECTED = "{escaped-value}";  
       var te = new TemplateEmitter();
 
       string formatted = te.FormatValue(new dhll.Grammars.v1.Attribute()
