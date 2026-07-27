@@ -2,7 +2,7 @@
     <div class={"login-form" + IsWorking}>
         <div class="inputs">
             <label for="username">Username</label>
-            <input type="text" name="username" />
+            <input type="text" name="username" value={Username} />
         </div>
         <div class="actions">
             <button class="btn btn-login">Log In</button>

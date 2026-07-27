@@ -15,4 +15,8 @@
     <None Include="ui\src\example.dhlproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\dhll\dhll.csproj" />
+  </ItemGroup>
+
 </Project>

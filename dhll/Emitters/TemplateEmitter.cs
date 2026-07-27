@@ -106,7 +106,8 @@ internal class TemplateEmitter
 
       string fullId = dec.Identifier;
       if (emitNullCheck) { fullId += "?"; }
-      if (!isString) { 
+      if (!isString)
+      {
         fullId += ".ToString()";
       }
       fullId += " ?? string.Empty";
@@ -486,10 +487,10 @@ internal class TemplateEmitter
   // --------------------------------------------------------------------------------------------------------------------------
   private void CreateChildElements(CodeFile cf, Node parent, NamingContext nameContext)
   {
-    if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
-    {
-      return;
-    }
+    //if (parent.ChildContent == null || parent.ChildContent.Nodes.Count == 0)
+    //{
+    //  return;
+    //}
 
     // Attributes:
     foreach (var attr in parent.Attributes)
@@ -508,32 +509,35 @@ internal class TemplateEmitter
     }
     else
     {
-      foreach (var item in parent.ChildContent.Nodes)
+      if (parent.ChildContent != null)
       {
-        if (item.IsTextNode)
+        foreach (var item in parent.ChildContent.Nodes)
         {
-          string? useText = FormatText(item.Value);
-          string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
-          if (useValue == null) { continue; }
+          if (item.IsTextNode)
+          {
+            string? useText = FormatText(item.Value);
+            string? useValue = !string.IsNullOrWhiteSpace(useText) ? $"'{useText}'" : null;
+            if (useValue == null) { continue; }
 
-          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
+            cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.insertAdjacentText('beforeend', {useValue});");
+          }
+          else
+          {
+            cf.NextLine(2);
+            string assignTo = GetTypescriptAssignSyntax(item);
+            cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
+
+            // Attributes.
+            AddAttributes(cf, item, item.Identifier, nameContext);
+
+            // Now its child elements too....
+            CreateChildElements(cf, item, nameContext);
+
+            // Add the child node to the parent....
+            cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
+          }
+
         }
-        else
-        {
-          cf.NextLine(2);
-          string assignTo = GetTypescriptAssignSyntax(item);
-          cf.WriteLine($"{assignTo} = document.createElement('{item.Name}');");
-
-          // Attributes.
-          AddAttributes(cf, item, item.Identifier, nameContext);
-
-          // Now its child elements too....
-          CreateChildElements(cf, item, nameContext);
-
-          // Add the child node to the parent....
-          cf.WriteLine($"{QualifyIdentifier(parent.Identifier)}.append({QualifyIdentifier(item.Identifier)});");
-        }
-
       }
     }
 

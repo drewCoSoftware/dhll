@@ -35,6 +35,8 @@ class LoginForm
     var node2 = new HTMLNode("input");
     node2.SetAttribute("type", "text");
     node2.SetAttribute("name", "username");
+    var val1 = getValue1();
+    node2.SetAttribute("value", val1);
     node.AddChild(node2);
     root.AddChild(node);
 
@@ -50,20 +52,20 @@ class LoginForm
     root.AddChild(node3);
 
     // Set property values on attributes so that 'Bind' calls will work.
-    var val1 = this.Username ?? string.Empty;
-    if (val1 != string.Empty)
-    {
-      root.SetAttribute("data-id-Username", val1);
-    }
-    var val2 = this.Password ?? string.Empty;
+    var val2 = this.Username ?? string.Empty;
     if (val2 != string.Empty)
     {
-      root.SetAttribute("data-id-Password", val2);
+      root.SetAttribute("data-id-Username", val2);
     }
-    var val3 = this.IsWorking.ToString() ?? string.Empty;
+    var val3 = this.Password ?? string.Empty;
     if (val3 != string.Empty)
     {
-      root.SetAttribute("data-id-IsWorking", val3);
+      root.SetAttribute("data-id-Password", val3);
+    }
+    var val4 = this.IsWorking.ToString() ?? string.Empty;
+    if (val4 != string.Empty)
+    {
+      root.SetAttribute("data-id-IsWorking", val4);
     }
 
     string res = root.ToHTMLString();
