@@ -46,7 +46,7 @@ namespace dhll.CodeGen
     public void Save(string path)
     {
       string toWrite = SB.ToString();
-      File.WriteAllText(path, toWrite);
+      File.WriteAllText(path, toWrite, new UTF8Encoding(true));
     }
 
 
