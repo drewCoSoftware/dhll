@@ -288,28 +288,32 @@ namespace dhll.Emitters
 
         // This is where we do property target stuff...
         // var propTargets = templateInfo.PropTargets.GetTargetsForProperty(item.Identifier);
-        var dci = templateInfo.DynamicContentIndex;
-        var dynamicFunctions = dci.GetDynamicFunctions(item.Identifier);
-
-        if (dynamicFunctions != null)
+        if (templateInfo != null)
         {
-          int attrIndex = 0;
-          foreach (var df in dynamicFunctions)
-          {
-            if (df.Attribute != null)
-            {
-              string valId = $"val{attrIndex}";
-              cf.WriteLine($"const {valId} = this.{df.Name}();");
-              cf.WriteLine($"this.{df.Node.Identifier}.setAttribute('{df.Attribute.Name}', {valId});");
+          var dci = templateInfo.DynamicContentIndex;
+          var dynamicFunctions = dci.GetDynamicFunctions(item.Identifier);
 
-              ++attrIndex;
-            }
-            else
+          if (dynamicFunctions != null)
+          {
+            int attrIndex = 0;
+            foreach (var df in dynamicFunctions)
             {
-              // We are setting content for this item.
-              cf.WriteLine($"this.{df.Node.Identifier}.innerText = this.{df.Name}();");
+              if (df.Attribute != null)
+              {
+                string valId = $"val{attrIndex}";
+                cf.WriteLine($"const {valId} = this.{df.Name}();");
+                cf.WriteLine($"this.{df.Node.Identifier}.setAttribute('{df.Attribute.Name}', {valId});");
+
+                ++attrIndex;
+              }
+              else
+              {
+                // We are setting content for this item.
+                cf.WriteLine($"this.{df.Node.Identifier}.innerText = this.{df.Name}();");
+              }
             }
           }
+
         }
 
         cf.CloseBlock(2);
@@ -376,8 +380,18 @@ namespace dhll.Emitters
         {
           case "string": return "\"\"";
           case "number": return "0";
+
           default:
-            throw new NotSupportedException($"The value: {useType} is not supported!");
+            // Detect array type + empty array as initial value.
+            if (useType.EndsWith("[]")) { 
+              return "[]";
+            }
+
+            // If it isn't a built in type, then we will assume null!
+            // TODO: The real way to do this is to make it so that we are aware of composite types by name before we get here....
+            Log.Warning($"The type:{useType} is not recognized and will be assumed to be null!");
+            return "null";
+            // throw new NotSupportedException($"The value: {useType} is not supported!");
         }
       }
       else

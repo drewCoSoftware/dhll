@@ -149,6 +149,12 @@ public class dhllVisitorImpl : dhllBaseVisitor<object>
     var res = new Declare();
 
     res.TypeName = context.typename().GetText();
+    if (context.ARRAY() != null)
+    {
+      // NOTE: We may want some other way to indicate / track that this is an array?
+      res.TypeName += "[]";
+    }
+
     res.Identifier = context.identifier().GetText();
 
     var initializer = context.initializer();

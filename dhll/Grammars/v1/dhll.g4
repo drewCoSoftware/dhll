@@ -7,7 +7,7 @@ file: (COMMENT | typedef)+? EOF;
 // anywhere.....
 typedef: 'typedef' identifier OBRACE (decl+)? CBRACE;
 
-decl: prop? typename identifier initializer? EOS;
+decl: prop? typename ARRAY? identifier initializer? EOS;
 
 initializer: ASSIGN value;
 prop:PROP;
@@ -32,6 +32,9 @@ PROP: 'prop';           // Indicates a declaration should be implemented as a pr
 ID: FIRSTCHAR ([a-zA-Z0-9_]*);     // FIX: This is making it so that we need at least two chars.  making the second part optional (?) makes it so no ids are detected....
 fragment FIRSTCHAR: [a-zA-Z_];
 
+ARRAY: OSQUARE CSQUARE;
+fragment OSQUARE: '[';
+fragment CSQUARE: ']';
 
 WORD: [a-zA-Z]+;
 

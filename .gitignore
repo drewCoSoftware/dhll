@@ -10,3 +10,5 @@ dist/
 
 *.csproj.user
 /.github
+
+scratch/
